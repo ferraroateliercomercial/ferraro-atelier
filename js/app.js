@@ -6,7 +6,7 @@
 const STORE = {
   // Número com DDI + DDD, só dígitos. Ex.: "5511999998888".
   // Vazio: o WhatsApp abre e o cliente escolhe o contato.
-  whatsapp: "",
+  whatsapp: "5548996950800",
   instagram: "https://instagram.com/",
   basePrice: 1490, // relógio base: caixa de aço + movimento automático
   engravingPrice: 60,
@@ -478,7 +478,7 @@ const cart = {
       const btn = e.target.closest("[data-remove]");
       if (btn) this.remove(Number(btn.dataset.remove));
     });
-    $("#checkout").addEventListener("click", () => this.checkout());
+    $("#checkout").addEventListener("click", (e) => { if (!this.items.length) e.preventDefault(); });
     this.render();
   },
 
@@ -507,7 +507,9 @@ const cart = {
     count.textContent = this.items.length;
     count.toggleAttribute("data-zero", this.items.length === 0);
     $("#cartEmpty").hidden = this.items.length > 0;
-    $("#checkout").disabled = this.items.length === 0;
+    const checkout = $("#checkout");
+    checkout.setAttribute("aria-disabled", String(this.items.length === 0));
+    checkout.href = this.items.length ? this.checkoutUrl() : "#";
     $("#cartTotal").textContent = brl.format(this.total());
     $("#cartList").innerHTML = this.items.map((i, idx) => `
       <li class="drawer__item">
@@ -534,10 +536,10 @@ const cart = {
     this.lastFocus?.focus();
   },
 
-  checkout() {
+  checkoutUrl() {
     const lines = this.items.map((i, n) => `${n + 1}. ${i.title} — ${brl.format(i.price)}${i.detail ? `\n   ${i.detail}` : ""}`);
     const msg = `Olá, Custom Time! Quero fazer este pedido:\n\n${lines.join("\n")}\n\nTotal estimado: ${brl.format(this.total())}`;
-    window.open(whatsUrl(msg), "_blank", "noopener");
+    return whatsUrl(msg);
   },
 };
 

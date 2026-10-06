@@ -30,6 +30,8 @@ const DEFAULT_WATCH = {
   stitchColor: "#e8d6c0",
   movement: "automatico",    // quartzo | automatico | manual
   rotorColor: "#3fbfbd",
+  displayBack: true,         // fundo de vidro (só automático e manual)
+  skeleton: false,           // mostrador esqueleto (só automático e manual)
   refWatch: "",
   refNotes: "",
 };
@@ -370,10 +372,13 @@ const Watch = (() => {
 
   const MOVEMENT_LABEL = { quartzo: "QUARTZO", automatico: "AUTOMÁTICO", manual: "CORDA MANUAL" };
 
+  const isSkeleton = (c) => !!c.skeleton && c.movement !== "quartzo";
+
   function dial(u, c) {
     const dr = dialRadius(c);
     const shapeD = dialShapePath(c);
     let s = `<path d="${isOct(c) ? roundRectPath(CX - 98, CY - 98, 196, 196, 50) : circlePath(105)}" fill="#14171b"/>`;
+    if (isSkeleton(c)) return s + skeletonDial(u, c, dr, shapeD);
     s += `<path d="${shapeD}" fill="${c.dialColor}"/>`;
     s += `<g clip-path="url(#${u}-dial)">${dialFinish(u, c)}${c.dialFume ? `<path d="${shapeD}" fill="url(#${u}-fume)"/>` : ""}<path d="${shapeD}" fill="url(#${u}-shade)"/></g>`;
     s += indices(c);
@@ -393,6 +398,30 @@ const Watch = (() => {
         s += `<text x="${x}" y="${CY + 4.5}" text-anchor="middle" font-family="Jost, sans-serif" font-size="12" font-weight="500" fill="#16191e">${dateNum()}</text>`;
       }
     }
+    return s;
+  }
+
+  /** Mostrador esqueleto: só o anel das horas fica; o centro mostra o mecanismo funcionando. */
+  function skeletonDial(u, c, dr, shapeD) {
+    const inner = dr * 0.7;
+    let s = `<g clip-path="url(#${u}-dial)"><circle cx="${CX}" cy="${CY}" r="${dr + 8}" fill="#0d0f12"/>${movement(u, c, dr + 4, true)}</g>`;
+    // anel das horas na cor do mostrador
+    const ring = `${shapeD}${circlePath(inner)}`;
+    s += `<path d="${ring}" fill-rule="evenodd" fill="${c.dialColor}"/>`;
+    if (c.dialFume) s += `<path d="${ring}" fill-rule="evenodd" fill="url(#${u}-fume)"/>`;
+    s += `<path d="${ring}" fill-rule="evenodd" fill="url(#${u}-shade)"/>`;
+    // ponte vazada entre 12 e 6, como nos esqueletos clássicos
+    const bw = 7;
+    s += `<path d="M${CX - bw} ${CY - inner + 2} Q${CX - bw * 2.2} ${CY} ${CX - bw} ${CY + inner - 2} L${CX - bw + 3} ${CY + inner - 2} Q${CX - bw * 1.4} ${CY} ${CX - bw + 3} ${CY - inner + 2}Z" fill="${c.dialColor}" opacity=".9"/>`;
+    s += `<circle cx="${CX}" cy="${CY}" r="${inner}" fill="none" stroke="${shade(c.dialColor, 0.35)}" stroke-width="1.6"/>`;
+    s += `<circle cx="${CX}" cy="${CY}" r="${inner - 3}" fill="none" stroke="#000" stroke-opacity=".35" stroke-width="2"/>`;
+    s += indices({ ...c, dialLayout: c.dialLayout === "data" ? "sem-data" : c.dialLayout });
+    if (c.dialLayout === "crono") {
+      const off = dr * 0.5;
+      const r = dr * 0.27;
+      s += subdial(c, CX + off, CY, r, "cm") + subdial(c, CX, CY + off, r, "ch") + subdial(c, CX - off, CY, r, "sub");
+    }
+    s += `<text x="${CX}" y="${CY - inner + 15}" text-anchor="middle" font-family="'Bodoni Moda', Georgia, serif" font-size="8" letter-spacing="1.2" fill="#f4f4f1" stroke="#14171b" stroke-width="1.4" stroke-opacity=".6" paint-order="stroke">Custom Time</text>`;
     return s;
   }
 
@@ -503,7 +532,7 @@ const Watch = (() => {
   }
 
   // ---------- movimento ----------
-  function movement(u, c, r = 96) {
+  function movement(u, c, r = 96, front = false) {
     const plate = "#c3c7cd";
     const brass = "#c9a44c";
     const ruby = "#b4233c";
@@ -537,7 +566,7 @@ const Watch = (() => {
     const bx = CX + 46, by = CY + 46;
     s += `<g data-balance data-cx="${bx}" data-cy="${by}"><circle cx="${bx}" cy="${by}" r="24" fill="none" stroke="${brass}" stroke-width="4"/>${[0, 120, 240].map((a) => { const [x, y] = polar(22, a, bx, by); return `<line x1="${bx}" y1="${by}" x2="${x}" y2="${y}" stroke="${brass}" stroke-width="2.5"/>`; }).join("")}<path d="M${bx} ${by} m-14 0 a14 14 0 1 1 28 0 a11 11 0 1 1 -22 0 a8 8 0 1 1 16 0" fill="none" stroke="#5b6170" stroke-width=".8"/><circle cx="${bx}" cy="${by}" r="2.6" fill="${ruby}"/></g>`;
     for (const [jx, jy] of [[CX - 60, CY + 10], [CX + 70, CY + 30], [CX - 10, CY + 78], [CX + 20, CY - 70]]) s += `<circle cx="${jx}" cy="${jy}" r="3" fill="${ruby}" stroke="#d9d9d9" stroke-width="1.2"/>`;
-    if (c.movement === "automatico") {
+    if (c.movement === "automatico" && !front) {
       const rc = c.rotorColor;
       let waves = "";
       for (let row = 0; row < 6; row++) for (let col = -6; col < 7; col++) {
@@ -548,9 +577,10 @@ const Watch = (() => {
       s += `<g data-rotor><path d="M${CX - r + 4} ${CY} A${r - 4} ${r - 4} 0 0 1 ${CX + r - 4} ${CY} L${CX + 16} ${CY} A16 16 0 0 0 ${CX - 16} ${CY}Z" fill="${rc}" stroke="${shade(rc, -0.35)}"/><g clip-path="url(#${u}-rotor)">${waves}</g>
         <text x="${CX}" y="${CY - r * 0.66}" text-anchor="middle" font-family="'Bodoni Moda', Georgia, serif" font-size="10" letter-spacing="1.2" fill="${ink(rc)}">Custom Time</text></g>`;
       s += `<circle cx="${CX}" cy="${CY}" r="9" fill="#9aa0a6" stroke="#6f757c"/><circle cx="${CX}" cy="${CY}" r="3" fill="${ruby}"/>`;
-    } else {
+    } else if (c.movement === "manual") {
       s += `<text x="${CX}" y="${CY + r - 14}" text-anchor="middle" font-family="Jost, sans-serif" font-size="7" letter-spacing="1.4" fill="#5b6067">17 JEWELS · CORDA MANUAL</text>`;
     }
+    if (front) s += `<circle cx="${CX}" cy="${CY}" r="7" fill="#9aa0a6" stroke="#6f757c"/>`;
     return s;
   }
 
@@ -595,11 +625,12 @@ const Watch = (() => {
       const [x2, y2] = polar(119, i * 4);
       s += `<line x1="${x1}" y1="${y1}" x2="${x2}" y2="${y2}" stroke="${shade(c.caseColor, -0.45)}" stroke-opacity=".6" stroke-width="1.4"/>`;
     }
-    if (c.movement === "quartzo") {
+    if (c.movement === "quartzo" || c.displayBack === false) {
+      // fundo fechado
       s += `<circle cx="${CX}" cy="${CY}" r="112" fill="${m}"/>`;
       for (let r = 20; r < 110; r += 6) s += `<circle cx="${CX}" cy="${CY}" r="${r}" fill="none" stroke="#fff" stroke-opacity=".08"/>`;
       s += `<text x="${CX}" y="${CY - 8}" text-anchor="middle" font-family="'Bodoni Moda', Georgia, serif" font-size="18" fill="${shade(c.caseColor, -0.55)}">Custom Time</text>`;
-      s += `<text x="${CX}" y="${CY + 14}" text-anchor="middle" font-family="Jost, sans-serif" font-size="8" letter-spacing="2" fill="${shade(c.caseColor, -0.5)}">QUARTZO · AÇO · 100 M</text>`;
+      s += `<text x="${CX}" y="${CY + 14}" text-anchor="middle" font-family="Jost, sans-serif" font-size="8" letter-spacing="2" fill="${shade(c.caseColor, -0.5)}">${MOVEMENT_LABEL[c.movement]} · AÇO · 100 M</text>`;
     } else {
       s += `<circle cx="${CX}" cy="${CY}" r="112" fill="${m}"/>`;
       s += `<path id="${u}-arc" d="M${CX - 103} ${CY} A103 103 0 0 1 ${CX + 103} ${CY}" fill="none"/>`;

@@ -127,7 +127,10 @@ const TABS = [
     id: "movimento", title: "Movimento", intro: "O coração do relógio. Teste na prévia: cada um anda de um jeito.",
     fields: [
       { type: "movement", key: "movement" },
-      { type: "color", key: "rotorColor", label: "Cor do rotor", note: "Aparece pelo fundo de vidro", when: (c) => c.movement === "automatico" },
+      { type: "toggle", key: "displayBack", label: "Fundo de vidro", note: "Mostra o mecanismo na parte de trás. Desligado, o fundo é fechado.", when: (c) => c.movement !== "quartzo" },
+      { type: "toggle", key: "skeleton", label: "Mostrador esqueleto", note: "Abre o centro do mostrador e mostra o mecanismo pela frente", when: (c) => c.movement !== "quartzo" },
+      { type: "note", text: "No quartzo o fundo é fechado e o mostrador é inteiro. Fundo de vidro e mostrador esqueleto estão disponíveis no automático e na corda manual.", when: (c) => c.movement === "quartzo" },
+      { type: "color", key: "rotorColor", label: "Cor do rotor", note: "Aparece pelo fundo de vidro", when: (c) => c.movement === "automatico" && c.displayBack !== false },
     ],
   },
   {
@@ -585,7 +588,15 @@ function projectGroups(c, nImages = 0) {
         : (c.strapTwoTone ? [["Cor de fora", color(c.strapColor)], ["Cor de dentro", color(c.strapColor2)]] : [["Cor", color(c.strapColor)]])),
       ...(c.strapType === "couro" ? [["Costura", color(c.stitchColor)]] : []),
     ]],
-    ["Movimento", [["Tipo", MOVEMENTS[c.movement].name + (c.dialLayout === "crono" ? " (cronógrafo)" : "")], ...(c.movement !== "quartzo" ? [["Calibre", MOVEMENTS[c.movement].caliber]] : []), ...(c.movement === "automatico" ? [["Rotor", color(c.rotorColor)]] : [])]],
+    ["Movimento", [
+      ["Tipo", MOVEMENTS[c.movement].name + (c.dialLayout === "crono" ? " (cronógrafo)" : "")],
+      ...(c.movement !== "quartzo" ? [
+        ["Calibre", MOVEMENTS[c.movement].caliber],
+        ["Frente", c.skeleton ? "Mostrador esqueleto" : "Mostrador inteiro"],
+        ["Fundo", c.displayBack !== false ? "De vidro" : "Fechado"],
+      ] : []),
+      ...(c.movement === "automatico" && c.displayBack !== false ? [["Rotor", color(c.rotorColor)]] : []),
+    ]],
     ...(hasRef ? [["Referência", [
       ...((c.refWatch || "").trim() ? [["Relógio", c.refWatch.trim()]] : []),
       ...((c.refNotes || "").trim() ? [["Observações", c.refNotes.trim()]] : []),
@@ -600,7 +611,7 @@ function groupsHtml(groups) {
 }
 
 // Código compacto com todas as escolhas (sem a referência). A ordem dos campos não pode mudar:
-// para acrescentar campos, crie uma versão nova (CT2) e mantenha a leitura da CT1.
+// campos novos entram no fim, com uma versão nova do código. CT1 = os 28 primeiros campos.
 const CODE_FIELDS = [
   ["caseShape", ["redonda", "almofada", "octogonal"]], ["size", [38, 40, 42]], ["caseColor"],
   ["dialColor"], ["dialFume", "bool"], ["dialFinish", ["liso", "raios", "listrado", "texturizado", "grade"]],
@@ -610,23 +621,26 @@ const CODE_FIELDS = [
   ["bezelColor"], ["bezelTwoTone", "bool"], ["bezelColor2"], ["strapType", ["nato", "couro", "borracha", "oyster", "jubile", "integrada"]],
   ["strapTwoTone", "bool"], ["strapColor"], ["strapColor2"], ["braceletColor"], ["braceletColor2"], ["stitchColor"],
   ["movement", ["quartzo", "automatico", "manual"]], ["rotorColor"],
+  // CT2
+  ["displayBack", "bool"], ["skeleton", "bool"],
 ];
+const CODE_VERSIONS = { 1: 28, 2: 30 };
 
 function encodeProject(c) {
-  return "CT1-" + CODE_FIELDS.map(([k, kind]) => {
-    if (kind === "bool") return c[k] ? "1" : "0";
+  return "CT2-" + CODE_FIELDS.map(([k, kind]) => {
+    if (kind === "bool") return c[k] === undefined ? (DEFAULT_WATCH[k] ? "1" : "0") : c[k] ? "1" : "0";
     if (Array.isArray(kind)) return Math.max(0, kind.indexOf(c[k])).toString(36);
     return String(c[k] || "#000000").replace("#", "").toLowerCase().padEnd(6, "0").slice(0, 6);
   }).join("");
 }
 
 function decodeProject(text) {
-  const m = String(text).match(/CT1-([0-9a-z]+)/i);
+  const m = String(text).match(/CT([12])-([0-9a-z]+)/i);
   if (!m) return null;
-  const raw = m[1].toLowerCase();
+  const raw = m[2].toLowerCase();
   const cfg = {};
   let i = 0;
-  for (const [k, kind] of CODE_FIELDS) {
+  for (const [k, kind] of CODE_FIELDS.slice(0, CODE_VERSIONS[m[1]])) {
     if (kind === "bool") { cfg[k] = raw[i] === "1"; i += 1; }
     else if (Array.isArray(kind)) { const v = kind[parseInt(raw[i], 36)]; if (v === undefined) return null; cfg[k] = v; i += 1; }
     else { const hex = raw.slice(i, i + 6); if (!/^[0-9a-f]{6}$/.test(hex)) return null; cfg[k] = `#${hex}`; i += 6; }
@@ -676,6 +690,8 @@ function parseProjectMessage(text) {
       case "Pulseira|Costura": set("stitchColor", hex(v)); break;
       case "Movimento|Tipo": set("movement", Object.keys(MOVEMENTS).find((m) => v.toLowerCase().startsWith(MOVEMENTS[m].name.toLowerCase()))); break;
       case "Movimento|Rotor": set("rotorColor", hex(v)); break;
+      case "Movimento|Frente": set("skeleton", /esqueleto/i.test(v)); break;
+      case "Movimento|Fundo": set("displayBack", /vidro/i.test(v)); break;
       case "Referência|Relógio": set("refWatch", v); break;
       case "Referência|Observações": set("refNotes", v); break;
     }
@@ -910,7 +926,11 @@ const Studio = {
     }
     const tg = e.target.closest("[data-toggle]");
     if (tg) {
-      this.cfg[tg.dataset.toggle] = !this.cfg[tg.dataset.toggle];
+      const key = tg.dataset.toggle;
+      this.cfg[key] = !this.cfg[key];
+      // mostra na prévia o lado que mudou
+      if (key === "skeleton") this.setView("frente");
+      if (key === "displayBack") this.setView("fundo");
       this.refresh();
       this.renderPanel();
       return;
@@ -1119,7 +1139,7 @@ const Workshop = {
     const parsed = parseProjectMessage(text);
     const fromCode = decodeProject(text);
     if (!fromCode && parsed.found < 3) {
-      if (!quiet) this.status("Não encontrei um projeto nesse texto. Cole a mensagem inteira que o cliente mandou, ou o código que começa com CT1-.", "error");
+      if (!quiet) this.status("Não encontrei um projeto nesse texto. Cole a mensagem inteira que o cliente mandou, ou o código que começa com CT.", "error");
       else this.status("");
       return;
     }

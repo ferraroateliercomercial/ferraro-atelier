@@ -19,6 +19,7 @@ Oito etapas: caixa, mostrador, ponteiros, luneta, pulseira, movimento, referênc
 - Todas as cores são livres (seletor de espectro completo e código HEX), inclusive a do aço da pulseira.
 - Pulseira em duas cores: laterais de uma cor e centro de outra (no aço, elos de fora e elos do centro).
 - Vistas de frente, explodida e de fundo.
+- No automático e na corda manual: fundo de vidro ou fechado, e mostrador inteiro ou esqueleto (centro aberto mostrando o mecanismo).
 - Referência: o cliente informa um relógio de referência, anexa até 6 imagens e escreve observações. No celular, o envio já leva as imagens junto (compartilhamento do sistema); no computador, o cliente anexa as imagens na conversa do WhatsApp.
 - O relógio da prévia marca a hora real e anda conforme o movimento escolhido. Nos mecânicos dá para dar corda girando a coroa; no cronógrafo os botões laterais ligam, param e zeram.
 - O resumo gera a mensagem do WhatsApp com todas as escolhas, os códigos das cores e a referência.
@@ -27,7 +28,7 @@ Oito etapas: caixa, mostrador, ponteiros, luneta, pulseira, movimento, referênc
 
 Página para a Custom Time ver o relógio que o cliente montou. Abra o site com `#oficina` no fim do endereço (há também um link discreto "Oficina" no rodapé).
 
-- Cole a mensagem que o cliente mandou pelo WhatsApp (ou só o código `CT1-...`) e o relógio aparece montado, de frente, explodido e de fundo, com a ficha completa.
+- Cole a mensagem que o cliente mandou pelo WhatsApp (ou só o código `CT2-...`; códigos antigos `CT1-...` também funcionam) e o relógio aparece montado, de frente, explodido e de fundo, com a ficha completa.
 - O código do projeto vai no fim de toda mensagem enviada pelo ateliê virtual e reproduz o relógio exatamente. Sem o código, a Oficina lê as linhas da mensagem e avisa para conferir.
 - "Abrir no ateliê virtual" carrega o projeto para ajustar; "Salvar projeto" guarda na lista deste aparelho.
 

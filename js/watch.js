@@ -26,7 +26,8 @@ const DEFAULT_WATCH = {
   stitchColor: "#e8d6c0",
   movement: "automatico",    // quartzo | automatico | manual
   rotorColor: "#3fbfbd",
-  engraving: "",
+  refWatch: "",
+  refNotes: "",
 };
 
 const Watch = (() => {
@@ -571,27 +572,21 @@ const Watch = (() => {
       const [x2, y2] = polar(119, i * 4);
       s += `<line x1="${x1}" y1="${y1}" x2="${x2}" y2="${y2}" stroke="${shade(c.caseColor, -0.45)}" stroke-opacity=".6" stroke-width="1.4"/>`;
     }
-    const text = (c.engraving || "").trim();
     if (c.movement === "quartzo") {
       s += `<circle cx="${CX}" cy="${CY}" r="112" fill="${m}"/>`;
       for (let r = 20; r < 110; r += 6) s += `<circle cx="${CX}" cy="${CY}" r="${r}" fill="none" stroke="#fff" stroke-opacity=".08"/>`;
       s += `<text x="${CX}" y="${CY - 8}" text-anchor="middle" font-family="'Bodoni Moda', Georgia, serif" font-size="18" fill="${shade(c.caseColor, -0.55)}">Custom Time</text>`;
       s += `<text x="${CX}" y="${CY + 14}" text-anchor="middle" font-family="Jost, sans-serif" font-size="8" letter-spacing="2" fill="${shade(c.caseColor, -0.5)}">QUARTZO · AÇO · 100 M</text>`;
-      if (text) s += `<text x="${CX}" y="${CY + 52}" text-anchor="middle" font-family="'Bodoni Moda', Georgia, serif" font-style="italic" font-size="14" fill="${shade(c.caseColor, -0.6)}">${escapeXml(text)}</text>`;
     } else {
       s += `<circle cx="${CX}" cy="${CY}" r="112" fill="${m}"/>`;
       s += `<path id="${u}-arc" d="M${CX - 103} ${CY} A103 103 0 0 1 ${CX + 103} ${CY}" fill="none"/>`;
-      s += `<text font-family="'Bodoni Moda', Georgia, serif" font-style="italic" font-size="11" fill="${shade(c.caseColor, -0.6)}"><textPath href="#${u}-arc" startOffset="50%" text-anchor="middle">${escapeXml(text || "Custom Time · ateliê de relojoaria")}</textPath></text>`;
+      s += `<text font-family="'Bodoni Moda', Georgia, serif" font-style="italic" font-size="11" fill="${shade(c.caseColor, -0.6)}"><textPath href="#${u}-arc" startOffset="50%" text-anchor="middle">Custom Time · ateliê de relojoaria</textPath></text>`;
       s += `<circle cx="${CX}" cy="${CY}" r="92" fill="#0d0f12"/>`;
       s += movement(u, c, 90);
       s += `<circle cx="${CX}" cy="${CY}" r="91" fill="none" stroke="#fff" stroke-opacity=".25" stroke-width="2"/>`;
       s += `<ellipse cx="${CX - 30}" cy="${CY - 50}" rx="55" ry="26" fill="#fff" opacity=".08" transform="rotate(-30 ${CX - 30} ${CY - 50})"/>`;
     }
     return wrap(u, c, s, "Fundo do relógio");
-  }
-
-  function escapeXml(t) {
-    return String(t).replace(/[&<>"']/g, (ch) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[ch]));
   }
 
   /** Ícone de um estilo de ponteiro, para os botões de escolha. */

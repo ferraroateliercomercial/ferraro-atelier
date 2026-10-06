@@ -12,17 +12,17 @@ Site da Custom Time, ateliê de relojoaria. O cliente não compra relógios pron
 
 ## Ateliê virtual (`#personalizar`)
 
-Oito etapas: caixa, mostrador, ponteiros, luneta, pulseira, movimento, gravação e resumo.
+Oito etapas: caixa, mostrador, ponteiros, luneta, pulseira, movimento, referência e resumo. O site não mostra preços: valor e prazo são combinados no atendimento.
 
 - Todas as cores são livres (seletor de espectro completo e código HEX).
 - Vistas de frente, explodida e de fundo.
+- Referência: o cliente informa um relógio de referência, anexa até 6 imagens e escreve observações. No celular, o envio já leva as imagens junto (compartilhamento do sistema); no computador, o cliente anexa as imagens na conversa do WhatsApp.
 - O relógio da prévia marca a hora real e anda conforme o movimento escolhido. Nos mecânicos dá para dar corda girando a coroa; no cronógrafo os botões laterais ligam, param e zeram.
-- O resumo gera a mensagem do WhatsApp com todas as escolhas e os códigos das cores.
+- O resumo gera a mensagem do WhatsApp com todas as escolhas, os códigos das cores e a referência.
 
 ## Como editar
 
 - `js/app.js`, começo do arquivo: `STORE.whatsapp` e `STORE.instagram`.
-- `js/app.js`, `PRICES`: valores de cada opção (são estimativas de exemplo).
 - `js/app.js`, `PORTFOLIO`: fotos e descrições do portfólio. Fotos ficam em `assets/`.
 - `js/watch.js`: desenho do relógio e funcionamento dos movimentos.
 

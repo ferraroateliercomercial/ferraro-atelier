@@ -8,7 +8,6 @@ const STORE = {
   instagram: "https://instagram.com/",
 };
 
-const brl = new Intl.NumberFormat("pt-BR", { style: "currency", currency: "BRL", maximumFractionDigits: 0 });
 const $ = (sel, root = document) => root.querySelector(sel);
 const $$ = (sel, root = document) => [...root.querySelectorAll(sel)];
 const whatsUrl = (text) => `https://wa.me/${STORE.whatsapp}?text=${encodeURIComponent(text)}`;
@@ -34,19 +33,19 @@ function hslHex(h, s, l) {
 }
 
 // ---------------------------------------------------------------------------
-// Catálogo de opções e valores (estimativas)
+// Catálogo de opções
 // ---------------------------------------------------------------------------
 const HAND_STYLES = [
   { id: "bastao", name: "Bastão", desc: "Retos e finos. Clássicos, discretos e muito legíveis." },
   { id: "espada", name: "Espada", desc: "Lâmina larga e pontuda. Padrão dos relógios de ferramenta." },
   { id: "mercedes", name: "Mercedes", desc: "Círculo com estrela de três pontas no ponteiro das horas. Ícone dos relógios de mergulho." },
   { id: "dauphine", name: "Dauphine", desc: "Triangulares e facetados, refletem a luz. Elegância social." },
-  { id: "folha", name: "Folha", desc: "Curvas finas em forma de folha. Ar vintage e delicado.", price: 40 },
+  { id: "folha", name: "Folha", desc: "Curvas finas em forma de folha. Ar vintage e delicado." },
   { id: "seringa", name: "Seringa", desc: "Corpo reto que termina em agulha. Usados desde os anos 1930." },
-  { id: "catedral", name: "Catedral", desc: "Recortes que lembram vitrais góticos. Aviação e militares.", price: 40 },
-  { id: "breguet", name: "Breguet", desc: "Haste fina com lua vazada. Criados por Breguet em 1783.", price: 60 },
+  { id: "catedral", name: "Catedral", desc: "Recortes que lembram vitrais góticos. Aviação e militares." },
+  { id: "breguet", name: "Breguet", desc: "Haste fina com lua vazada. Criados por Breguet em 1783." },
   { id: "flecha", name: "Flecha", desc: "Ponta larga em seta no ponteiro das horas. Relógios de ferramenta antigos." },
-  { id: "floco", name: "Floco de neve", desc: "Bloco quadrado de lume. Nasceu na Marinha francesa nos anos 1970.", price: 40 },
+  { id: "floco", name: "Floco de neve", desc: "Bloco quadrado de lume. Nasceu na Marinha francesa nos anos 1970." },
 ];
 
 const MOVEMENTS = {
@@ -55,35 +54,9 @@ const MOVEMENTS = {
   manual: { name: "Corda manual", caliber: "Seagull ST3600", text: "Você dá corda girando a coroa. Reserva de mais de 40 horas e visual de relógio de bolso no fundo." },
 };
 
-const PRICES = {
-  movement: { quartzo: 790, automatico: 1190, manual: 1390 },
-  caseShape: { redonda: 0, almofada: 120, octogonal: 280 },
-  dialFinish: { liso: 0, raios: 60, listrado: 90, texturizado: 120, grade: 90 },
-  dialLayout: { data: 0, "sem-data": 0, crono: 380 },
-  indexStyle: { bastao: 0, romanos: 40, arabicos: 40, pontos: 0 },
-  handStyle: Object.fromEntries(HAND_STYLES.map((h) => [h.id, h.price || 0])),
-  bezelType: { mergulho: 0, taquimetro: 60, lisa: 0, canelada: 120 },
-  strapType: { nato: 0, couro: 120, borracha: 90, oyster: 220, jubile: 260, integrada: 320 },
-  dialFume: 40,
-  bezelTwoTone: 60,
-  engraving: 60,
-};
-
 const isOct = (c) => c.caseShape === "octogonal";
 const metalStrap = (c) => ["oyster", "jubile", "integrada"].includes(c.strapType);
 const bezelHasInsert = (c) => !isOct(c) && ["mergulho", "taquimetro"].includes(c.bezelType);
-
-function priceOf(c) {
-  let t = PRICES.movement[c.movement] + PRICES.caseShape[c.caseShape] + PRICES.dialFinish[c.dialFinish] + PRICES.dialLayout[c.dialLayout]
-    + PRICES.indexStyle[c.indexStyle] + PRICES.handStyle[c.handStyle] + PRICES.strapType[c.strapType];
-  if (!isOct(c)) t += PRICES.bezelType[c.bezelType];
-  if (c.dialFume) t += PRICES.dialFume;
-  if (bezelHasInsert(c) && c.bezelTwoTone) t += PRICES.bezelTwoTone;
-  if ((c.engraving || "").trim()) t += PRICES.engraving;
-  return t;
-}
-
-const plus = (v) => (v ? `+ ${brl.format(v)}` : "");
 
 const TABS = [
   {
@@ -102,7 +75,7 @@ const TABS = [
     id: "mostrador", title: "Mostrador", intro: "A cor exata que você quiser, com o acabamento que der o brilho certo.",
     fields: [
       { type: "color", key: "dialColor", label: "Cor do mostrador" },
-      { type: "toggle", key: "dialFume", label: "Degradê fumê", note: "Escurece suavemente em direção às bordas", price: () => PRICES.dialFume },
+      { type: "toggle", key: "dialFume", label: "Degradê fumê", note: "Escurece suavemente em direção às bordas" },
       { type: "choice", key: "dialFinish", label: "Acabamento", options: [
         ["liso", "Liso"], ["raios", "Raios de sol"], ["listrado", "Listrado"], ["texturizado", "Texturizado"], ["grade", "Tapisserie"],
       ] },
@@ -130,7 +103,7 @@ const TABS = [
         ["mergulho", "Mergulho", "Escala de 60 minutos"], ["taquimetro", "Taquímetro", "Mede velocidade"], ["lisa", "Lisa polida"], ["canelada", "Canelada", "Sulcos verticais"],
       ] },
       { type: "color", key: "bezelColor", label: "Cor da luneta", when: bezelHasInsert },
-      { type: "toggle", key: "bezelTwoTone", label: "Luneta bicolor", note: "Metade de cima em outra cor", when: bezelHasInsert, price: () => PRICES.bezelTwoTone },
+      { type: "toggle", key: "bezelTwoTone", label: "Luneta bicolor", note: "Metade de cima em outra cor", when: bezelHasInsert },
       { type: "color", key: "bezelColor2", label: "Segunda cor", when: (c) => bezelHasInsert(c) && c.bezelTwoTone },
     ],
   },
@@ -153,10 +126,10 @@ const TABS = [
     ],
   },
   {
-    id: "gravacao", title: "Gravação", intro: "Um nome, uma data ou uma frase no fundo da caixa.",
-    fields: [{ type: "text", key: "engraving", label: "Texto no fundo", placeholder: "Ex.: Para o Lucas · 2026", max: 28 }],
+    id: "referencia", title: "Referência", intro: "Tem um relógio ou uma imagem que inspira o seu? Mostre para a gente. Esta etapa é opcional.",
+    fields: [{ type: "reference" }],
   },
-  { id: "resumo", title: "Resumo", intro: "Confira o projeto e envie para a gente pelo WhatsApp.", fields: [{ type: "summary" }] },
+  { id: "resumo", title: "Resumo", intro: "Confira o projeto e envie para a gente pelo WhatsApp. O valor é combinado no atendimento.", fields: [{ type: "summary" }] },
 ];
 
 const LABELS = {
@@ -175,7 +148,7 @@ const LABELS = {
 const PORTFOLIO = [
   {
     id: "carbon", name: "Carbon Edition", img: "assets/carbon-edition.jpg",
-    text: "Mostrador azul texturizado, luneta de aço gravada e fundo de vidro com rotor turquesa.",
+    text: "Mostrador azul texturizado, luneta de aço com relevo e fundo de vidro com rotor turquesa.",
     spec: [["Caixa", "Redonda, aço"], ["Mostrador", "Azul texturizado"], ["Ponteiros", "Espada com lume"], ["Movimento", "Automático"]],
     cfg: { caseShape: "redonda", dialColor: "#1d4e8f", dialFinish: "texturizado", dialFume: true, dialLayout: "data", indexStyle: "bastao", handStyle: "espada", handColor: "#e6e9ee", secondColor: "#3fc1c9", bezelType: "mergulho", bezelColor: "#575d64", bezelTwoTone: false, strapType: "nato", strapColor: "#1e3a6e", movement: "automatico", rotorColor: "#3fbfbd" },
   },
@@ -503,7 +476,7 @@ function initPortfolio() {
   $$("[data-close]", lb).forEach((b) => b.addEventListener("click", close));
   document.addEventListener("keydown", (e) => { if (e.key === "Escape" && !lb.hidden) close(); });
   $("#lbStart").addEventListener("click", () => {
-    if (current) Studio.apply({ ...DEFAULT_WATCH, ...current.cfg, engraving: "" }, "caixa", `Projeto iniciado a partir do ${current.name}`);
+    if (current) Studio.apply({ ...DEFAULT_WATCH, ...current.cfg }, "caixa", `Projeto iniciado a partir do ${current.name}`);
     close();
   });
 }
@@ -517,6 +490,7 @@ const Studio = {
   view: "frente",
   ready: false,
   openColor: null,
+  refImages: [],
 
   init() {
     if (this.ready) return;
@@ -530,6 +504,7 @@ const Studio = {
     $("#steps").innerHTML = TABS.map((t, i) => `<button role="tab" data-tab="${t.id}" aria-selected="false"><small>${i + 1}</small>${t.title}</button>`).join("");
     $("#steps").addEventListener("click", (e) => { const b = e.target.closest("[data-tab]"); if (b) this.go(b.dataset.tab); });
     $("#stepPrev").addEventListener("click", () => this.step(-1));
+    $("#toSummary").addEventListener("click", () => this.go("resumo"));
     $("#stepNext").addEventListener("click", () => this.step(1));
     $$(".views button").forEach((b) => b.addEventListener("click", () => this.setView(b.dataset.view)));
 
@@ -545,6 +520,21 @@ const Studio = {
     this.canvas.addEventListener("pointerleave", () => { lastX = null; });
 
     this.body.addEventListener("click", (e) => this.onClick(e));
+    this.body.addEventListener("change", (e) => {
+      if (e.target.id === "refFiles") { this.addImages(e.target.files); e.target.value = ""; }
+    });
+    this.body.addEventListener("dragover", (e) => {
+      const z = e.target.closest("#refDrop");
+      if (!z) return;
+      e.preventDefault();
+      z.classList.add("is-over");
+    });
+    this.body.addEventListener("dragleave", (e) => e.target.closest("#refDrop")?.classList.remove("is-over"));
+    this.body.addEventListener("drop", (e) => {
+      if (!e.target.closest("#refDrop")) return;
+      e.preventDefault();
+      this.addImages(e.dataTransfer.files);
+    });
     this.body.addEventListener("input", (e) => {
       const t = e.target.closest("[data-text]");
       if (!t) return;
@@ -571,7 +561,6 @@ const Studio = {
   /** Mantém combinações coerentes. */
   fix(changed) {
     const c = this.cfg;
-    if (c.dialLayout === "crono") c.movement = "quartzo";
     if (c.strapType === "integrada" && !isOct(c)) c.strapType = "oyster";
     if (changed === "caseShape" && isOct(c)) c.strapType = "integrada";
   },
@@ -593,7 +582,7 @@ const Studio = {
     next.hidden = i === TABS.length - 1;
     next.textContent = i < TABS.length - 1 ? `Próximo: ${TABS[i + 1].title}` : "";
     // vista que mais mostra o que está sendo escolhido
-    if (id === "gravacao" || (id === "movimento" && this.cfg.movement !== "quartzo")) this.setView("fundo");
+    if (id === "movimento" && this.cfg.movement !== "quartzo") this.setView("fundo");
     else if (this.view === "fundo") this.setView("frente");
     this.renderPanel();
     if (scroll && window.innerWidth < 860) $(".studio__panel").scrollIntoView({ behavior: "smooth", block: "start" });
@@ -619,7 +608,6 @@ const Studio = {
     if (back) this.backEl.innerHTML = Watch.back(this.cfg);
     else renderStack(this.stack, this.cfg);
     this.mv.setConfig(this.cfg);
-    $("#studioTotal").textContent = brl.format(priceOf(this.cfg));
   },
 
   refresh() {
@@ -651,36 +639,52 @@ const Studio = {
       case "choice": {
         const disabled = (v) => (f.key === "strapType" && v === "integrada" && !isOct(c));
         const opts = f.options.map(([v, name, sub]) => {
-          const p = PRICES[f.key]?.[v];
-          const small = [sub, p ? plus(p) : ""].filter(Boolean).join(" · ");
+          const small = sub || "";
           return `<button type="button" class="choice" data-set="${f.key}" data-value="${v}" aria-pressed="${String(c[f.key]) === String(v)}" ${disabled(v) ? "disabled" : ""}><b>${name}</b>${small ? `<small>${small}</small>` : ""}</button>`;
         }).join("");
         return `<div class="field">${head()}<div class="choices">${opts}</div></div>`;
       }
       case "hands": {
-        const opts = HAND_STYLES.map((h) => `<button type="button" class="choice" data-set="handStyle" data-value="${h.id}" aria-pressed="${c.handStyle === h.id}" title="${h.desc}">${Watch.handIcon(h.id, "#141b26")}<b>${h.name}</b>${h.price ? `<small>${plus(h.price)}</small>` : ""}</button>`).join("");
+        const opts = HAND_STYLES.map((h) => `<button type="button" class="choice" data-set="handStyle" data-value="${h.id}" aria-pressed="${c.handStyle === h.id}" title="${h.desc}">${Watch.handIcon(h.id, "#141b26")}<b>${h.name}</b></button>`).join("");
         const cur = HAND_STYLES.find((h) => h.id === c.handStyle);
         return `<div class="field">${head()}<div class="choices choices--icons">${opts}</div><p class="field__note">${cur.name}: ${cur.desc}</p></div>`;
       }
       case "movement": {
-        const crono = c.dialLayout === "crono";
         const opts = Object.entries(MOVEMENTS).map(([k, m]) => `
-          <button type="button" class="choice" data-set="movement" data-value="${k}" aria-pressed="${c.movement === k}" ${crono && k !== "quartzo" ? "disabled" : ""}>
-            <b>${m.name}${k !== "quartzo" ? ` · ${m.caliber}` : ""}</b><span>${m.text}</span><small>${brl.format(PRICES.movement[k])} com caixa e montagem</small>
+          <button type="button" class="choice" data-set="movement" data-value="${k}" aria-pressed="${c.movement === k}">
+            <b>${m.name}${k !== "quartzo" ? ` · ${m.caliber}` : ""}</b><span>${m.text}</span>
           </button>`).join("");
-        return `<div class="field"><div class="choices choices--cards">${opts}</div>${crono ? `<p class="field__note">Com cronógrafo o movimento é de quartzo. Para automático ou manual, escolha outra disposição em Mostrador.</p>` : ""}</div>`;
+        return `<div class="field"><div class="choices choices--cards">${opts}</div></div>`;
       }
       case "toggle": {
-        const p = f.price ? plus(f.price()) : "";
-        return `<button type="button" class="toggle" role="switch" aria-checked="${!!c[f.key]}" data-toggle="${f.key}"><span><b>${f.label}</b><small>${[f.note, p].filter(Boolean).join(" · ")}</small></span><span class="toggle__track"></span></button>`;
+        return `<button type="button" class="toggle" role="switch" aria-checked="${!!c[f.key]}" data-toggle="${f.key}"><span><b>${f.label}</b><small>${f.note || ""}</small></span><span class="toggle__track"></span></button>`;
       }
       case "color":
         return `<div class="color-field" data-color="${f.key}">
           <button type="button" class="color-field__btn" aria-expanded="false"><span class="color-field__swatch" style="background:${c[f.key]}"></span><span><b>${f.label}</b><small>${c[f.key].toUpperCase()}${f.note ? ` · ${f.note}` : ""}</small></span></button>
           <div class="color-field__body" hidden></div>
         </div>`;
-      case "text":
-        return `<div class="field text-field">${head(`<span class="field__note">${plus(PRICES.engraving)}</span>`)}<input type="text" id="f-${f.key}" data-text="${f.key}" maxlength="${f.max}" placeholder="${f.placeholder}" value="${escapeHtml(c[f.key] || "")}" /><p class="field__note">A prévia mudou para a vista do fundo para você ver a gravação.</p></div>`;
+      case "reference": {
+        const imgs = this.refImages.map((r, i) => `<li><img src="${r.url}" alt="Imagem de referência ${i + 1}" /><button type="button" data-remove-ref="${i}" aria-label="Remover imagem ${i + 1}">×</button></li>`).join("");
+        return `<div class="field text-field">
+            <div class="field__head"><label class="label" for="f-refWatch">Relógio de referência</label></div>
+            <input type="text" id="f-refWatch" data-text="refWatch" maxlength="120" placeholder="Ex.: um modelo, uma marca ou um link" value="${escapeHtml(c.refWatch || "")}" />
+          </div>
+          <div class="field">
+            <div class="field__head"><span class="label">Imagens de referência</span><span class="field__note">${this.refImages.length ? `${this.refImages.length} de 6` : "até 6"}</span></div>
+            <label class="dropzone" id="refDrop" for="refFiles">
+              <input type="file" id="refFiles" accept="image/*" multiple />
+              <strong>Escolher imagens</strong>
+              <span>ou arraste para cá. Fotos de relógios, detalhes, cores que você gosta.</span>
+            </label>
+            ${imgs ? `<ul class="ref-thumbs">${imgs}</ul>` : ""}
+            <p class="field__note">${this.canShareFiles() ? "No celular, o botão de envio do resumo já manda as imagens junto." : "As imagens não vão sozinhas pelo link do WhatsApp: quando a conversa abrir, anexe as fotos por lá."}</p>
+          </div>
+          <div class="field text-field">
+            <div class="field__head"><label class="label" for="f-refNotes">Observações</label></div>
+            <textarea id="f-refNotes" data-text="refNotes" rows="3" maxlength="600" placeholder="Conte o que você gosta nessa referência">${escapeHtml(c.refNotes || "")}</textarea>
+          </div>`;
+      }
       case "note":
         return `<p class="field__note">${f.text}</p>`;
       case "summary":
@@ -715,16 +719,58 @@ const Studio = {
       else this.openPicker(key);
       return;
     }
+    const rm = e.target.closest("[data-remove-ref]");
+    if (rm) {
+      e.preventDefault();
+      const [gone] = this.refImages.splice(+rm.dataset.removeRef, 1);
+      if (gone) URL.revokeObjectURL(gone.url);
+      this.renderPanel();
+      return;
+    }
+    if (e.target.closest("#shareProject")) { this.shareProject(); return; }
     if (e.target.closest("#copySummary")) {
       navigator.clipboard?.writeText(this.message()).then(() => toast("Resumo copiado"), () => toast("Não foi possível copiar. Selecione o texto e copie."));
       return;
     }
     if (e.target.closest("#resetDesign")) {
       this.cfg = { ...DEFAULT_WATCH };
+      this.refImages.forEach((r) => URL.revokeObjectURL(r.url));
+      this.refImages = [];
       this.save();
       this.renderWatch();
       this.go("caixa");
       toast("Projeto recomeçado");
+    }
+  },
+
+  // ---------- referência ----------
+  hasReference() {
+    const c = this.cfg;
+    return !!((c.refWatch || "").trim() || (c.refNotes || "").trim() || this.refImages.length);
+  },
+
+  canShareFiles() {
+    try {
+      const f = new File(["x"], "x.png", { type: "image/png" });
+      return /Android|iPhone|iPad/i.test(navigator.userAgent) && !!navigator.canShare?.({ files: [f] });
+    } catch { return false; }
+  },
+
+  addImages(list) {
+    const files = [...(list || [])].filter((f) => f.type.startsWith("image/"));
+    const room = 6 - this.refImages.length;
+    if (!files.length) return;
+    files.slice(0, room).forEach((file) => this.refImages.push({ file, url: URL.createObjectURL(file) }));
+    if (files.length > room) toast("Máximo de 6 imagens");
+    else toast(files.length === 1 ? "Imagem adicionada" : `${files.length} imagens adicionadas`);
+    this.renderPanel();
+  },
+
+  async shareProject() {
+    try {
+      await navigator.share({ files: this.refImages.map((r) => r.file), text: this.message() });
+    } catch (err) {
+      if (err?.name !== "AbortError") window.open(whatsUrl(this.message()), "_blank", "noopener");
     }
   },
 
@@ -780,14 +826,20 @@ const Studio = {
       ]],
       ["Pulseira", [["Tipo", LABELS.strapType[c.strapType]], ...(metalStrap(c) ? [] : [["Cor", color(c.strapColor)]]), ...(c.strapType === "couro" ? [["Costura", color(c.stitchColor)]] : [])]],
       ["Movimento", [["Tipo", MOVEMENTS[c.movement].name + (c.dialLayout === "crono" ? " (cronógrafo)" : "")], ...(c.movement !== "quartzo" ? [["Calibre", MOVEMENTS[c.movement].caliber]] : []), ...(c.movement === "automatico" ? [["Rotor", color(c.rotorColor)]] : [])]],
-      ["Gravação", [["Texto", (c.engraving || "").trim() || "Sem gravação"]]],
+      ...(this.hasReference() ? [["Referência", [
+        ...(c.refWatch?.trim() ? [["Relógio", c.refWatch.trim()]] : []),
+        ...(c.refNotes?.trim() ? [["Observações", c.refNotes.trim()]] : []),
+        ...(this.refImages.length ? [["Imagens", `${this.refImages.length} ${this.refImages.length === 1 ? "imagem" : "imagens"}`]] : []),
+      ]]] : []),
     ];
     return g;
   },
 
   message() {
     const lines = this.groups().map(([title, rows]) => `*${title}*\n` + rows.map(([k, v]) => `- ${k}: ${typeof v === "object" ? v.color.toUpperCase() : v}`).join("\n"));
-    return `Olá, Custom Time! Montei este relógio no ateliê virtual:\n\n${lines.join("\n\n")}\n\nEstimativa: ${brl.format(priceOf(this.cfg))}`;
+    const n = this.refImages.length;
+    const pics = n ? `\n\nVou mandar ${n === 1 ? "1 imagem" : `${n} imagens`} de referência aqui na conversa.` : "";
+    return `Olá, Custom Time! Montei este relógio no ateliê virtual:\n\n${lines.join("\n\n")}${pics}\n\nPodem me passar o valor e o prazo?`;
   },
 
   renderSummary() {
@@ -795,14 +847,15 @@ const Studio = {
     if (!el) return;
     el.innerHTML = `<div class="summary">${this.groups().map(([title, rows]) => `
       <div class="summary__group"><h3>${title}</h3>${rows.map(([k, v]) => `<div class="summary__row"><span>${k}</span><span>${typeof v === "object" ? `<i class="summary__chip" style="background:${v.color}"></i>${v.color.toUpperCase()}` : escapeHtml(v)}</span></div>`).join("")}</div>`).join("")}
-      <div class="summary__total"><span>Estimativa</span><strong>${brl.format(priceOf(this.cfg))}</strong></div>
     </div>
     <div class="summary__actions">
-      <a class="btn" href="${whatsUrl(this.message())}" target="_blank" rel="noopener">Enviar projeto pelo WhatsApp</a>
+      ${this.refImages.length && this.canShareFiles()
+        ? `<button type="button" class="btn" id="shareProject">Enviar projeto com as imagens</button><a class="link-arrow link-arrow--small" href="${whatsUrl(this.message())}" target="_blank" rel="noopener">Enviar só o texto pelo WhatsApp</a>`
+        : `<a class="btn" href="${whatsUrl(this.message())}" target="_blank" rel="noopener">Enviar projeto pelo WhatsApp</a>`}
       <button type="button" class="link-arrow link-arrow--small" id="copySummary">Copiar resumo</button>
       <button type="button" class="link-arrow link-arrow--small" id="resetDesign">Recomeçar</button>
     </div>
-    <p class="summary__note">O valor é uma estimativa. Preço final e prazo são confirmados no atendimento, antes de qualquer pagamento. WhatsApp: (48) 99695-0800.</p>`;
+    <p class="summary__note">Valor e prazo são combinados no atendimento, antes de qualquer pagamento. WhatsApp: (48) 99695-0800.${this.refImages.length && !this.canShareFiles() ? " Lembre de anexar as imagens de referência na conversa." : ""}</p>`;
   },
 
   // ---------- estado do movimento ----------

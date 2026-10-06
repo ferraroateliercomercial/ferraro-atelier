@@ -20,7 +20,7 @@
       var d = document.documentElement, seen = false;
       try { seen = sessionStorage.getItem("ct-intro") === "1"; } catch (e) {}
       var reduced = window.matchMedia && matchMedia("(prefers-reduced-motion: reduce)").matches;
-      var studio = /^#personalizar/.test(location.hash);
+      var studio = /^#(personalizar|oficina)/.test(location.hash);
       if (!seen && !reduced && !studio) d.setAttribute("data-intro", "on");
     })();
   </script>
@@ -301,7 +301,7 @@
       </div>
       <div class="wrap footer__base">
         <p>© <span id="year"></span> Custom Time</p>
-        <p>Valor e prazo combinados no atendimento.</p>
+        <p>Valor e prazo combinados no atendimento. <a href="#oficina" class="footer__internal">Oficina</a></p>
       </div>
     </footer>
   </div>
@@ -346,6 +346,66 @@
           <button class="link-arrow link-arrow--back" id="stepPrev" type="button">Anterior</button>
           <button class="btn" id="stepNext" type="button">Próximo</button>
         </footer>
+      </section>
+    </div>
+  </div>
+
+  <!-- ===================== OFICINA (uso interno) ===================== -->
+  <div class="view workshop" id="viewWorkshop" hidden>
+    <header class="studio__bar">
+      <a href="#topo" class="studio__back">← Início</a>
+      <a href="#topo" class="brand brand--small" aria-label="Custom Time, início"><span class="brand__name">Custom Time</span><span class="brand__tag">Oficina</span></a>
+      <a href="#personalizar" class="studio__summary link-arrow link-arrow--small">Ateliê virtual</a>
+    </header>
+
+    <div class="workshop__grid">
+      <section class="workshop__input" aria-labelledby="wsTitle">
+        <p class="label">Uso interno</p>
+        <h1 id="wsTitle">Projeto do cliente</h1>
+        <p class="workshop__intro">Cole aqui a mensagem que o cliente mandou pelo WhatsApp, inteira, ou só o código do projeto. O relógio aparece montado ao lado.</p>
+        <div class="field text-field">
+          <div class="field__head"><label class="label" for="wsName">Cliente</label><span class="field__note">opcional</span></div>
+          <input type="text" id="wsName" maxlength="60" placeholder="Nome do cliente" autocomplete="off" />
+        </div>
+        <div class="field text-field">
+          <div class="field__head"><label class="label" for="wsText">Mensagem ou código</label></div>
+          <textarea id="wsText" rows="9" placeholder="Olá, Custom Time! Montei este relógio no ateliê virtual: ..."></textarea>
+        </div>
+        <p class="workshop__status" id="wsStatus" role="status"></p>
+        <div class="workshop__actions">
+          <button type="button" class="btn" id="wsBuild">Montar relógio</button>
+          <button type="button" class="link-arrow link-arrow--small" id="wsClear">Limpar</button>
+        </div>
+
+        <div class="workshop__saved">
+          <h2 class="label">Projetos salvos neste aparelho</h2>
+          <ul id="wsList"></ul>
+          <p class="field__note" id="wsEmpty">Nenhum projeto salvo ainda. Monte um relógio e toque em "Salvar projeto".</p>
+        </div>
+      </section>
+
+      <section class="workshop__result" aria-label="Relógio montado">
+        <div class="workshop__placeholder" id="wsPlaceholder">
+          <svg viewBox="0 0 120 150" aria-hidden="true"><rect x="40" y="2" width="40" height="40" rx="3"/><rect x="40" y="108" width="40" height="40" rx="3"/><circle cx="60" cy="75" r="40"/><circle cx="60" cy="75" r="30"/><path d="M60 75V55M60 75l12 8"/></svg>
+          <p>O relógio do cliente aparece aqui.</p>
+        </div>
+        <div id="wsShow" hidden>
+          <div class="views" role="tablist" aria-label="Vista">
+            <button role="tab" aria-selected="true" data-wsview="frente">Frente</button>
+            <button role="tab" aria-selected="false" data-wsview="explodida">Explodida</button>
+            <button role="tab" aria-selected="false" data-wsview="fundo">Fundo</button>
+          </div>
+          <div class="workshop__canvas" id="wsCanvas">
+            <div class="stack-scene"><div class="stack" id="wsStack"></div></div>
+            <div class="studio__back-view" id="wsBack" hidden></div>
+          </div>
+          <div class="workshop__tools">
+            <button type="button" class="btn" id="wsSave">Salvar projeto</button>
+            <button type="button" class="btn btn--line" id="wsEdit">Abrir no ateliê virtual</button>
+            <button type="button" class="link-arrow link-arrow--small" id="wsCopy">Copiar código</button>
+          </div>
+          <div class="summary" id="wsSpec"></div>
+        </div>
       </section>
     </div>
   </div>

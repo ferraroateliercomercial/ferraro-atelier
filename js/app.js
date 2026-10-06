@@ -524,6 +524,135 @@ function initPortfolio() {
 }
 
 // ---------------------------------------------------------------------------
+// Ficha do projeto (resumo) e código do projeto
+// ---------------------------------------------------------------------------
+function projectGroups(c, nImages = 0) {
+  const color = (hex) => ({ color: hex });
+  const hand = HAND_STYLES.find((h) => h.id === c.handStyle) || HAND_STYLES[0];
+  const hasRef = (c.refWatch || "").trim() || (c.refNotes || "").trim() || nImages;
+  return [
+    ["Caixa", [["Formato", LABELS.caseShape[c.caseShape]], ["Diâmetro", `${c.size} mm`], ["Metal", color(c.caseColor)]]],
+    ["Mostrador", [
+      ["Cor", color(c.dialColor)],
+      ["Acabamento", LABELS.dialFinish[c.dialFinish] + (c.dialFume ? ", degradê fumê" : "")],
+      ["Disposição", LABELS.dialLayout[c.dialLayout]],
+      ...(c.dialLayout === "crono" ? [["Submostradores", color(c.subdialColor)]] : []),
+      ["Índices", LABELS.indexStyle[c.indexStyle]],
+      ["Cor dos índices", color(c.indexColor)],
+      ["Lume", c.lume ? "Sim" : "Não"],
+    ]],
+    ["Ponteiros", [["Estilo", hand.name], ["Cor", color(c.handColor)], ["Segundos", LABELS.secondStyle[c.secondStyle]], ["Cor dos segundos", color(c.secondColor)]]],
+    ["Luneta", isOct(c) ? [["Tipo", "Integrada à caixa"]] : [
+      ["Tipo", LABELS.bezelType[c.bezelType]],
+      ...(bezelHasInsert(c) ? [["Cor", color(c.bezelColor)], ...(c.bezelTwoTone ? [["Segunda cor", color(c.bezelColor2)]] : [])] : []),
+    ]],
+    ["Pulseira", [
+      ["Tipo", LABELS.strapType[c.strapType] + (c.strapTwoTone ? ", duas cores" : "")],
+      ...(metalStrap(c)
+        ? (c.strapTwoTone ? [["Elos de fora", color(c.braceletColor)], ["Elos do centro", color(c.braceletColor2)]] : [["Cor do aço", color(c.braceletColor)]])
+        : (c.strapTwoTone ? [["Cor de fora", color(c.strapColor)], ["Cor de dentro", color(c.strapColor2)]] : [["Cor", color(c.strapColor)]])),
+      ...(c.strapType === "couro" ? [["Costura", color(c.stitchColor)]] : []),
+    ]],
+    ["Movimento", [["Tipo", MOVEMENTS[c.movement].name + (c.dialLayout === "crono" ? " (cronógrafo)" : "")], ...(c.movement !== "quartzo" ? [["Calibre", MOVEMENTS[c.movement].caliber]] : []), ...(c.movement === "automatico" ? [["Rotor", color(c.rotorColor)]] : [])]],
+    ...(hasRef ? [["Referência", [
+      ...((c.refWatch || "").trim() ? [["Relógio", c.refWatch.trim()]] : []),
+      ...((c.refNotes || "").trim() ? [["Observações", c.refNotes.trim()]] : []),
+      ...(nImages ? [["Imagens", `${nImages} ${nImages === 1 ? "imagem" : "imagens"}`]] : []),
+    ]]] : []),
+  ];
+}
+
+function groupsHtml(groups) {
+  return groups.map(([title, rows]) => `
+    <div class="summary__group"><h3>${title}</h3>${rows.map(([k, v]) => `<div class="summary__row"><span>${k}</span><span>${typeof v === "object" ? `<i class="summary__chip" style="background:${v.color}"></i>${v.color.toUpperCase()}` : escapeHtml(v)}</span></div>`).join("")}</div>`).join("");
+}
+
+// Código compacto com todas as escolhas (sem a referência). A ordem dos campos não pode mudar:
+// para acrescentar campos, crie uma versão nova (CT2) e mantenha a leitura da CT1.
+const CODE_FIELDS = [
+  ["caseShape", ["redonda", "almofada", "octogonal"]], ["size", [38, 40, 42]], ["caseColor"],
+  ["dialColor"], ["dialFume", "bool"], ["dialFinish", ["liso", "raios", "listrado", "texturizado", "grade"]],
+  ["dialLayout", ["data", "sem-data", "crono"]], ["subdialColor"], ["indexStyle", ["bastao", "romanos", "arabicos", "pontos"]],
+  ["indexColor"], ["lume", "bool"], ["handStyle", HAND_STYLES.map((h) => h.id)], ["handColor"],
+  ["secondStyle", ["agulha", "pirulito", "seta"]], ["secondColor"], ["bezelType", ["mergulho", "taquimetro", "lisa", "canelada"]],
+  ["bezelColor"], ["bezelTwoTone", "bool"], ["bezelColor2"], ["strapType", ["nato", "couro", "borracha", "oyster", "jubile", "integrada"]],
+  ["strapTwoTone", "bool"], ["strapColor"], ["strapColor2"], ["braceletColor"], ["braceletColor2"], ["stitchColor"],
+  ["movement", ["quartzo", "automatico", "manual"]], ["rotorColor"],
+];
+
+function encodeProject(c) {
+  return "CT1-" + CODE_FIELDS.map(([k, kind]) => {
+    if (kind === "bool") return c[k] ? "1" : "0";
+    if (Array.isArray(kind)) return Math.max(0, kind.indexOf(c[k])).toString(36);
+    return String(c[k] || "#000000").replace("#", "").toLowerCase().padEnd(6, "0").slice(0, 6);
+  }).join("");
+}
+
+function decodeProject(text) {
+  const m = String(text).match(/CT1-([0-9a-z]+)/i);
+  if (!m) return null;
+  const raw = m[1].toLowerCase();
+  const cfg = {};
+  let i = 0;
+  for (const [k, kind] of CODE_FIELDS) {
+    if (kind === "bool") { cfg[k] = raw[i] === "1"; i += 1; }
+    else if (Array.isArray(kind)) { const v = kind[parseInt(raw[i], 36)]; if (v === undefined) return null; cfg[k] = v; i += 1; }
+    else { const hex = raw.slice(i, i + 6); if (!/^[0-9a-f]{6}$/.test(hex)) return null; cfg[k] = `#${hex}`; i += 6; }
+  }
+  return i === raw.length ? cfg : null;
+}
+
+/** Lê a mensagem do resumo (para mensagens sem código ou editadas pelo cliente). */
+function parseProjectMessage(text) {
+  const cfg = {};
+  let found = 0;
+  let group = "";
+  const rev = (map, v) => Object.keys(map).find((k) => map[k].toLowerCase() === v.toLowerCase());
+  const hex = (v) => { const m = v.match(/#?([0-9a-f]{6})\b/i); return m ? `#${m[1].toLowerCase()}` : null; };
+  for (const line of String(text).split(/\r?\n/)) {
+    const g = line.match(/^\s*\*([^*]+)\*\s*$/);
+    if (g) { group = g[1].trim(); continue; }
+    const kv = line.match(/^\s*[-•]\s*([^:]+):\s*(.+)$/);
+    if (!kv) continue;
+    const k = kv[1].trim();
+    const v = kv[2].trim();
+    const set = (key, val) => { if (val !== undefined && val !== null) { cfg[key] = val; found++; } };
+    const key = `${group}|${k}`;
+    switch (key) {
+      case "Caixa|Formato": set("caseShape", rev(LABELS.caseShape, v)); break;
+      case "Caixa|Diâmetro": { const n = parseInt(v, 10); set("size", [38, 40, 42].includes(n) ? n : undefined); break; }
+      case "Caixa|Metal": set("caseColor", hex(v)); break;
+      case "Mostrador|Cor": set("dialColor", hex(v)); break;
+      case "Mostrador|Acabamento": set("dialFinish", rev(LABELS.dialFinish, v.split(",")[0].trim())); set("dialFume", /fum/i.test(v)); break;
+      case "Mostrador|Disposição": set("dialLayout", rev(LABELS.dialLayout, v)); break;
+      case "Mostrador|Submostradores": set("subdialColor", hex(v)); break;
+      case "Mostrador|Índices": set("indexStyle", rev(LABELS.indexStyle, v)); break;
+      case "Mostrador|Cor dos índices": set("indexColor", hex(v)); break;
+      case "Mostrador|Lume": set("lume", /^s/i.test(v)); break;
+      case "Ponteiros|Estilo": set("handStyle", HAND_STYLES.find((h) => h.name.toLowerCase() === v.toLowerCase())?.id); break;
+      case "Ponteiros|Cor": set("handColor", hex(v)); break;
+      case "Ponteiros|Segundos": set("secondStyle", rev(LABELS.secondStyle, v)); break;
+      case "Ponteiros|Cor dos segundos": set("secondColor", hex(v)); break;
+      case "Luneta|Tipo": set("bezelType", rev(LABELS.bezelType, v)); break;
+      case "Luneta|Cor": set("bezelColor", hex(v)); break;
+      case "Luneta|Segunda cor": set("bezelColor2", hex(v)); set("bezelTwoTone", true); break;
+      case "Pulseira|Tipo": set("strapType", rev(LABELS.strapType, v.split(",")[0].trim())); set("strapTwoTone", /duas cores/i.test(v)); break;
+      case "Pulseira|Cor": case "Pulseira|Cor de fora": set("strapColor", hex(v)); break;
+      case "Pulseira|Cor de dentro": set("strapColor2", hex(v)); break;
+      case "Pulseira|Cor do aço": case "Pulseira|Elos de fora": set("braceletColor", hex(v)); break;
+      case "Pulseira|Elos do centro": set("braceletColor2", hex(v)); break;
+      case "Pulseira|Costura": set("stitchColor", hex(v)); break;
+      case "Movimento|Tipo": set("movement", Object.keys(MOVEMENTS).find((m) => v.toLowerCase().startsWith(MOVEMENTS[m].name.toLowerCase()))); break;
+      case "Movimento|Rotor": set("rotorColor", hex(v)); break;
+      case "Referência|Relógio": set("refWatch", v); break;
+      case "Referência|Observações": set("refNotes", v); break;
+    }
+  }
+  const imgs = String(text).match(/mandar (\d+) image/i);
+  return { cfg, found, images: imgs ? +imgs[1] : 0 };
+}
+
+// ---------------------------------------------------------------------------
 // Ateliê virtual
 // ---------------------------------------------------------------------------
 const Studio = {
@@ -846,55 +975,20 @@ const Studio = {
   },
 
   // ---------- resumo ----------
-  groups() {
-    const c = this.cfg;
-    const color = (hex) => ({ color: hex });
-    const hand = HAND_STYLES.find((h) => h.id === c.handStyle);
-    const g = [
-      ["Caixa", [["Formato", LABELS.caseShape[c.caseShape]], ["Diâmetro", `${c.size} mm`], ["Metal", color(c.caseColor)]]],
-      ["Mostrador", [
-        ["Cor", color(c.dialColor)],
-        ["Acabamento", LABELS.dialFinish[c.dialFinish] + (c.dialFume ? ", degradê fumê" : "")],
-        ["Disposição", LABELS.dialLayout[c.dialLayout]],
-        ...(c.dialLayout === "crono" ? [["Submostradores", color(c.subdialColor)]] : []),
-        ["Índices", LABELS.indexStyle[c.indexStyle]],
-        ["Cor dos índices", color(c.indexColor)],
-        ["Lume", c.lume ? "Sim" : "Não"],
-      ]],
-      ["Ponteiros", [["Estilo", hand.name], ["Cor", color(c.handColor)], ["Segundos", LABELS.secondStyle[c.secondStyle]], ["Cor dos segundos", color(c.secondColor)]]],
-      ["Luneta", isOct(c) ? [["Tipo", "Integrada à caixa"]] : [
-        ["Tipo", LABELS.bezelType[c.bezelType]],
-        ...(bezelHasInsert(c) ? [["Cor", color(c.bezelColor)], ...(c.bezelTwoTone ? [["Segunda cor", color(c.bezelColor2)]] : [])] : []),
-      ]],
-      ["Pulseira", [
-        ["Tipo", LABELS.strapType[c.strapType] + (c.strapTwoTone ? ", duas cores" : "")],
-        ...(metalStrap(c)
-          ? (c.strapTwoTone ? [["Elos de fora", color(c.braceletColor)], ["Elos do centro", color(c.braceletColor2)]] : [["Cor do aço", color(c.braceletColor)]])
-          : (c.strapTwoTone ? [["Cor de fora", color(c.strapColor)], ["Cor de dentro", color(c.strapColor2)]] : [["Cor", color(c.strapColor)]])),
-        ...(c.strapType === "couro" ? [["Costura", color(c.stitchColor)]] : []),
-      ]],
-      ["Movimento", [["Tipo", MOVEMENTS[c.movement].name + (c.dialLayout === "crono" ? " (cronógrafo)" : "")], ...(c.movement !== "quartzo" ? [["Calibre", MOVEMENTS[c.movement].caliber]] : []), ...(c.movement === "automatico" ? [["Rotor", color(c.rotorColor)]] : [])]],
-      ...(this.hasReference() ? [["Referência", [
-        ...(c.refWatch?.trim() ? [["Relógio", c.refWatch.trim()]] : []),
-        ...(c.refNotes?.trim() ? [["Observações", c.refNotes.trim()]] : []),
-        ...(this.refImages.length ? [["Imagens", `${this.refImages.length} ${this.refImages.length === 1 ? "imagem" : "imagens"}`]] : []),
-      ]]] : []),
-    ];
-    return g;
-  },
+  groups() { return projectGroups(this.cfg, this.refImages.length); },
 
   message() {
     const lines = this.groups().map(([title, rows]) => `*${title}*\n` + rows.map(([k, v]) => `- ${k}: ${typeof v === "object" ? v.color.toUpperCase() : v}`).join("\n"));
     const n = this.refImages.length;
     const pics = n ? `\n\nVou mandar ${n === 1 ? "1 imagem" : `${n} imagens`} de referência aqui na conversa.` : "";
-    return `Olá, Custom Time! Montei este relógio no ateliê virtual:\n\n${lines.join("\n\n")}${pics}\n\nPodem me passar o valor e o prazo?`;
+    return `Olá, Custom Time! Montei este relógio no ateliê virtual:\n\n${lines.join("\n\n")}${pics}\n\nCódigo do projeto: ${encodeProject(this.cfg)}\n\nPodem me passar o valor e o prazo?`;
   },
 
   renderSummary() {
     const el = $("#summary");
     if (!el) return;
-    el.innerHTML = `<div class="summary">${this.groups().map(([title, rows]) => `
-      <div class="summary__group"><h3>${title}</h3>${rows.map(([k, v]) => `<div class="summary__row"><span>${k}</span><span>${typeof v === "object" ? `<i class="summary__chip" style="background:${v.color}"></i>${v.color.toUpperCase()}` : escapeHtml(v)}</span></div>`).join("")}</div>`).join("")}
+    el.innerHTML = `<div class="summary">${groupsHtml(this.groups())}
+      <div class="summary__group"><h3>Código do projeto</h3><code class="project-code">${encodeProject(this.cfg)}</code></div>
     </div>
     <div class="summary__actions">
       ${this.refImages.length && this.canShareFiles()
@@ -931,15 +1025,158 @@ const Studio = {
 };
 
 // ---------------------------------------------------------------------------
+// Oficina: você cola a mensagem do cliente e vê o relógio montado
+// ---------------------------------------------------------------------------
+const Workshop = {
+  ready: false,
+  cfg: null,
+  images: 0,
+  view: "frente",
+  savedKey: "ct-oficina",
+
+  init() {
+    if (this.ready) return;
+    this.ready = true;
+    this.text = $("#wsText");
+    this.name = $("#wsName");
+    this.stack = $("#wsStack");
+    this.back = $("#wsBack");
+    this.mv = null;
+    this.text.addEventListener("input", () => { clearTimeout(this.timer); this.timer = setTimeout(() => this.build(true), 350); });
+    $("#wsBuild").addEventListener("click", () => { clearTimeout(this.timer); this.build(); });
+    $("#wsClear").addEventListener("click", () => this.clear());
+    $("#wsSave").addEventListener("click", () => this.save());
+    $("#wsEdit").addEventListener("click", () => {
+      Studio.apply({ ...DEFAULT_WATCH, ...this.cfg }, "resumo", "Projeto do cliente aberto no ateliê virtual");
+      location.hash = "personalizar";
+    });
+    $("#wsCopy").addEventListener("click", () => {
+      const code = encodeProject(this.cfg);
+      navigator.clipboard?.writeText(code).then(() => toast("Código copiado"), () => toast(code));
+    });
+    $$("[data-wsview]").forEach((b) => b.addEventListener("click", () => this.setView(b.dataset.wsview)));
+    $("#wsList").addEventListener("click", (e) => {
+      const open = e.target.closest("[data-open-saved]");
+      const del = e.target.closest("[data-del-saved]");
+      const list = this.list();
+      if (open) {
+        const item = list[+open.dataset.openSaved];
+        this.name.value = item.name || "";
+        this.text.value = item.text;
+        this.build();
+        window.scrollTo({ top: 0, behavior: "smooth" });
+      } else if (del) {
+        list.splice(+del.dataset.delSaved, 1);
+        storage.set(this.savedKey, list);
+        this.renderList();
+      }
+    });
+    bindCrown($("#wsCanvas"), () => this.mv);
+    this.renderList();
+  },
+
+  status(msg, kind) {
+    const el = $("#wsStatus");
+    el.textContent = msg;
+    el.className = `workshop__status${kind ? ` is-${kind}` : ""}`;
+  },
+
+  build(quiet = false) {
+    const text = this.text.value.trim();
+    if (!text) { this.clear(true); return; }
+    const parsed = parseProjectMessage(text);
+    const fromCode = decodeProject(text);
+    if (!fromCode && parsed.found < 3) {
+      if (!quiet) this.status("Não encontrei um projeto nesse texto. Cole a mensagem inteira que o cliente mandou, ou o código que começa com CT1-.", "error");
+      else this.status("");
+      return;
+    }
+    // o código tem todas as escolhas; a mensagem traz a referência do cliente
+    this.cfg = { ...DEFAULT_WATCH, ...parsed.cfg, ...(fromCode || {}) };
+    this.images = parsed.images;
+    this.status(fromCode
+      ? "Projeto lido pelo código. Tudo igual ao que o cliente montou."
+      : "Projeto lido pela mensagem (sem código). Confira as cores e detalhes com o cliente.", fromCode ? "ok" : "warn");
+    $("#wsPlaceholder").hidden = true;
+    $("#wsShow").hidden = false;
+    this.render();
+    if (!quiet && window.innerWidth < 860) $("#wsShow").scrollIntoView({ behavior: "smooth", block: "start" });
+  },
+
+  clear(keepText) {
+    if (!keepText) { this.text.value = ""; this.name.value = ""; }
+    this.cfg = null;
+    this.status("");
+    $("#wsPlaceholder").hidden = false;
+    $("#wsShow").hidden = true;
+  },
+
+  setView(v) {
+    this.view = v;
+    $$("[data-wsview]").forEach((b) => b.setAttribute("aria-selected", String(b.dataset.wsview === v)));
+    const ex = v === "explodida";
+    const mobile = window.innerWidth < 860;
+    this.stack.style.setProperty("--tilt", ex ? "56deg" : "0deg");
+    this.stack.style.setProperty("--spin", ex ? "-24deg" : "0deg");
+    this.stack.style.setProperty("--gap", ex ? (mobile ? "24px" : "40px") : "0px");
+    this.stack.style.setProperty("--lift", ex ? (mobile ? "40px" : "80px") : "0px");
+    if (this.cfg) this.render();
+  },
+
+  render() {
+    const c = this.cfg;
+    const back = this.view === "fundo";
+    this.stack.parentElement.hidden = back;
+    this.back.hidden = !back;
+    if (back) this.back.innerHTML = Watch.back(c);
+    else renderStack(this.stack, c);
+    if (!this.mv) this.mv = Clockwork.add(new Movement($("#wsCanvas"), c));
+    this.mv.reserve = 1;
+    this.mv.setConfig(c);
+    const name = this.name.value.trim();
+    $("#wsSpec").innerHTML = `${name ? `<div class="summary__group"><h3>Cliente</h3><div class="summary__row"><span>Nome</span><span>${escapeHtml(name)}</span></div></div>` : ""}${groupsHtml(projectGroups(c, this.images))}`;
+  },
+
+  list() { return storage.get(this.savedKey, []); },
+
+  save() {
+    if (!this.cfg) return;
+    const list = this.list();
+    const name = this.name.value.trim() || `Projeto ${list.length + 1}`;
+    list.unshift({ name, text: this.text.value.trim(), dial: this.cfg.dialColor, rim: this.cfg.caseColor, date: new Date().toISOString() });
+    storage.set(this.savedKey, list.slice(0, 40));
+    this.renderList();
+    toast("Projeto salvo neste aparelho");
+  },
+
+  renderList() {
+    const list = this.list();
+    $("#wsEmpty").hidden = list.length > 0;
+    $("#wsList").innerHTML = list.map((p, i) => `
+      <li class="ws-item">
+        <span class="ws-item__swatch" style="background:${p.dial};border-color:${p.rim}"></span>
+        <button type="button" class="ws-item__open" data-open-saved="${i}"><b>${escapeHtml(p.name)}</b><small>${new Date(p.date).toLocaleDateString("pt-BR")}</small></button>
+        <button type="button" class="ws-item__del" data-del-saved="${i}">Apagar</button>
+      </li>`).join("");
+  },
+};
+
+// ---------------------------------------------------------------------------
 // Navegação entre a página inicial e o ateliê
 // ---------------------------------------------------------------------------
 function route() {
   const hash = location.hash.slice(1);
   const studio = hash.startsWith("personalizar");
-  const wasStudio = !$("#viewStudio").hidden;
-  $("#viewHome").hidden = studio;
+  const workshop = hash === "oficina";
+  const wasStudio = !$("#viewStudio").hidden || !$("#viewWorkshop").hidden;
+  $("#viewHome").hidden = studio || workshop;
   $("#viewStudio").hidden = !studio;
-  if (studio) {
+  $("#viewWorkshop").hidden = !workshop;
+  if (workshop) {
+    Workshop.init();
+    window.scrollTo(0, 0);
+    document.title = "Oficina · Custom Time";
+  } else if (studio) {
     Studio.init();
     if (!wasStudio) window.scrollTo(0, 0);
     document.title = "Ateliê virtual · Custom Time";

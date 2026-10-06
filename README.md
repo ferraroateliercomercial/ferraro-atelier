@@ -22,6 +22,14 @@ Oito etapas: caixa, mostrador, ponteiros, luneta, pulseira, movimento, referênc
 - O relógio da prévia marca a hora real e anda conforme o movimento escolhido. Nos mecânicos dá para dar corda girando a coroa; no cronógrafo os botões laterais ligam, param e zeram.
 - O resumo gera a mensagem do WhatsApp com todas as escolhas, os códigos das cores e a referência.
 
+## Oficina (`#oficina`, uso interno)
+
+Página para a Custom Time ver o relógio que o cliente montou. Abra o site com `#oficina` no fim do endereço (há também um link discreto "Oficina" no rodapé).
+
+- Cole a mensagem que o cliente mandou pelo WhatsApp (ou só o código `CT1-...`) e o relógio aparece montado, de frente, explodido e de fundo, com a ficha completa.
+- O código do projeto vai no fim de toda mensagem enviada pelo ateliê virtual e reproduz o relógio exatamente. Sem o código, a Oficina lê as linhas da mensagem e avisa para conferir.
+- "Abrir no ateliê virtual" carrega o projeto para ajustar; "Salvar projeto" guarda na lista deste aparelho.
+
 ## Como editar
 
 - `js/app.js`, começo do arquivo: `STORE.whatsapp` e `STORE.instagram`.

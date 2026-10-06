@@ -4,18 +4,17 @@
 // Configurações da loja: troque pelos seus dados
 // ---------------------------------------------------------------------------
 const STORE = {
-  // Número com DDI + DDD, só dígitos. Ex.: "5511999998888".
-  // Vazio: o WhatsApp abre e o cliente escolhe o contato.
+  // Número com DDI + DDD, só dígitos.
   whatsapp: "5548996950800",
   instagram: "https://instagram.com/",
   basePrice: 1490, // relógio base: caixa de aço + movimento automático
   engravingPrice: 60,
+  carbonPrice: 1890,
 };
 
 const brl = new Intl.NumberFormat("pt-BR", { style: "currency", currency: "BRL", maximumFractionDigits: 0 });
 const $ = (sel, root = document) => root.querySelector(sel);
 const $$ = (sel, root = document) => [...root.querySelectorAll(sel)];
-const SVG_NS = "http://www.w3.org/2000/svg";
 
 // ---------------------------------------------------------------------------
 // Opções do configurador
@@ -55,58 +54,65 @@ const GROUP_LABEL = { dial: "Mostrador", bezel: "Luneta", hands: "Ponteiros", st
 const DEFAULT_CONFIG = { dial: "oceano", bezel: "topo", hands: "prata", strap: "nato-azul" };
 
 // ---------------------------------------------------------------------------
-// Serviços
+// Coleção. Para usar uma foto sua, troque `config` por `image: "assets/arquivo.jpg"`
+// e informe o preço em `price`.
 // ---------------------------------------------------------------------------
-const ICONS = {
-  watch: '<circle cx="12" cy="12" r="6"/><path d="M12 9v3l2 1M9 6l1-4h4l1 4M9 18l1 4h4l1-4"/>',
-  dial: '<circle cx="12" cy="12" r="9"/><circle cx="12" cy="12" r="4"/><path d="M12 3v2M21 12h-2M12 21v-2M3 12h2"/>',
-  bezel: '<circle cx="12" cy="12" r="9"/><circle cx="12" cy="12" r="6"/><path d="M12 3l1.5 2.5h-3Z"/>',
-  hands: '<circle cx="12" cy="12" r="9"/><path d="M12 12V6M12 12l4 3"/>',
-  strap: '<rect x="8" y="2" width="8" height="20" rx="2"/><path d="M8 8h8M8 16h8"/>',
-  pen: '<path d="M4 20h4L19 9l-4-4L4 16v4Z"/><path d="M13 7l4 4"/>',
-  wrench: '<path d="M14 6a4 4 0 0 0 5 5l-8 8a2 2 0 0 1-3-3l8-8a4 4 0 0 0-2-2Z"/>',
-  drop: '<path d="M12 3s6 7 6 11a6 6 0 0 1-12 0c0-4 6-11 6-11Z"/>',
-};
-
-const SERVICES = [
-  { id: "sob-medida", cat: "novo", icon: "watch", title: "Relógio sob medida", text: "Do zero, com as peças que você escolher. Montado, regulado e testado.", price: STORE.basePrice, from: true, cta: "monte" },
-  { id: "replica-carbon", cat: "novo", icon: "watch", title: "Carbon Edition", text: "A peça da foto: mostrador azul texturizado, luneta topográfica e fundo de vidro.", price: 1890 },
-  { id: "mostrador", cat: "personalizar", icon: "dial", title: "Troca de mostrador", text: "Novo mostrador e índices para o seu relógio, com acabamento original.", price: 220, from: true },
-  { id: "luneta", cat: "personalizar", icon: "bezel", title: "Troca de luneta", text: "Cerâmica, aço gravado ou bicolor. Muda a cara do relógio na hora.", price: 160, from: true },
-  { id: "ponteiros", cat: "personalizar", icon: "hands", title: "Troca de ponteiros", text: "Ponteiros em prata, dourado, preto ou rosé, com lume.", price: 120, from: true },
-  { id: "pulseira", cat: "personalizar", icon: "strap", title: "Pulseira nova", text: "NATO, couro ou aço, ajustada ao seu pulso.", price: 90, from: true },
-  { id: "gravacao", cat: "personalizar", icon: "pen", title: "Gravação no fundo", text: "Nome, data ou mensagem gravada no fundo da caixa.", price: STORE.engravingPrice },
-  { id: "revisao", cat: "cuidado", icon: "wrench", title: "Revisão do movimento", text: "Limpeza, lubrificação e regulagem do automático.", price: 250, from: true },
-  { id: "vedacao", cat: "cuidado", icon: "drop", title: "Teste de vedação", text: "Troca de juntas e teste de pressão para voltar a mergulhar tranquilo.", price: 120 },
+const COLLECTION = [
+  { id: "carbon", name: "Carbon Edition", ref: "CT-001", image: "assets/carbon-edition.jpg", strap: "weave", price: STORE.carbonPrice, spec: "Mostrador texturizado · luneta topográfica", tag: "Destaque", link: "#carbon" },
+  { id: "abissal", name: "Abissal", ref: "CT-002", config: { dial: "preto", bezel: "pepsi", hands: "prata", strap: "aco" }, spec: "Mostrador preto · luneta Pepsi" },
+  { id: "floresta", name: "Floresta", ref: "CT-003", config: { dial: "verde", bezel: "ceramica", hands: "dourado", strap: "couro" }, spec: "Mostrador verde · ponteiros dourados" },
+  { id: "laguna", name: "Laguna", ref: "CT-004", config: { dial: "turquesa", bezel: "topo", hands: "prata", strap: "nato-azul" }, spec: "Mostrador turquesa · luneta topográfica" },
+  { id: "gelo", name: "Gelo", ref: "CT-005", config: { dial: "branco", bezel: "batman", hands: "preto", strap: "aco" }, spec: "Mostrador branco · luneta Batman" },
+  { id: "aurora", name: "Aurora", ref: "CT-006", config: { dial: "salmao", bezel: "ceramica", hands: "rose", strap: "couro" }, spec: "Mostrador salmão · ponteiros rosé" },
 ];
 
 // ---------------------------------------------------------------------------
-// Detalhes da Carbon Edition (pontos na foto)
+// Serviços
 // ---------------------------------------------------------------------------
-const SPOTS = [
+const SERVICE_GROUPS = [
+  { title: "Relógio novo", items: [
+    { id: "sob-medida", title: "Relógio sob medida", text: "Montado do zero com as peças que você escolher.", price: STORE.basePrice, from: true, link: "#personalizar" },
+    { id: "carbon", title: "Carbon Edition", text: "A peça em destaque, montada para você.", price: STORE.carbonPrice },
+  ] },
+  { title: "Personalização", items: [
+    { id: "mostrador", title: "Troca de mostrador", text: "Novo mostrador e índices para o seu relógio.", price: 220, from: true },
+    { id: "luneta", title: "Troca de luneta", text: "Cerâmica, aço gravado ou bicolor.", price: 160, from: true },
+    { id: "ponteiros", title: "Troca de ponteiros", text: "Prata, dourado, preto ou rosé, com lume.", price: 120, from: true },
+    { id: "pulseira", title: "Pulseira nova", text: "NATO, couro ou aço, ajustada ao seu pulso.", price: 90, from: true },
+    { id: "gravacao", title: "Gravação no fundo", text: "Nome, data ou mensagem.", price: STORE.engravingPrice },
+  ] },
+  { title: "Manutenção", items: [
+    { id: "revisao", title: "Revisão do movimento", text: "Limpeza, lubrificação e regulagem.", price: 250, from: true },
+    { id: "vedacao", title: "Teste de vedação", text: "Troca de juntas e teste de pressão.", price: 120 },
+    { id: "polimento", title: "Polimento de caixa", text: "Acabamento escovado e polido refeito.", price: 180, from: true },
+  ] },
+];
+
+// ---------------------------------------------------------------------------
+// Detalhes da Carbon Edition
+// ---------------------------------------------------------------------------
+const CARBON_DETAILS = [
   { title: "Luneta topográfica", text: "Aço gravado com curvas de nível, como um mapa. Gira em um só sentido, com marcações azuis a cada 10 minutos." },
-  { title: "Mostrador texturizado", text: "Azul profundo com textura que lembra gelo e fundo do mar. Cada mostrador sai com um desenho diferente." },
-  { title: "Ponteiros com lume", text: "Ponteiros em aço polido com material luminescente, e o ponteiro de segundos em turquesa." },
-  { title: "Coroa azul", text: "Coroa de rosca anodizada em azul, combinando com o mostrador e a pulseira." },
-  { title: "Data com lupa", text: "Janela de data às 3 horas com lupa no vidro, para ler o dia sem esforço." },
-  { title: "Pulseira NATO", text: "Nylon trançado azul, resistente à água e fácil de trocar." },
-  { title: "Rotor decorado", text: "Rotor em turquesa com padrão de ondas japonês (seigaiha). É ele que dá corda ao relógio com o movimento do pulso." },
-  { title: "Fundo de vidro", text: "Fundo transparente para ver o movimento automático trabalhando." },
+  { title: "Mostrador texturizado", text: "Azul profundo com textura que lembra gelo e fundo do mar. Nenhum sai igual ao outro." },
+  { title: "Ponteiros e coroa", text: "Ponteiros em aço polido com lume, segundos em turquesa e coroa de rosca anodizada em azul." },
+  { title: "Fundo de vidro", text: "Rotor turquesa com padrão de ondas japonês (seigaiha). É ele que dá corda ao relógio com o movimento do pulso." },
 ];
 
 // ---------------------------------------------------------------------------
 // Utilidades
 // ---------------------------------------------------------------------------
-function svg(tag, attrs = {}) {
-  const el = document.createElementNS(SVG_NS, tag);
-  for (const [k, v] of Object.entries(attrs)) el.setAttribute(k, v);
-  return el;
-}
-
 function polar(r, deg, cx = 200, cy = 260) {
   const a = ((deg - 90) * Math.PI) / 180;
-  return [cx + r * Math.cos(a), cy + r * Math.sin(a)];
+  return [+(cx + r * Math.cos(a)).toFixed(2), +(cy + r * Math.sin(a)).toFixed(2)];
 }
+
+function escapeHtml(str) {
+  return String(str).replace(/[&<>"']/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c]));
+}
+
+const pick = (group, id) => OPTIONS[group].find((o) => o.id === id);
+const configPrice = (config) => STORE.basePrice + Object.keys(OPTIONS).reduce((s, g) => s + pick(g, config[g]).price, 0);
+const configText = (config) => Object.keys(OPTIONS).map((g) => pick(g, config[g]).label).join(" · ");
 
 const storage = {
   get(key, fallback) {
@@ -126,346 +132,326 @@ function toast(msg) {
   toastTimer = setTimeout(() => el.classList.remove("is-visible"), 2400);
 }
 
+function whatsUrl(text) {
+  return `https://wa.me/${STORE.whatsapp}?text=${encodeURIComponent(text)}`;
+}
+
 // ---------------------------------------------------------------------------
-// Navegação
+// Desenho do relógio (SVG)
+// ---------------------------------------------------------------------------
+const TOPO_PATHS = (() => {
+  let out = "";
+  for (let i = 0; i < 9; i++) {
+    const base = 108 + i * 2.8;
+    let d = "";
+    for (let a = 0; a <= 360; a += 6) {
+      const r = base + Math.sin((a + i * 37) * 0.07) * 1.4 + Math.cos((a * 3 + i * 11) * 0.031) * 1.1;
+      const [x, y] = polar(r, a);
+      d += `${a ? "L" : "M"}${x} ${y}`;
+    }
+    out += `<path d="${d}Z" fill="none" stroke="#2b3036" stroke-opacity=".55" stroke-width=".7"/>`;
+  }
+  return out;
+})();
+
+function watchSVG(config, { time = { h: 10, m: 8, s: 38 }, title = "Desenho do relógio" } = {}) {
+  const dial = pick("dial", config.dial);
+  const bezel = pick("bezel", config.bezel);
+  const hands = pick("hands", config.hands);
+  const strap = pick("strap", config.strap);
+
+  // pulseira
+  let strapSvg = "";
+  for (const y of [0, 370]) {
+    if (strap.kind === "links") {
+      strapSvg += `<rect x="138" y="${y}" width="124" height="150" rx="4" fill="url(#links)"/>`;
+    } else {
+      strapSvg += `<rect x="138" y="${y}" width="124" height="150" rx="10" fill="${strap.color}"/>`;
+      strapSvg += `<rect x="138" y="${y}" width="124" height="150" rx="10" fill="url(#${strap.kind})"/>`;
+      if (strap.kind === "leather") strapSvg += `<rect x="143" y="${y + 5}" width="114" height="140" rx="7" fill="none" stroke="#e8d6c0" stroke-opacity=".55" stroke-dasharray="4 3"/>`;
+    }
+  }
+
+  // luneta
+  let bezelSvg = `<circle cx="200" cy="260" r="132" fill="${bezel.color}"/>`;
+  if (bezel.half) bezelSvg += `<path d="M68 260 A132 132 0 0 1 332 260 Z" fill="${bezel.half}"/>`;
+  if (bezel.topo) bezelSvg += TOPO_PATHS;
+  const [tx, ty] = polar(124, 0);
+  bezelSvg += `<path d="M${tx - 7} ${ty - 5} L${tx + 7} ${ty - 5} L${tx} ${ty + 7} Z" fill="${bezel.ink}"/><circle cx="${tx}" cy="${ty - 0.5}" r="2.4" fill="#cfe9f6"/>`;
+  for (let m = 5; m < 60; m += 5) {
+    const deg = m * 6;
+    const [x, y] = polar(119, deg);
+    bezelSvg += m % 10 === 0
+      ? `<text x="${x}" y="${y + 5}" text-anchor="middle" font-family="Jost, sans-serif" font-size="15" font-weight="500" fill="${bezel.ink}" transform="rotate(${deg} ${x} ${y})">${m}</text>`
+      : `<rect x="${x - 2}" y="${y - 7}" width="4" height="14" rx="1" fill="${bezel.topo ? "#4fb3e8" : bezel.ink}" transform="rotate(${deg} ${x} ${y})"/>`;
+  }
+  for (let m = 1; m < 15; m++) {
+    if (m % 5 === 0) continue;
+    const [x1, y1] = polar(130, m * 6);
+    const [x2, y2] = polar(124, m * 6);
+    bezelSvg += `<line x1="${x1}" y1="${y1}" x2="${x2}" y2="${y2}" stroke="${bezel.ink}" stroke-width="1.4"/>`;
+  }
+
+  // índices e minutos
+  let idx = "";
+  for (let h = 0; h < 12; h++) {
+    if (h === 3) continue; // janela da data
+    const deg = h * 30;
+    const len = h % 3 === 0 ? 18 : 14;
+    const [x, y] = polar(94 - len / 2, deg);
+    const bar = (dx) => `<rect x="${x - 2.5 + dx}" y="${y - len / 2}" width="5" height="${len}" rx="1.2" fill="#f3f6ea" stroke="${hands.color}" stroke-width="1.2" transform="rotate(${deg} ${x} ${y})"/>`;
+    idx += h === 0 ? bar(-4) + bar(4) : bar(0);
+  }
+  for (let m = 0; m < 60; m++) {
+    if (m % 5 === 0) continue;
+    const [x1, y1] = polar(101, m * 6);
+    const [x2, y2] = polar(97, m * 6);
+    idx += `<line x1="${x1}" y1="${y1}" x2="${x2}" y2="${y2}" stroke="${dial.ink}" stroke-width=".8"/>`;
+  }
+
+  const sec = time.s;
+  const min = time.m + sec / 60;
+  const hr = (time.h % 12) + min / 60;
+
+  return `<svg viewBox="0 0 400 520" role="img" aria-label="${escapeHtml(title)}">
+    <g>${strapSvg}</g>
+    <path d="M140 150 L150 120 H250 L260 150 Z M140 370 L150 400 H250 L260 370 Z" fill="url(#steel)"/>
+    <rect x="338" y="246" width="24" height="28" rx="5" fill="url(#steel)"/>
+    <circle cx="200" cy="260" r="140" fill="url(#steel)"/>
+    <circle cx="200" cy="260" r="136" fill="none" stroke="#000" stroke-opacity=".12" stroke-width="2"/>
+    ${bezelSvg}
+    <circle cx="200" cy="260" r="104" fill="#1b1f24"/>
+    <circle cx="200" cy="260" r="102" fill="${dial.color}"/>
+    ${dial.texture ? '<rect x="96" y="156" width="208" height="208" fill="url(#texture)" clip-path="url(#dialClip)"/>' : ""}
+    <circle cx="200" cy="260" r="102" fill="url(#dialShade)"/>
+    ${idx}
+    <rect x="262" y="250" width="26" height="20" rx="2" fill="#f4f4f1" stroke="#999" stroke-width=".8"/>
+    <text x="275" y="265" text-anchor="middle" font-family="Jost, sans-serif" font-size="12" font-weight="500" fill="#111">${new Date().getDate()}</text>
+    <text x="200" y="210" text-anchor="middle" font-family="'Bodoni Moda', Georgia, serif" font-size="11" letter-spacing="1.5" fill="${dial.ink}">Custom Time</text>
+    <text x="200" y="306" text-anchor="middle" font-family="Jost, sans-serif" font-size="6" letter-spacing="1.6" fill="${dial.ink}">AUTOMATIC · 200m</text>
+    <g data-hand="h" transform="rotate(${hr * 30} 200 260)"><path d="M196 268 L196 205 L200 196 L204 205 L204 268 Z" fill="${hands.color}"/><rect x="197.5" y="208" width="5" height="40" rx="1.5" fill="#f3f6ea"/></g>
+    <g data-hand="m" transform="rotate(${min * 6} 200 260)"><path d="M197 270 L197 178 L200 168 L203 178 L203 270 Z" fill="${hands.color}"/><rect x="198.3" y="180" width="3.4" height="62" rx="1.2" fill="#f3f6ea"/></g>
+    <g data-hand="s" transform="rotate(${sec * 6} 200 260)"><rect x="199.2" y="182" width="1.6" height="100" fill="${hands.second}"/><circle cx="200" cy="215" r="4" fill="${hands.second}"/></g>
+    <circle cx="200" cy="260" r="5" fill="${hands.color}"/>
+    <circle cx="200" cy="260" r="2" fill="${hands.second}"/>
+    <ellipse cx="160" cy="200" rx="70" ry="38" fill="#fff" opacity=".06" transform="rotate(-30 160 200)"/>
+  </svg>`;
+}
+
+// ---------------------------------------------------------------------------
+// Cabeçalho
 // ---------------------------------------------------------------------------
 function initNav() {
-  const nav = $("#nav");
   const menu = $("#menu");
   const btn = $("#menuBtn");
-  const onScroll = () => nav.classList.toggle("is-scrolled", window.scrollY > 20);
-  onScroll();
-  window.addEventListener("scroll", onScroll, { passive: true });
-
   const setMenu = (open) => {
     menu.classList.toggle("is-open", open);
-    nav.classList.toggle("menu-open", open);
     btn.setAttribute("aria-expanded", String(open));
   };
   btn.addEventListener("click", () => setMenu(!menu.classList.contains("is-open")));
   $$("a", menu).forEach((a) => a.addEventListener("click", () => setMenu(false)));
 }
 
-function initReveal() {
-  const items = $$(".reveal");
-  if (!("IntersectionObserver" in window)) return items.forEach((el) => el.classList.add("is-in"));
-  const io = new IntersectionObserver((entries) => {
-    entries.forEach((e) => {
-      if (e.isIntersecting) { e.target.classList.add("is-in"); io.unobserve(e.target); }
-    });
-  }, { threshold: 0.12 });
-  items.forEach((el) => io.observe(el));
-}
+// ---------------------------------------------------------------------------
+// Coleção
+// ---------------------------------------------------------------------------
+function productPrice(p) { return p.config ? configPrice(p.config) : p.price; }
+function productStrap(p) { return p.config ? pick("strap", p.config.strap).kind : p.strap; }
 
-// ---------------------------------------------------------------------------
-// Hero: inclinação da foto e relógio ao vivo
-// ---------------------------------------------------------------------------
-function initHero() {
-  const visual = $("#heroVisual");
-  const img = $("#heroImg");
-  if (window.matchMedia("(hover: hover)").matches) {
-    visual.addEventListener("mousemove", (e) => {
-      const r = visual.getBoundingClientRect();
-      const x = (e.clientX - r.left) / r.width - 0.5;
-      const y = (e.clientY - r.top) / r.height - 0.5;
-      img.style.setProperty("--ry", `${x * 10}deg`);
-      img.style.setProperty("--rx", `${-y * 10}deg`);
-    });
-    visual.addEventListener("mouseleave", () => {
-      img.style.setProperty("--ry", "0deg");
-      img.style.setProperty("--rx", "0deg");
-    });
-  }
-  const clock = $("#liveClock");
-  const tick = () => { clock.textContent = new Date().toLocaleTimeString("pt-BR"); };
-  tick();
-  setInterval(tick, 1000);
-}
-
-// ---------------------------------------------------------------------------
-// Carbon Edition: pontos interativos
-// ---------------------------------------------------------------------------
-function initShowcase() {
-  let current = 0;
-  const dots = $("#spotDots");
-  SPOTS.forEach((_, i) => {
-    const b = document.createElement("button");
-    b.setAttribute("aria-label", `Detalhe ${i + 1}`);
-    b.addEventListener("click", () => show(i));
-    dots.append(b);
-  });
-
-  const setView = (view) => {
-    $$(".showcase__toggle button").forEach((b) => b.setAttribute("aria-selected", String(b.dataset.view === view)));
-    $$(".showcase__view").forEach((f) => f.classList.toggle("is-active", f.dataset.view === view));
+function initCollection() {
+  const grid = $("#products");
+  const render = (filter) => {
+    const list = COLLECTION.filter((p) => filter === "todos" || productStrap(p) === filter);
+    $("#productCount").textContent = `${list.length} ${list.length === 1 ? "peça" : "peças"}`;
+    grid.innerHTML = list.map((p) => `
+      <article class="item">
+        <a class="item__media" href="${p.link || "#personalizar"}" data-open="${p.id}" aria-label="${p.link ? "Ver" : "Personalizar"} ${escapeHtml(p.name)}">
+          ${p.image ? `<img src="${p.image}" alt="${escapeHtml(p.name)}" loading="lazy" />` : watchSVG(p.config, { title: p.name })}
+          ${p.tag ? `<span class="item__tag">${p.tag}</span>` : ""}
+        </a>
+        <div class="item__body">
+          <h3>${escapeHtml(p.name)}</h3>
+          <p class="item__spec">${escapeHtml(p.spec)}</p>
+          <p class="item__price">${brl.format(productPrice(p))}</p>
+          <div class="item__actions">
+            <button type="button" data-add="${p.id}">Adicionar à sacola</button>
+            ${p.config ? `<a href="#personalizar" data-open="${p.id}">Personalizar</a>` : `<a href="${p.link}">Ver detalhes</a>`}
+          </div>
+        </div>
+      </article>`).join("");
   };
+  render("todos");
 
-  function show(i) {
-    current = (i + SPOTS.length) % SPOTS.length;
-    const spot = SPOTS[current];
-    const hotspot = $(`.hotspot[data-spot="${current}"]`);
-    setView(hotspot.closest(".showcase__view").dataset.view);
-    $$(".hotspot").forEach((h) => h.classList.toggle("is-active", h === hotspot));
-    $$("button", dots).forEach((d, k) => d.classList.toggle("is-active", k === current));
-    $("#spotNum").textContent = String(current + 1).padStart(2, "0");
-    $("#spotTitle").textContent = spot.title;
-    $("#spotText").textContent = spot.text;
-    $$("#spotTitle, #spotText").forEach((el) => {
-      el.classList.remove("is-changing"); void el.offsetWidth; el.classList.add("is-changing");
-    });
-  }
-
-  $$(".hotspot").forEach((h) => h.addEventListener("click", () => show(Number(h.dataset.spot))));
-  $$(".showcase__toggle button").forEach((b) => b.addEventListener("click", () => {
-    const first = SPOTS.findIndex((_, i) => $(`.hotspot[data-spot="${i}"]`).closest(".showcase__view").dataset.view === b.dataset.view);
-    show(first);
+  $$(".tabs button").forEach((tab) => tab.addEventListener("click", () => {
+    $$(".tabs button").forEach((t) => t.setAttribute("aria-selected", String(t === tab)));
+    render(tab.dataset.filter);
   }));
-  $("#spotPrev").addEventListener("click", () => show(current - 1));
-  $("#spotNext").addEventListener("click", () => show(current + 1));
-  $("#addCarbon").addEventListener("click", () => {
-    const s = SERVICES.find((x) => x.id === "replica-carbon");
-    cart.add({ title: s.title, detail: "Igual à peça da foto", price: s.price });
+
+  grid.addEventListener("click", (e) => {
+    const add = e.target.closest("[data-add]");
+    if (add) {
+      const p = COLLECTION.find((x) => x.id === add.dataset.add);
+      cart.add({ title: p.name, detail: p.config ? configText(p.config) : p.spec, price: productPrice(p) });
+      return;
+    }
+    const open = e.target.closest("[data-open]");
+    const p = open && COLLECTION.find((x) => x.id === open.dataset.open);
+    if (p?.config) builder.load(p.config);
   });
-  show(0);
 }
 
 // ---------------------------------------------------------------------------
-// Configurador
+// Ficha da Carbon Edition
+// ---------------------------------------------------------------------------
+function initCarbon() {
+  $("#carbonPrice").textContent = brl.format(STORE.carbonPrice);
+  $("#carbonDetails").innerHTML = CARBON_DETAILS.map((d, i) => `
+    <details ${i === 0 ? "open" : ""}><summary>${d.title}</summary><p>${d.text}</p></details>`).join("");
+
+  const main = $("#galleryMain");
+  $$(".product__thumbs button").forEach((b) => b.addEventListener("click", () => {
+    $$(".product__thumbs button").forEach((t) => t.setAttribute("aria-selected", String(t === b)));
+    main.src = b.dataset.src;
+    main.alt = b.dataset.alt;
+    main.style.animation = "none"; void main.offsetWidth; main.style.animation = "";
+  }));
+
+  $("#addCarbon").addEventListener("click", () => cart.add({ title: "Carbon Edition", detail: "Ref. CT-001", price: STORE.carbonPrice }));
+  $("#askCarbon").href = whatsUrl("Olá, Custom Time! Quero saber mais sobre o Carbon Edition.");
+}
+
+// ---------------------------------------------------------------------------
+// Personalizar
 // ---------------------------------------------------------------------------
 const builder = {
   config: { ...DEFAULT_CONFIG },
 
   init() {
     for (const [group, opts] of Object.entries(OPTIONS)) {
-      const wrap = $(`.swatches[data-group="${group}"]`);
-      opts.forEach((o) => {
+      const wrap = $(`.option[data-group="${group}"] .option__swatches`);
+      wrap.innerHTML = opts.map((o) => {
         const id = `opt-${group}-${o.id}`;
-        const div = document.createElement("div");
-        div.className = "swatch";
         const bg = o.half ? `linear-gradient(180deg, ${o.half} 50%, ${o.color} 50%)` : o.color;
-        div.innerHTML = `
-          <input type="radio" name="${group}" id="${id}" value="${o.id}" ${this.config[group] === o.id ? "checked" : ""}>
-          <label for="${id}">
-            <span class="swatch__color" style="background:${bg}"></span>
-            <span>${o.label}${o.price ? ` <span class="swatch__price">+${brl.format(o.price)}</span>` : ""}</span>
-          </label>`;
-        wrap.append(div);
-      });
+        const title = `${o.label}${o.price ? ` (+${brl.format(o.price)})` : ""}`;
+        return `<span class="sw"><input type="radio" name="${group}" id="${id}" value="${o.id}"><label for="${id}" title="${title}" style="background:${bg}"></label></span>`;
+      }).join("");
+      $$("label", wrap).forEach((l, i) => l.setAttribute("aria-label", opts[i].label));
     }
+    $("#engravingPrice").textContent = `opcional, + ${brl.format(STORE.engravingPrice)}`;
 
     const form = $("#builder");
     form.addEventListener("change", (e) => {
       if (e.target.name in OPTIONS) { this.config[e.target.name] = e.target.value; this.render(); }
     });
     $("#engraving").addEventListener("input", () => this.render());
-    $("#randomize").addEventListener("click", () => this.randomize());
+    $("#randomize").addEventListener("click", () => {
+      const cfg = {};
+      for (const g of Object.keys(OPTIONS)) cfg[g] = OPTIONS[g][Math.floor(Math.random() * OPTIONS[g].length)].id;
+      this.load(cfg, false);
+    });
     form.addEventListener("submit", (e) => {
       e.preventDefault();
       const { lines, total } = this.summary();
       cart.add({ title: "Relógio sob medida", detail: lines.map((l) => l.value).join(" · "), price: total });
     });
 
-    $("#dateText").textContent = new Date().getDate();
-    this.drawIndices();
-    this.render();
+    this.load(this.config, false);
     this.startClock();
   },
 
-  pick(group) { return OPTIONS[group].find((o) => o.id === this.config[group]); },
+  load(config, notify = true) {
+    this.config = { ...config };
+    for (const g of Object.keys(OPTIONS)) $(`#opt-${g}-${this.config[g]}`).checked = true;
+    this.render();
+    if (notify) toast("Combinação carregada no configurador");
+  },
 
   summary() {
     const lines = Object.keys(OPTIONS).map((g) => {
-      const o = this.pick(g);
+      const o = pick(g, this.config[g]);
       return { label: GROUP_LABEL[g], value: o.label, price: o.price };
     });
     const engraving = $("#engraving").value.trim();
     if (engraving) lines.push({ label: "Gravação", value: `“${engraving}”`, price: STORE.engravingPrice });
-    const total = STORE.basePrice + lines.reduce((s, l) => s + l.price, 0);
-    return { lines, total };
-  },
-
-  randomize() {
-    for (const g of Object.keys(OPTIONS)) {
-      const opts = OPTIONS[g];
-      this.config[g] = opts[Math.floor(Math.random() * opts.length)].id;
-      $(`#opt-${g}-${this.config[g]}`).checked = true;
-    }
-    this.render();
-  },
-
-  drawIndices() {
-    const g = $("#indices");
-    for (let h = 0; h < 12; h++) {
-      if (h === 3) continue; // janela da data
-      const deg = h * 30;
-      const wide = h === 0;
-      const len = h % 3 === 0 ? 18 : 14;
-      const w = 5;
-      const [x, y] = polar(94 - len / 2, deg);
-      const make = (dx) => svg("rect", {
-        x: x - w / 2 + dx, y: y - len / 2, width: w, height: len, rx: 1.2,
-        transform: `rotate(${deg} ${x} ${y})`, class: "index",
-      });
-      if (wide) { g.append(make(-4), make(4)); } else { g.append(make(0)); }
-    }
-    // minutos
-    for (let m = 0; m < 60; m++) {
-      if (m % 5 === 0) continue;
-      const [x1, y1] = polar(101, m * 6);
-      const [x2, y2] = polar(97, m * 6);
-      g.append(svg("line", { x1, y1, x2, y2, class: "minute-tick", "stroke-width": 0.8 }));
-    }
-  },
-
-  drawBezel(b) {
-    const pat = $("#bezelPattern");
-    const marks = $("#bezelMarks");
-    pat.replaceChildren();
-    marks.replaceChildren();
-    $("#bezel").setAttribute("fill", b.color);
-
-    if (b.half) pat.append(svg("path", { d: "M68 260 A132 132 0 0 1 332 260 Z", fill: b.half }));
-    if (b.topo) {
-      // curvas de nível irregulares
-      for (let i = 0; i < 9; i++) {
-        const base = 108 + i * 2.8;
-        let d = "";
-        for (let a = 0; a <= 360; a += 6) {
-          const r = base + Math.sin((a + i * 37) * 0.07) * 1.4 + Math.cos((a * 3 + i * 11) * 0.031) * 1.1;
-          const [x, y] = polar(r, a);
-          d += `${a ? "L" : "M"}${x.toFixed(1)} ${y.toFixed(1)}`;
-        }
-        pat.append(svg("path", { d: `${d}Z`, fill: "none", stroke: "#2b3036", "stroke-opacity": 0.55, "stroke-width": 0.7 }));
-      }
-    }
-
-    // triângulo no 12
-    const [tx, ty] = polar(124, 0);
-    marks.append(svg("path", { d: `M${tx - 7} ${ty - 5} L${tx + 7} ${ty - 5} L${tx} ${ty + 7} Z`, fill: b.ink }));
-    marks.append(svg("circle", { cx: tx, cy: ty - 0.5, r: 2.4, fill: "#cfe9f6" }));
-    for (let m = 5; m < 60; m += 5) {
-      const deg = m * 6;
-      const [x, y] = polar(119, deg);
-      if (m % 10 === 0) {
-        const t = svg("text", { x, y: y + 5, "text-anchor": "middle", class: "bezel-num", fill: b.ink, transform: `rotate(${deg} ${x} ${y})` });
-        t.textContent = m;
-        marks.append(t);
-      } else {
-        marks.append(svg("rect", { x: x - 2, y: y - 7, width: 4, height: 14, rx: 1, fill: b.topo ? "#4fb3e8" : b.ink, transform: `rotate(${deg} ${x} ${y})` }));
-      }
-    }
-    for (let m = 1; m < 15; m++) {
-      if (m % 5 === 0) continue;
-      const [x1, y1] = polar(130, m * 6);
-      const [x2, y2] = polar(124, m * 6);
-      marks.append(svg("line", { x1, y1, x2, y2, stroke: b.ink, "stroke-width": 1.4 }));
-    }
-  },
-
-  drawStrap(s) {
-    const g = $("#strap");
-    g.replaceChildren();
-    for (const y of [0, 370]) {
-      const fill = s.kind === "links" ? "url(#links)" : s.color;
-      g.append(svg("rect", { x: 138, y, width: 124, height: 150, rx: s.kind === "links" ? 4 : 10, fill }));
-      if (s.kind === "weave") g.append(svg("rect", { x: 138, y, width: 124, height: 150, rx: 10, fill: "url(#weave)" }));
-      if (s.kind === "leather") {
-        g.append(svg("rect", { x: 138, y, width: 124, height: 150, rx: 10, fill: "url(#leather)" }));
-        g.append(svg("rect", { x: 143, y: y + 5, width: 114, height: 140, rx: 7, fill: "none", stroke: "#e8d6c0", "stroke-opacity": 0.55, "stroke-dasharray": "4 3" }));
-      }
-    }
+    return { lines, total: STORE.basePrice + lines.reduce((s, l) => s + l.price, 0) };
   },
 
   render() {
-    const dial = this.pick("dial");
-    const bezel = this.pick("bezel");
-    const hands = this.pick("hands");
-    const strap = this.pick("strap");
-
-    $("#dial").setAttribute("fill", dial.color);
-    $("#dialTexture").style.display = dial.texture ? "" : "none";
-    $$(".dial-text").forEach((t) => t.setAttribute("fill", dial.ink));
-    $$(".minute-tick").forEach((t) => t.setAttribute("stroke", dial.ink));
-    $$(".index").forEach((i) => { i.setAttribute("fill", "#f3f6ea"); i.setAttribute("stroke", hands.color); i.setAttribute("stroke-width", 1.2); });
-    $$(".hand").forEach((h) => h.setAttribute("fill", hands.color));
-    $$(".lume").forEach((l) => l.setAttribute("fill", "#f3f6ea"));
-    $("#secondBar").setAttribute("fill", hands.second);
-    $("#secondDot").setAttribute("fill", hands.second);
-    $("#pinion").setAttribute("fill", hands.second);
-    $("#crown").setAttribute("fill", "url(#steel)");
-    this.drawBezel(bezel);
-    this.drawStrap(strap);
+    $("#builderWatch").innerHTML = watchSVG(this.config, { time: this.now(), title: "Prévia do seu relógio" });
+    this.hands = {
+      h: $('#builderWatch [data-hand="h"]'),
+      m: $('#builderWatch [data-hand="m"]'),
+      s: $('#builderWatch [data-hand="s"]'),
+    };
+    for (const g of Object.keys(OPTIONS)) {
+      const o = pick(g, this.config[g]);
+      $(`.option[data-group="${g}"] .option__value`).textContent = o.price ? `${o.label} · +${brl.format(o.price)}` : o.label;
+    }
 
     const engraving = $("#engraving").value.trim();
     const preview = $("#engravingPreview");
     preview.hidden = !engraving;
-    $("strong", preview).textContent = `“${engraving}”`;
+    $("em", preview).textContent = `“${engraving}”`;
 
     const { lines, total } = this.summary();
-    $("#summaryList").innerHTML = `<li><span>Relógio base (automático)</span><span>${brl.format(STORE.basePrice)}</span></li>` +
-      lines.map((l) => `<li><span>${l.label}: ${escapeHtml(l.value)}</span><span>${l.price ? "+" + brl.format(l.price) : "incluso"}</span></li>`).join("");
+    $("#summaryList").innerHTML = `<li><span>Caixa de aço e movimento automático</span><span>${brl.format(STORE.basePrice)}</span></li>` +
+      lines.map((l) => `<li><span>${l.label}: ${escapeHtml(l.value)}</span><span>${l.price ? "+ " + brl.format(l.price) : "incluso"}</span></li>`).join("");
     $("#total").textContent = brl.format(total);
   },
 
+  reduced: window.matchMedia("(prefers-reduced-motion: reduce)").matches,
+
+  now() {
+    const d = new Date();
+    return { h: d.getHours(), m: d.getMinutes(), s: d.getSeconds() + (this.reduced ? 0 : d.getMilliseconds() / 1000) };
+  },
+
   startClock() {
-    const hour = $("#hourHand");
-    const minute = $("#minuteHand");
-    const second = $("#secondHand");
-    const reduced = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
     const frame = () => {
-      const now = new Date();
-      const s = now.getSeconds() + (reduced ? 0 : now.getMilliseconds() / 1000);
-      const m = now.getMinutes() + s / 60;
-      const h = (now.getHours() % 12) + m / 60;
-      hour.setAttribute("transform", `rotate(${h * 30} 200 260)`);
-      minute.setAttribute("transform", `rotate(${m * 6} 200 260)`);
-      second.setAttribute("transform", `rotate(${s * 6} 200 260)`);
-      if (reduced) setTimeout(frame, 1000); else requestAnimationFrame(frame);
+      const { h, m, s } = this.now();
+      const min = m + s / 60;
+      const hr = (h % 12) + min / 60;
+      this.hands.h.setAttribute("transform", `rotate(${hr * 30} 200 260)`);
+      this.hands.m.setAttribute("transform", `rotate(${min * 6} 200 260)`);
+      this.hands.s.setAttribute("transform", `rotate(${s * 6} 200 260)`);
+      if (this.reduced) setTimeout(frame, 1000); else requestAnimationFrame(frame);
     };
     frame();
   },
 };
 
-function escapeHtml(str) {
-  return str.replace(/[&<>"']/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c]));
-}
-
 // ---------------------------------------------------------------------------
-// Serviços com filtro
+// Serviços
 // ---------------------------------------------------------------------------
 function initServices() {
+  const all = SERVICE_GROUPS.flatMap((g) => g.items);
   const wrap = $("#services");
-  const render = (filter) => {
-    wrap.innerHTML = SERVICES.filter((s) => filter === "todos" || s.cat === filter).map((s) => `
-      <article class="card">
-        <div class="card__icon"><svg viewBox="0 0 24 24" aria-hidden="true">${ICONS[s.icon]}</svg></div>
-        <h3>${s.title}</h3>
-        <p>${s.text}</p>
-        <div class="card__foot">
-          <span class="card__price">${s.from ? "a partir de" : "valor"}<strong>${brl.format(s.price)}</strong></span>
-          ${s.cta === "monte"
-            ? '<a class="btn btn--ghost" href="#monte">Montar</a>'
-            : `<button class="btn btn--ghost" data-add="${s.id}">Adicionar</button>`}
-        </div>
-      </article>`).join("");
-  };
-  render("todos");
-
-  $$(".filters .chip").forEach((chip) => chip.addEventListener("click", () => {
-    $$(".filters .chip").forEach((c) => c.classList.toggle("is-active", c === chip));
-    render(chip.dataset.filter);
-  }));
+  wrap.innerHTML = SERVICE_GROUPS.map((g) => `
+    <div class="price-group">
+      <h3>${g.title}</h3>
+      <ul>${g.items.map((s) => `
+        <li class="price-row">
+          <div class="price-row__top">
+            <span class="price-row__name">${s.title}</span>
+            <span class="price-row__dots" aria-hidden="true"></span>
+            <span class="price-row__price">${s.from ? "<small>a partir de</small>" : ""}${brl.format(s.price)}</span>
+          </div>
+          <p>${s.text}</p>
+          ${s.link ? `<a class="price-row__add" href="${s.link}">Personalizar</a>` : `<button type="button" class="price-row__add" data-add="${s.id}">Adicionar à sacola</button>`}
+        </li>`).join("")}
+      </ul>
+    </div>`).join("");
 
   wrap.addEventListener("click", (e) => {
     const btn = e.target.closest("[data-add]");
     if (!btn) return;
-    const s = SERVICES.find((x) => x.id === btn.dataset.add);
+    const s = all.find((x) => x.id === btn.dataset.add);
     cart.add({ title: s.title, detail: s.from ? "Valor inicial, confirmado na avaliação" : "", price: s.price });
   });
 }
 
 // ---------------------------------------------------------------------------
-// Pedido (carrinho) e envio pelo WhatsApp
+// Sacola e envio pelo WhatsApp
 // ---------------------------------------------------------------------------
 const cart = {
   items: storage.get("ct-cart", []),
@@ -478,14 +464,13 @@ const cart = {
       const btn = e.target.closest("[data-remove]");
       if (btn) this.remove(Number(btn.dataset.remove));
     });
-    $("#checkout").addEventListener("click", (e) => { if (!this.items.length) e.preventDefault(); });
     this.render();
   },
 
   add(item) {
-    this.items.push({ ...item, key: Date.now() + Math.random() });
+    this.items.push(item);
     this.save();
-    toast(`${item.title} adicionado ao pedido`);
+    toast(`${item.title} na sacola`);
     const btn = $("#cartOpen");
     btn.classList.remove("bump"); void btn.offsetWidth; btn.classList.add("bump");
   },
@@ -503,14 +488,13 @@ const cart = {
   total() { return this.items.reduce((s, i) => s + i.price, 0); },
 
   render() {
-    const count = $("#cartCount");
-    count.textContent = this.items.length;
-    count.toggleAttribute("data-zero", this.items.length === 0);
-    $("#cartEmpty").hidden = this.items.length > 0;
-    const checkout = $("#checkout");
-    checkout.setAttribute("aria-disabled", String(this.items.length === 0));
-    checkout.href = this.items.length ? this.checkoutUrl() : "#";
+    const empty = this.items.length === 0;
+    $("#cartCount").textContent = this.items.length;
+    $("#cartEmpty").hidden = !empty;
     $("#cartTotal").textContent = brl.format(this.total());
+    const checkout = $("#checkout");
+    checkout.setAttribute("aria-disabled", String(empty));
+    checkout.href = empty ? "#" : this.checkoutUrl();
     $("#cartList").innerHTML = this.items.map((i, idx) => `
       <li class="drawer__item">
         <h3>${escapeHtml(i.title)}</h3>
@@ -525,7 +509,7 @@ const cart = {
     const d = $("#drawer");
     d.classList.add("is-open");
     d.setAttribute("aria-hidden", "false");
-    $(".drawer__head .icon-btn").focus();
+    $(".drawer__close").focus();
   },
 
   close() {
@@ -543,19 +527,14 @@ const cart = {
   },
 };
 
-function whatsUrl(text) {
-  return `https://wa.me/${STORE.whatsapp}?text=${encodeURIComponent(text)}`;
-}
-
 // ---------------------------------------------------------------------------
 document.addEventListener("DOMContentLoaded", () => {
   $("#year").textContent = new Date().getFullYear();
   $("#whatsLink").href = whatsUrl("Olá, Custom Time! Tenho uma ideia de relógio personalizado.");
   $("#instaLink").href = STORE.instagram;
   initNav();
-  initReveal();
-  initHero();
-  initShowcase();
+  initCollection();
+  initCarbon();
   builder.init();
   initServices();
   cart.init();

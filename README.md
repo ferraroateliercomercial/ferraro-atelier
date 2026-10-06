@@ -4,12 +4,13 @@ Site da Custom Time, loja de relógios personalizados feitos à mão.
 
 ## O que tem no site
 
-- **Início**: apresentação com a foto da Carbon Edition e um relógio ao vivo.
-- **Carbon Edition**: foto com pontos clicáveis que explicam cada detalhe (frente e fundo).
-- **Monte o seu**: configurador com prévia do relógio que muda na hora (mostrador, luneta, ponteiros, pulseira e gravação) e marca a hora atual.
-- **Serviços**: cards com filtro (relógio novo, personalização, manutenção).
-- **Pedido**: carrinho lateral que envia o pedido pronto pelo WhatsApp.
-- Processo, perguntas frequentes e contato.
+- **Abertura**: foto do ateliê e as garantias da loja.
+- **Coleção**: vitrine de peças com filtro por pulseira. Cada peça vai para a sacola ou abre no configurador.
+- **Carbon Edition**: ficha de produto com galeria de fotos, detalhes e ficha técnica.
+- **Personalize o seu**: configurador com desenho do relógio que muda na hora (mostrador, luneta, ponteiros, pulseira e gravação) e marca a hora atual.
+- **O ateliê**: como funciona, do pedido à entrega.
+- **Serviços e valores**: tabela de preços por categoria.
+- **Sacola**: envia o pedido pronto pelo WhatsApp.
 
 ## Como editar
 
@@ -19,7 +20,8 @@ Tudo fica em `js/app.js`, no começo do arquivo:
 - `STORE.instagram`: link do seu Instagram.
 - `STORE.basePrice`: preço do relógio base.
 - `OPTIONS`: opções e preços do configurador.
-- `SERVICES`: serviços e preços.
+- `COLLECTION`: peças da vitrine. Peças com `config` aparecem como desenho; para usar uma foto, coloque o arquivo em `assets/` e troque `config` por `image: "assets/arquivo.jpg"` e `price`.
+- `SERVICE_GROUPS`: serviços e preços.
 
 Os preços que estão lá são exemplos. Troque pelos seus.
 

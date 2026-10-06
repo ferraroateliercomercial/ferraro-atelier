@@ -14,7 +14,8 @@ Site da Custom Time, ateliê de relojoaria. O cliente não compra relógios pron
 
 Oito etapas: caixa, mostrador, ponteiros, luneta, pulseira, movimento, referência e resumo. O site não mostra preços: valor e prazo são combinados no atendimento.
 
-- Todas as cores são livres (seletor de espectro completo e código HEX).
+- Todas as cores são livres (seletor de espectro completo e código HEX), inclusive a do aço da pulseira.
+- Pulseira em duas cores: laterais de uma cor e centro de outra (no aço, elos de fora e elos do centro).
 - Vistas de frente, explodida e de fundo.
 - Referência: o cliente informa um relógio de referência, anexa até 6 imagens e escreve observações. No celular, o envio já leva as imagens junto (compartilhamento do sistema); no computador, o cliente anexa as imagens na conversa do WhatsApp.
 - O relógio da prévia marca a hora real e anda conforme o movimento escolhido. Nos mecânicos dá para dar corda girando a coroa; no cronógrafo os botões laterais ligam, param e zeram.

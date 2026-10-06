@@ -22,7 +22,11 @@ const DEFAULT_WATCH = {
   bezelTwoTone: false,
   bezelColor2: "#a51f2b",
   strapType: "nato",         // nato | couro | borracha | oyster | jubile | integrada
-  strapColor: "#1e3a6e",
+  strapColor: "#1e3a6e",     // pulseiras de tecido, couro e borracha: cor de fora
+  strapColor2: "#9b2335",    // cor de dentro (faixa central), quando em duas cores
+  braceletColor: "#c9cdd2",  // pulseiras de aço: elos de fora
+  braceletColor2: "#d4b062", // elos do centro, quando em duas cores
+  strapTwoTone: false,
   stitchColor: "#e8d6c0",
   movement: "automatico",    // quartzo | automatico | manual
   rotorColor: "#3fbfbd",
@@ -81,9 +85,22 @@ const Watch = (() => {
   const dateNum = () => new Date().getDate();
 
   // ---------- defs (ids únicos por desenho) ----------
+  function metalGrad(id, m) {
+    return `<linearGradient id="${id}" x1="0" y1="0" x2="1" y2="1">
+        <stop offset="0" stop-color="${shade(m, 0.55)}"/><stop offset=".48" stop-color="${shade(m, -0.28)}"/><stop offset="1" stop-color="${shade(m, 0.32)}"/>
+      </linearGradient>`;
+  }
+  function polishGrad(id, m) {
+    return `<linearGradient id="${id}" x1="0" y1="0" x2="1" y2="0">
+        <stop offset="0" stop-color="${shade(m, -0.15)}"/><stop offset=".35" stop-color="${shade(m, 0.7)}"/><stop offset=".65" stop-color="${shade(m, -0.2)}"/><stop offset="1" stop-color="${shade(m, 0.45)}"/>
+      </linearGradient>`;
+  }
+
   function defs(u, c) {
     const m = c.caseColor;
-    return `<defs>
+    const b1 = c.braceletColor || m;
+    const b2 = c.strapTwoTone ? (c.braceletColor2 || b1) : b1;
+    return `<defs>${metalGrad(`${u}-bm`, b1)}${polishGrad(`${u}-bp`, b2)}
       <linearGradient id="${u}-metal" x1="0" y1="0" x2="1" y2="1">
         <stop offset="0" stop-color="${shade(m, 0.55)}"/><stop offset=".48" stop-color="${shade(m, -0.28)}"/><stop offset="1" stop-color="${shade(m, 0.32)}"/>
       </linearGradient>
@@ -111,12 +128,16 @@ const Watch = (() => {
     const x = CX - w / 2;
     const y = top ? 0 : 370;
     const h = 150;
-    const metal = c.caseColor;
     const t = c.strapType;
+    const two = !!c.strapTwoTone;
+    const c1 = c.strapColor;
+    const c2 = c.strapColor2 || c1;
+    // faixa central (parte de dentro) quando a pulseira tem duas cores
+    const center = (fill, inset = 0) => two ? `<rect x="${x + w * 0.32}" y="${y + inset}" width="${w * 0.36}" height="${h - inset * 2}" fill="${fill}"/>` : "";
     let s = "";
     if (t === "nato") {
-      s += `<rect x="${x}" y="${y}" width="${w}" height="${h}" rx="4" fill="${c.strapColor}"/><rect x="${x}" y="${y}" width="${w}" height="${h}" rx="4" fill="url(#${u}-weave)"/>`;
-      s += `<rect x="${x}" y="${y}" width="${w}" height="${h}" rx="4" fill="none" stroke="${shade(c.strapColor, -0.3)}" stroke-width="1.5"/>`;
+      s += `<rect x="${x}" y="${y}" width="${w}" height="${h}" rx="4" fill="${c1}"/>${center(c2)}<rect x="${x}" y="${y}" width="${w}" height="${h}" rx="4" fill="url(#${u}-weave)"/>`;
+      s += `<rect x="${x}" y="${y}" width="${w}" height="${h}" rx="4" fill="none" stroke="${shade(c1, -0.3)}" stroke-width="1.5"/>`;
       const ky = top ? y + 40 : y + 92;
       s += `<rect x="${x - 4}" y="${ky}" width="${w + 8}" height="14" rx="3" fill="url(#${u}-metal)"/>`;
     } else if (t === "couro") {
@@ -124,30 +145,32 @@ const Watch = (() => {
       const d = top
         ? `M${x + far} ${y}H${x + w - far}L${x + w} ${y + h}H${x}Z`
         : `M${x} ${y}H${x + w}L${x + w - far} ${y + h}H${x + far}Z`;
-      s += `<path d="${d}" fill="${c.strapColor}"/><path d="${d}" fill="url(#${u}-leather)"/>`;
+      s += `<path d="${d}" fill="${c1}"/>${center(c2)}<path d="${d}" fill="url(#${u}-leather)"/>`;
       const ins = top
         ? `M${x + far + 6} ${y + 6}H${x + w - far - 6}L${x + w - 6} ${y + h - 4}H${x + 6}Z`
         : `M${x + 6} ${y + 4}H${x + w - 6}L${x + w - far - 6} ${y + h - 6}H${x + far + 6}Z`;
       s += `<path d="${ins}" fill="none" stroke="${c.stitchColor}" stroke-width="1.3" stroke-dasharray="4 3"/>`;
-      s += `<path d="${d}" fill="none" stroke="${shade(c.strapColor, -0.35)}" stroke-width="1.5"/>`;
+      s += `<path d="${d}" fill="none" stroke="${shade(c1, -0.35)}" stroke-width="1.5"/>`;
     } else if (t === "borracha") {
-      s += `<rect x="${x}" y="${y}" width="${w}" height="${h}" rx="12" fill="${c.strapColor}"/>`;
-      for (let gy = y + 10; gy < y + h - 4; gy += 13) s += `<rect x="${x + 14}" y="${gy}" width="${w - 28}" height="5" rx="2.5" fill="${shade(c.strapColor, -0.25)}"/>`;
+      s += `<rect x="${x}" y="${y}" width="${w}" height="${h}" rx="12" fill="${c1}"/>${center(c2)}`;
+      for (let gy = y + 10; gy < y + h - 4; gy += 13) s += `<rect x="${x + 14}" y="${gy}" width="${w - 28}" height="5" rx="2.5" fill="#000" fill-opacity=".2"/>`;
       s += `<rect x="${x + 4}" y="${y}" width="10" height="${h}" fill="#fff" opacity=".08"/>`;
     } else {
-      // metais: oyster, jubile, integrada
+      // aço: oyster, jubile, integrada. Elos de fora na primeira cor, elos do centro na segunda.
+      const metal = c.braceletColor || c.caseColor;
+      const mid = `url(#${u}-bp)`;
       const rows = t === "jubile" ? 16 : t === "integrada" ? 30 : 24;
-      s += `<rect x="${x}" y="${y}" width="${w}" height="${h}" rx="3" fill="url(#${u}-metal)"/>`;
+      s += `<rect x="${x}" y="${y}" width="${w}" height="${h}" rx="3" fill="url(#${u}-bm)"/>`;
       for (let ry = y; ry < y + h; ry += rows) {
         if (t === "oyster") {
-          s += `<rect x="${x + w * 0.34}" y="${ry + 1}" width="${w * 0.32}" height="${rows - 2}" rx="2" fill="url(#${u}-polish)"/>`;
+          s += `<rect x="${x + w * 0.34}" y="${ry + 1}" width="${w * 0.32}" height="${rows - 2}" rx="2" fill="${mid}"/>`;
         } else if (t === "jubile") {
           const odd = Math.round((ry - y) / rows) % 2;
-          s += `<rect x="${x + w * 0.3}" y="${ry + 2}" width="${w * 0.13}" height="${rows - 4}" rx="4" fill="url(#${u}-polish)"/>`;
-          s += `<rect x="${x + w * 0.57}" y="${ry + 2}" width="${w * 0.13}" height="${rows - 4}" rx="4" fill="url(#${u}-polish)"/>`;
-          if (odd) s += `<rect x="${x + w * 0.44}" y="${ry + 4}" width="${w * 0.12}" height="${rows - 8}" rx="3" fill="url(#${u}-polish)"/>`;
+          s += `<rect x="${x + w * 0.3}" y="${ry + 2}" width="${w * 0.13}" height="${rows - 4}" rx="4" fill="${mid}"/>`;
+          s += `<rect x="${x + w * 0.57}" y="${ry + 2}" width="${w * 0.13}" height="${rows - 4}" rx="4" fill="${mid}"/>`;
+          if (odd) s += `<rect x="${x + w * 0.44}" y="${ry + 4}" width="${w * 0.12}" height="${rows - 8}" rx="3" fill="${mid}"/>`;
         } else {
-          s += `<rect x="${x + w * 0.4}" y="${ry + 4}" width="${w * 0.2}" height="${rows - 8}" rx="3" fill="url(#${u}-polish)"/>`;
+          s += `<rect x="${x + w * 0.4}" y="${ry + 4}" width="${w * 0.2}" height="${rows - 8}" rx="3" fill="${mid}"/>`;
         }
         s += `<path d="M${x} ${ry + rows}h${w}" stroke="${shade(metal, -0.5)}" stroke-opacity=".55"/>`;
       }

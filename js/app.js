@@ -113,9 +113,14 @@ const TABS = [
       { type: "choice", key: "strapType", label: "Tipo", options: [
         ["nato", "NATO", "Nylon trançado"], ["couro", "Couro"], ["borracha", "Borracha"], ["oyster", "Aço Oyster", "Três elos"], ["jubile", "Aço Jubilee", "Cinco elos"], ["integrada", "Integrada", "Só na octogonal"],
       ] },
-      { type: "color", key: "strapColor", label: "Cor da pulseira", when: (c) => !metalStrap(c) },
+      { type: "toggle", key: "strapTwoTone", label: "Pulseira em duas cores", note: "Uma cor por fora e outra no centro" },
+      { type: "color", key: "strapColor", label: "Cor da pulseira", when: (c) => !metalStrap(c) && !c.strapTwoTone },
+      { type: "color", key: "strapColor", label: "Cor de fora", note: "Laterais da pulseira", when: (c) => !metalStrap(c) && c.strapTwoTone },
+      { type: "color", key: "strapColor2", label: "Cor de dentro", note: "Faixa central", when: (c) => !metalStrap(c) && c.strapTwoTone },
+      { type: "color", key: "braceletColor", label: "Cor do aço", note: "Aço, dourado, PVD preto ou o tom que quiser", when: (c) => metalStrap(c) && !c.strapTwoTone },
+      { type: "color", key: "braceletColor", label: "Cor dos elos de fora", when: (c) => metalStrap(c) && c.strapTwoTone },
+      { type: "color", key: "braceletColor2", label: "Cor dos elos do centro", when: (c) => metalStrap(c) && c.strapTwoTone },
       { type: "color", key: "stitchColor", label: "Cor da costura", when: (c) => c.strapType === "couro" },
-      { type: "note", text: "Pulseiras de metal acompanham a cor escolhida para a caixa.", when: metalStrap },
     ],
   },
   {
@@ -824,7 +829,13 @@ const Studio = {
         ["Tipo", LABELS.bezelType[c.bezelType]],
         ...(bezelHasInsert(c) ? [["Cor", color(c.bezelColor)], ...(c.bezelTwoTone ? [["Segunda cor", color(c.bezelColor2)]] : [])] : []),
       ]],
-      ["Pulseira", [["Tipo", LABELS.strapType[c.strapType]], ...(metalStrap(c) ? [] : [["Cor", color(c.strapColor)]]), ...(c.strapType === "couro" ? [["Costura", color(c.stitchColor)]] : [])]],
+      ["Pulseira", [
+        ["Tipo", LABELS.strapType[c.strapType] + (c.strapTwoTone ? ", duas cores" : "")],
+        ...(metalStrap(c)
+          ? (c.strapTwoTone ? [["Elos de fora", color(c.braceletColor)], ["Elos do centro", color(c.braceletColor2)]] : [["Cor do aço", color(c.braceletColor)]])
+          : (c.strapTwoTone ? [["Cor de fora", color(c.strapColor)], ["Cor de dentro", color(c.strapColor2)]] : [["Cor", color(c.strapColor)]])),
+        ...(c.strapType === "couro" ? [["Costura", color(c.stitchColor)]] : []),
+      ]],
       ["Movimento", [["Tipo", MOVEMENTS[c.movement].name + (c.dialLayout === "crono" ? " (cronógrafo)" : "")], ...(c.movement !== "quartzo" ? [["Calibre", MOVEMENTS[c.movement].caliber]] : []), ...(c.movement === "automatico" ? [["Rotor", color(c.rotorColor)]] : [])]],
       ...(this.hasReference() ? [["Referência", [
         ...(c.refWatch?.trim() ? [["Relógio", c.refWatch.trim()]] : []),

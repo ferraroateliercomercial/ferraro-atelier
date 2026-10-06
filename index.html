@@ -67,10 +67,11 @@
       <div class="wrap header__inner">
         <button class="menu-btn" id="menuBtn" aria-label="Abrir menu" aria-expanded="false" aria-controls="menu"><span></span><span></span></button>
         <nav class="header__nav" id="menu" aria-label="Principal">
+          <a href="#a-venda" class="nav-sale">À venda</a>
           <a href="#movimentos">Movimentos</a>
           <a href="#ponteiros">Ponteiros</a>
           <a href="#portfolio">Portfólio</a>
-          <a href="#atelie">O ateliê</a>
+          <a href="#atelie" class="header__nav-extra">O ateliê</a>
           <a href="#duvidas" class="header__nav-extra">Dúvidas</a>
         </nav>
         <a href="#topo" class="brand" aria-label="Custom Time, início">
@@ -141,6 +142,18 @@
               <p class="part-caption" id="partCaption" aria-hidden="true"><strong></strong><span></span></p>
             </div>
           </div>
+        </div>
+      </section>
+
+      <!-- À VENDA -->
+      <section class="section section--stone" id="a-venda">
+        <div class="wrap">
+          <header class="section-head">
+            <p class="label">Pronto para o pulso</p>
+            <h2>À venda</h2>
+            <p>Relógios que já saíram da bancada e estão disponíveis. A compra é feita pelo WhatsApp.</p>
+          </header>
+          <div class="sale-grid" id="saleGrid"></div>
         </div>
       </section>
 
@@ -293,6 +306,7 @@
           <p class="label">Navegar</p>
           <ul class="footer__links">
             <li><a href="#personalizar">Ateliê virtual</a></li>
+            <li class="nav-sale"><a href="#a-venda">À venda</a></li>
             <li><a href="#movimentos">Movimentos</a></li>
             <li><a href="#portfolio">Portfólio</a></li>
             <li><a id="instaLink" href="#" target="_blank" rel="noopener">Instagram</a></li>
@@ -416,10 +430,12 @@
     <div class="lightbox__panel" role="dialog" aria-modal="true" aria-labelledby="lbTitle">
       <img id="lbImg" src="" alt="" />
       <div class="lightbox__info">
-        <p class="label">Portfólio</p>
+        <p class="label" id="lbLabel">Portfólio</p>
         <h2 id="lbTitle"></h2>
         <p id="lbText"></p>
         <ul class="lightbox__spec" id="lbSpec"></ul>
+        <p class="lightbox__price" id="lbPrice" hidden></p>
+        <a href="#" class="btn" id="lbBuy" target="_blank" rel="noopener" hidden>Comprar pelo WhatsApp</a>
         <a href="#personalizar" class="btn" id="lbStart">Começar com esta base</a>
         <button type="button" class="lightbox__close" data-close>Fechar</button>
       </div>

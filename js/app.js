@@ -148,11 +148,14 @@ const LABELS = {
 };
 
 // ---------------------------------------------------------------------------
-// Portfólio
+// Portfólio. Peças com `price` aparecem também na seção "À venda".
+// Para vender outra peça, coloque `price: 1500` nela; para tirar da venda, apague o `price`.
 // ---------------------------------------------------------------------------
+const brl = new Intl.NumberFormat("pt-BR", { style: "currency", currency: "BRL", maximumFractionDigits: 0 });
+const buyUrl = (p) => whatsUrl(`Olá, Custom Time! Quero comprar o ${p.name} (${brl.format(p.price)}). Ainda está disponível?`);
 const PORTFOLIO = [
   {
-    id: "carbon", name: "Carbon Edition", img: "assets/carbon-edition.jpg",
+    id: "carbon", name: "Carbon Edition", img: "assets/carbon-edition.jpg", price: 1200,
     text: "Mostrador azul texturizado, luneta de aço com relevo e fundo de vidro com rotor turquesa.",
     spec: [["Caixa", "Redonda, aço"], ["Mostrador", "Azul texturizado"], ["Ponteiros", "Espada com lume"], ["Movimento", "Automático"]],
     cfg: { caseShape: "redonda", dialColor: "#1d4e8f", dialFinish: "texturizado", dialFume: true, dialLayout: "data", indexStyle: "bastao", handStyle: "espada", handColor: "#e6e9ee", secondColor: "#3fc1c9", bezelType: "mergulho", bezelColor: "#575d64", bezelTwoTone: false, strapType: "nato", strapColor: "#1e3a6e", movement: "automatico", rotorColor: "#3fbfbd" },
@@ -492,10 +495,30 @@ function initPortfolio() {
   const grid = $("#portfolioGrid");
   grid.innerHTML = PORTFOLIO.map((p) => `
     <article class="work reveal">
-      <button class="work__img" type="button" data-open="${p.id}" aria-label="Ver ${p.name}"><img src="${p.img}" alt="${p.name}" loading="lazy" width="900" height="900" /></button>
+      <button class="work__img" type="button" data-open="${p.id}" aria-label="Ver ${p.name}"><img src="${p.img}" alt="${p.name}" loading="lazy" width="900" height="900" />${p.price ? `<span class="work__tag">À venda · ${brl.format(p.price)}</span>` : ""}</button>
       <h3>${p.name}</h3>
       <p>${p.text}</p>
       <button class="link-arrow" type="button" data-open="${p.id}">Ver detalhes</button>
+    </article>`).join("");
+
+  // À venda
+  const forSale = PORTFOLIO.filter((p) => p.price);
+  $("#a-venda").hidden = forSale.length === 0;
+  $$(".nav-sale").forEach((a) => { a.hidden = forSale.length === 0; });
+  $("#saleGrid").innerHTML = forSale.map((p) => `
+    <article class="sale-card reveal">
+      <button class="sale-card__img" type="button" data-open="${p.id}" aria-label="Ver ${p.name}"><img src="${p.img}" alt="${p.name}" loading="lazy" width="900" height="900" /><span class="sale-card__tag">Disponível</span></button>
+      <div class="sale-card__info">
+        <p class="label">Feito no ateliê</p>
+        <h3>${p.name}</h3>
+        <p class="sale-card__text">${p.text}</p>
+        <ul class="sale-card__spec">${p.spec.map(([k, v]) => `<li><span>${k}</span><span>${v}</span></li>`).join("")}</ul>
+        <p class="sale-card__price">${brl.format(p.price)}</p>
+        <div class="sale-card__actions">
+          <a class="btn" href="${buyUrl(p)}" target="_blank" rel="noopener">Comprar pelo WhatsApp</a>
+          <button class="link-arrow link-arrow--small" type="button" data-open="${p.id}">Ver em detalhe</button>
+        </div>
+      </div>
     </article>`).join("");
 
   const lb = $("#lightbox");
@@ -504,17 +527,26 @@ function initPortfolio() {
     current = p;
     $("#lbImg").src = p.img;
     $("#lbImg").alt = p.name;
+    $("#lbLabel").textContent = p.price ? "À venda" : "Portfólio";
     $("#lbTitle").textContent = p.name;
     $("#lbText").textContent = p.text;
     $("#lbSpec").innerHTML = p.spec.map(([k, v]) => `<li><span>${k}</span><span>${v}</span></li>`).join("");
+    $("#lbPrice").hidden = !p.price;
+    $("#lbBuy").hidden = !p.price;
+    if (p.price) {
+      $("#lbPrice").textContent = brl.format(p.price);
+      $("#lbBuy").href = buyUrl(p);
+    }
+    $("#lbStart").textContent = p.price ? "Montar um parecido" : "Começar com esta base";
+    $("#lbStart").classList.toggle("btn--line", !!p.price);
     lb.hidden = false;
-    $("#lbStart").focus();
+    (p.price ? $("#lbBuy") : $("#lbStart")).focus();
   };
   const close = () => { lb.hidden = true; current = null; };
-  grid.addEventListener("click", (e) => {
+  [grid, $("#saleGrid")].forEach((g) => g.addEventListener("click", (e) => {
     const b = e.target.closest("[data-open]");
     if (b) open(PORTFOLIO.find((p) => p.id === b.dataset.open));
-  });
+  }));
   $$("[data-close]", lb).forEach((b) => b.addEventListener("click", close));
   document.addEventListener("keydown", (e) => { if (e.key === "Escape" && !lb.hidden) close(); });
   $("#lbStart").addEventListener("click", () => {

@@ -157,6 +157,8 @@ html[data-intro="on"] .rise, html[data-intro="done"] .rise { animation-delay: ca
 .header__nav { display: flex; gap: 28px; }
 .header__nav a { font-size: .72rem; font-weight: 500; letter-spacing: .16em; text-transform: uppercase; text-decoration: none; padding-block: 6px; border-bottom: 1px solid transparent; transition: border-color .2s; }
 .header__nav a:hover { border-color: var(--ink); }
+.header__nav a { white-space: nowrap; }
+@media (max-width: 1320px) { .header__nav { gap: 22px; } .header__nav-extra { display: none; } }
 .brand { text-align: center; text-decoration: none; display: grid; gap: 3px; }
 .brand__name { font-family: var(--font-display); font-size: 1.7rem; letter-spacing: .04em; line-height: 1; }
 .brand__tag { font-size: .6rem; letter-spacing: .3em; text-transform: uppercase; color: var(--muted); }
@@ -315,6 +317,29 @@ html[data-intro="on"] .welcome__bg img, html[data-intro="done"] .welcome__bg img
 .work h3 { font-size: 1.45rem; }
 .work p { font-size: .88rem; color: var(--muted); font-weight: 300; }
 .work .link-arrow { justify-self: start; font-size: .68rem; margin-top: 2px; }
+
+/* à venda */
+.sale-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 28px; }
+.sale-card { display: grid; background: var(--paper); border: 1px solid var(--line); }
+.sale-grid > .sale-card:only-child { grid-template-columns: minmax(0, 1.05fr) minmax(0, 1fr); max-width: 1080px; margin-inline: auto; width: 100%; }
+.sale-card__img { position: relative; overflow: hidden; aspect-ratio: 1; background: #ddd; }
+.sale-card__img img { width: 100%; height: 100%; object-fit: cover; transition: transform 1.2s var(--ease); }
+.sale-card:hover .sale-card__img img { transform: scale(1.04); }
+.sale-card__tag, .work__tag {
+  position: absolute; top: 16px; left: 16px; padding: 6px 12px; background: var(--paper); color: var(--ink);
+  font-size: .66rem; font-weight: 500; letter-spacing: .18em; text-transform: uppercase;
+}
+.sale-card__tag::before { content: ""; display: inline-block; width: 6px; height: 6px; border-radius: 50%; background: #3f8f5a; margin-right: 8px; vertical-align: 1px; }
+.sale-card__info { display: grid; gap: 14px; align-content: center; padding: clamp(24px, 4vw, 48px); }
+.sale-card__info h3 { font-size: clamp(1.9rem, 3.4vw, 2.6rem); }
+.sale-card__text { color: var(--muted); font-weight: 300; }
+.sale-card__spec { list-style: none; margin: 4px 0 0; padding: 0; font-size: .88rem; border-top: 1px solid var(--line); }
+.sale-card__spec li { display: flex; justify-content: space-between; gap: 12px; padding: 8px 0; border-bottom: 1px solid var(--line); }
+.sale-card__spec li span:first-child { color: var(--muted); }
+.sale-card__price { font-family: var(--font-display); font-size: 2.2rem; line-height: 1.1; margin-top: 6px; font-variant-numeric: tabular-nums; }
+.sale-card__actions { display: flex; flex-wrap: wrap; align-items: center; gap: 14px 26px; }
+.work__img { position: relative; }
+.lightbox__price { font-family: var(--font-display); font-size: 1.9rem; line-height: 1.1; }
 
 /* ateliê */
 .atelier { display: grid; grid-template-columns: .9fr 1.1fr; gap: clamp(32px, 6vw, 96px); align-items: center; }
@@ -621,6 +646,8 @@ html[data-intro="on"] .welcome__bg img, html[data-intro="done"] .welcome__bg img
   .callouts span { display: none; }
 
   .portfolio { grid-template-columns: 1fr; max-width: 520px; margin-inline: auto; }
+  .sale-grid > .sale-card:only-child { grid-template-columns: 1fr; max-width: 520px; }
+  .sale-card__info { text-align: left; }
   .atelier, .faq-wrap { grid-template-columns: 1fr; }
   .footer__grid { grid-template-columns: 1fr 1fr; }
   .footer__brand { grid-column: 1 / -1; }

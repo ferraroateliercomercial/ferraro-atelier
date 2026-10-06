@@ -9,6 +9,7 @@ Site da Custom Time, ateliê de relojoaria. O cliente não compra relógios pron
 - **Anatomia**: ao rolar, o relógio se separa em camadas (pulseira, movimento, caixa, mostrador, ponteiros, luneta, cristal). No celular ele ocupa a tela toda, com uma legenda por vez embaixo.
 - **Movimentos**: quartzo, automático (NH35) e corda manual (ST3600) funcionando como os de verdade. O automático gira o rotor quando o mouse passa por cima; o manual precisa de corda.
 - **Dez estilos de ponteiros**, com um controle para ver todos em qualquer cor.
+- **À venda**: relógios prontos com preço e botão "Comprar pelo WhatsApp" (mensagem já preenchida).
 - Portfólio, ateliê, dúvidas e contato.
 
 ## Ateliê virtual (`#personalizar`)
@@ -33,7 +34,7 @@ Página para a Custom Time ver o relógio que o cliente montou. Abra o site com 
 ## Como editar
 
 - `js/app.js`, começo do arquivo: `STORE.whatsapp` e `STORE.instagram`.
-- `js/app.js`, `PORTFOLIO`: fotos e descrições do portfólio. Fotos ficam em `assets/`.
+- `js/app.js`, `PORTFOLIO`: fotos e descrições do portfólio. Fotos ficam em `assets/`. Para pôr uma peça à venda, coloque `price: 1500` nela; para tirar da venda, apague o `price`.
 - `js/watch.js`: desenho do relógio e funcionamento dos movimentos.
 
 ## Rodar no computador

@@ -1,42 +1,35 @@
 # Custom Time
 
-Site da Custom Time, loja de relógios personalizados feitos à mão.
+Site da Custom Time, ateliê de relojoaria. O cliente não compra relógios prontos: ele monta o próprio relógio no **ateliê virtual** e envia o projeto pelo WhatsApp.
 
-## O que tem no site
+## Página inicial
 
-- **Abertura**: foto do ateliê e as garantias da loja.
-- **Coleção**: vitrine de peças com filtro por pulseira. Cada peça vai para a sacola ou abre no configurador.
-- **Carbon Edition**: ficha de produto com galeria de fotos, detalhes e ficha técnica.
-- **Personalize o seu**: configurador com desenho do relógio que muda na hora (mostrador, luneta, ponteiros, pulseira e gravação) e marca a hora atual.
-- **O ateliê**: como funciona, do pedido à entrega.
-- **Serviços e valores**: tabela de preços por categoria.
-- **Sacola**: envia o pedido pronto pelo WhatsApp.
+- **Abertura animada**: um mostrador se desenha, os ponteiros vão até 10:08 e a página se abre a partir do centro. Toca uma vez por visita; clique ou qualquer tecla pula.
+- **Relógio que se desmonta**: ao rolar, o relógio se separa em camadas (pulseira, movimento, caixa, mostrador, ponteiros, luneta, cristal).
+- **Movimentos**: quartzo, automático (NH35) e corda manual (ST3600) funcionando como os de verdade. O automático gira o rotor quando o mouse passa por cima; o manual precisa de corda.
+- **Dez estilos de ponteiros**, com um controle para ver todos em qualquer cor.
+- Portfólio, ateliê, dúvidas e contato.
+
+## Ateliê virtual (`#personalizar`)
+
+Oito etapas: caixa, mostrador, ponteiros, luneta, pulseira, movimento, gravação e resumo.
+
+- Todas as cores são livres (seletor de espectro completo e código HEX).
+- Vistas de frente, explodida e de fundo.
+- O relógio da prévia marca a hora real e anda conforme o movimento escolhido. Nos mecânicos dá para dar corda girando a coroa; no cronógrafo os botões laterais ligam, param e zeram.
+- O resumo gera a mensagem do WhatsApp com todas as escolhas e os códigos das cores.
 
 ## Como editar
 
-Tudo fica em `js/app.js`, no começo do arquivo:
-
-- `STORE.whatsapp`: seu número com DDI e DDD, só dígitos (ex.: `5511999998888`).
-- `STORE.instagram`: link do seu Instagram.
-- `STORE.basePrice`: preço do relógio base.
-- `OPTIONS`: opções e preços do configurador.
-- `COLLECTION`: peças da vitrine. Peças com `config` aparecem como desenho; para usar uma foto, coloque o arquivo em `assets/` e troque `config` por `image: "assets/arquivo.jpg"` e `price`.
-- `SERVICE_GROUPS`: serviços e preços.
-
-Os preços que estão lá são exemplos. Troque pelos seus.
-
-Fotos ficam em `assets/`.
+- `js/app.js`, começo do arquivo: `STORE.whatsapp` e `STORE.instagram`.
+- `js/app.js`, `PRICES`: valores de cada opção (são estimativas de exemplo).
+- `js/app.js`, `PORTFOLIO`: fotos e descrições do portfólio. Fotos ficam em `assets/`.
+- `js/watch.js`: desenho do relógio e funcionamento dos movimentos.
 
 ## Rodar no computador
-
-É um site estático, sem instalação:
 
 ```sh
 python3 -m http.server 8000
 ```
 
-Depois abra http://localhost:8000.
-
-## Publicar
-
-Funciona direto no GitHub Pages, Vercel ou Netlify (sem passo de build).
+Depois abra http://localhost:8000. É um site estático: funciona direto no GitHub Pages, Vercel ou Netlify, sem build.

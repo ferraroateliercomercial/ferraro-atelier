@@ -1,541 +1,767 @@
-/* Custom Time — interações do site */
+/* Custom Time — página inicial e ateliê virtual */
 
 // ---------------------------------------------------------------------------
-// Configurações da loja: troque pelos seus dados
+// Configurações da loja
 // ---------------------------------------------------------------------------
 const STORE = {
-  // Número com DDI + DDD, só dígitos.
-  whatsapp: "5548996950800",
+  whatsapp: "5548996950800", // DDI + DDD + número, só dígitos
   instagram: "https://instagram.com/",
-  basePrice: 1490, // relógio base: caixa de aço + movimento automático
-  engravingPrice: 60,
-  carbonPrice: 1890,
 };
 
 const brl = new Intl.NumberFormat("pt-BR", { style: "currency", currency: "BRL", maximumFractionDigits: 0 });
 const $ = (sel, root = document) => root.querySelector(sel);
 const $$ = (sel, root = document) => [...root.querySelectorAll(sel)];
-
-// ---------------------------------------------------------------------------
-// Opções do configurador
-// ---------------------------------------------------------------------------
-const OPTIONS = {
-  dial: [
-    { id: "oceano", label: "Azul oceano", color: "#1f5a96", ink: "#f2f6fb", texture: true, price: 0 },
-    { id: "preto", label: "Preto fosco", color: "#15171b", ink: "#f2f2f2", price: 0 },
-    { id: "verde", label: "Verde floresta", color: "#1f4d3a", ink: "#eef5ef", price: 80 },
-    { id: "turquesa", label: "Turquesa", color: "#2b8f9c", ink: "#f2fbfb", texture: true, price: 120 },
-    { id: "salmao", label: "Salmão", color: "#d99e86", ink: "#2a1a14", price: 120 },
-    { id: "branco", label: "Branco gelo", color: "#ebe8e1", ink: "#1a1c20", price: 80 },
-  ],
-  bezel: [
-    { id: "topo", label: "Aço topográfico", color: "#6c737b", ink: "#eef1f4", topo: true, price: 180 },
-    { id: "ceramica", label: "Cerâmica preta", color: "#16181c", ink: "#e9ecef", price: 0 },
-    { id: "azul", label: "Azul royal", color: "#1d3c78", ink: "#eef2fa", price: 60 },
-    { id: "pepsi", label: "Pepsi", color: "#1d3c78", half: "#a51f2b", ink: "#f4f4f4", price: 120 },
-    { id: "batman", label: "Batman", color: "#1d3c78", half: "#16181c", ink: "#f4f4f4", price: 120 },
-  ],
-  hands: [
-    { id: "prata", label: "Prata", color: "#e6e9ee", second: "#5fd3d0", price: 0 },
-    { id: "dourado", label: "Dourado", color: "#d4b062", second: "#d4b062", price: 90 },
-    { id: "preto", label: "Preto", color: "#202227", second: "#e0483b", price: 40 },
-    { id: "rose", label: "Rosé", color: "#d49a86", second: "#d49a86", price: 90 },
-  ],
-  strap: [
-    { id: "nato-azul", label: "NATO azul", color: "#1e3a6e", kind: "weave", price: 0 },
-    { id: "nato-preta", label: "NATO preta", color: "#1b1c20", kind: "weave", price: 0 },
-    { id: "nato-oliva", label: "NATO oliva", color: "#4a5233", kind: "weave", price: 0 },
-    { id: "couro", label: "Couro marrom", color: "#6b4226", kind: "leather", price: 140 },
-    { id: "aco", label: "Aço Oyster", color: "#c3c9d0", kind: "links", price: 260 },
-  ],
-};
-
-const GROUP_LABEL = { dial: "Mostrador", bezel: "Luneta", hands: "Ponteiros", strap: "Pulseira" };
-const DEFAULT_CONFIG = { dial: "oceano", bezel: "topo", hands: "prata", strap: "nato-azul" };
-
-// ---------------------------------------------------------------------------
-// Coleção. Para usar uma foto sua, troque `config` por `image: "assets/arquivo.jpg"`
-// e informe o preço em `price`.
-// ---------------------------------------------------------------------------
-const COLLECTION = [
-  { id: "carbon", name: "Carbon Edition", ref: "CT-001", image: "assets/carbon-edition.jpg", strap: "weave", price: STORE.carbonPrice, spec: "Mostrador texturizado · luneta topográfica", tag: "Destaque", link: "#carbon" },
-  { id: "abissal", name: "Abissal", ref: "CT-002", config: { dial: "preto", bezel: "pepsi", hands: "prata", strap: "aco" }, spec: "Mostrador preto · luneta Pepsi" },
-  { id: "floresta", name: "Floresta", ref: "CT-003", config: { dial: "verde", bezel: "ceramica", hands: "dourado", strap: "couro" }, spec: "Mostrador verde · ponteiros dourados" },
-  { id: "laguna", name: "Laguna", ref: "CT-004", config: { dial: "turquesa", bezel: "topo", hands: "prata", strap: "nato-azul" }, spec: "Mostrador turquesa · luneta topográfica" },
-  { id: "gelo", name: "Gelo", ref: "CT-005", config: { dial: "branco", bezel: "batman", hands: "preto", strap: "aco" }, spec: "Mostrador branco · luneta Batman" },
-  { id: "aurora", name: "Aurora", ref: "CT-006", config: { dial: "salmao", bezel: "ceramica", hands: "rose", strap: "couro" }, spec: "Mostrador salmão · ponteiros rosé" },
-];
-
-// ---------------------------------------------------------------------------
-// Serviços
-// ---------------------------------------------------------------------------
-const SERVICE_GROUPS = [
-  { title: "Relógio novo", items: [
-    { id: "sob-medida", title: "Relógio sob medida", text: "Montado do zero com as peças que você escolher.", price: STORE.basePrice, from: true, link: "#personalizar" },
-    { id: "carbon", title: "Carbon Edition", text: "A peça em destaque, montada para você.", price: STORE.carbonPrice },
-  ] },
-  { title: "Personalização", items: [
-    { id: "mostrador", title: "Troca de mostrador", text: "Novo mostrador e índices para o seu relógio.", price: 220, from: true },
-    { id: "luneta", title: "Troca de luneta", text: "Cerâmica, aço gravado ou bicolor.", price: 160, from: true },
-    { id: "ponteiros", title: "Troca de ponteiros", text: "Prata, dourado, preto ou rosé, com lume.", price: 120, from: true },
-    { id: "pulseira", title: "Pulseira nova", text: "NATO, couro ou aço, ajustada ao seu pulso.", price: 90, from: true },
-    { id: "gravacao", title: "Gravação no fundo", text: "Nome, data ou mensagem.", price: STORE.engravingPrice },
-  ] },
-  { title: "Manutenção", items: [
-    { id: "revisao", title: "Revisão do movimento", text: "Limpeza, lubrificação e regulagem.", price: 250, from: true },
-    { id: "vedacao", title: "Teste de vedação", text: "Troca de juntas e teste de pressão.", price: 120 },
-    { id: "polimento", title: "Polimento de caixa", text: "Acabamento escovado e polido refeito.", price: 180, from: true },
-  ] },
-];
-
-// ---------------------------------------------------------------------------
-// Detalhes da Carbon Edition
-// ---------------------------------------------------------------------------
-const CARBON_DETAILS = [
-  { title: "Luneta topográfica", text: "Aço gravado com curvas de nível, como um mapa. Gira em um só sentido, com marcações azuis a cada 10 minutos." },
-  { title: "Mostrador texturizado", text: "Azul profundo com textura que lembra gelo e fundo do mar. Nenhum sai igual ao outro." },
-  { title: "Ponteiros e coroa", text: "Ponteiros em aço polido com lume, segundos em turquesa e coroa de rosca anodizada em azul." },
-  { title: "Fundo de vidro", text: "Rotor turquesa com padrão de ondas japonês (seigaiha). É ele que dá corda ao relógio com o movimento do pulso." },
-];
-
-// ---------------------------------------------------------------------------
-// Utilidades
-// ---------------------------------------------------------------------------
-function polar(r, deg, cx = 200, cy = 260) {
-  const a = ((deg - 90) * Math.PI) / 180;
-  return [+(cx + r * Math.cos(a)).toFixed(2), +(cy + r * Math.sin(a)).toFixed(2)];
-}
-
-function escapeHtml(str) {
-  return String(str).replace(/[&<>"']/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c]));
-}
-
-const pick = (group, id) => OPTIONS[group].find((o) => o.id === id);
-const configPrice = (config) => STORE.basePrice + Object.keys(OPTIONS).reduce((s, g) => s + pick(g, config[g]).price, 0);
-const configText = (config) => Object.keys(OPTIONS).map((g) => pick(g, config[g]).label).join(" · ");
-
+const whatsUrl = (text) => `https://wa.me/${STORE.whatsapp}?text=${encodeURIComponent(text)}`;
+const escapeHtml = (s) => String(s).replace(/[&<>"']/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c]));
 const storage = {
-  get(key, fallback) {
-    try { return JSON.parse(localStorage.getItem(key)) ?? fallback; } catch { return fallback; }
-  },
-  set(key, value) {
-    try { localStorage.setItem(key, JSON.stringify(value)); } catch { /* sem armazenamento: segue sem salvar */ }
-  },
+  get(k, f) { try { return JSON.parse(localStorage.getItem(k)) ?? f; } catch { return f; } },
+  set(k, v) { try { localStorage.setItem(k, JSON.stringify(v)); } catch { /* sem armazenamento */ } },
 };
-
 let toastTimer;
 function toast(msg) {
   const el = $("#toast");
   el.textContent = msg;
   el.classList.add("is-visible");
   clearTimeout(toastTimer);
-  toastTimer = setTimeout(() => el.classList.remove("is-visible"), 2400);
+  toastTimer = setTimeout(() => el.classList.remove("is-visible"), 2600);
 }
-
-function whatsUrl(text) {
-  return `https://wa.me/${STORE.whatsapp}?text=${encodeURIComponent(text)}`;
-}
-
-// ---------------------------------------------------------------------------
-// Desenho do relógio (SVG)
-// ---------------------------------------------------------------------------
-const TOPO_PATHS = (() => {
-  let out = "";
-  for (let i = 0; i < 9; i++) {
-    const base = 108 + i * 2.8;
-    let d = "";
-    for (let a = 0; a <= 360; a += 6) {
-      const r = base + Math.sin((a + i * 37) * 0.07) * 1.4 + Math.cos((a * 3 + i * 11) * 0.031) * 1.1;
-      const [x, y] = polar(r, a);
-      d += `${a ? "L" : "M"}${x} ${y}`;
-    }
-    out += `<path d="${d}Z" fill="none" stroke="#2b3036" stroke-opacity=".55" stroke-width=".7"/>`;
-  }
-  return out;
-})();
-
-function watchSVG(config, { time = { h: 10, m: 8, s: 38 }, title = "Desenho do relógio" } = {}) {
-  const dial = pick("dial", config.dial);
-  const bezel = pick("bezel", config.bezel);
-  const hands = pick("hands", config.hands);
-  const strap = pick("strap", config.strap);
-
-  // pulseira
-  let strapSvg = "";
-  for (const y of [0, 370]) {
-    if (strap.kind === "links") {
-      strapSvg += `<rect x="138" y="${y}" width="124" height="150" rx="4" fill="url(#links)"/>`;
-    } else {
-      strapSvg += `<rect x="138" y="${y}" width="124" height="150" rx="10" fill="${strap.color}"/>`;
-      strapSvg += `<rect x="138" y="${y}" width="124" height="150" rx="10" fill="url(#${strap.kind})"/>`;
-      if (strap.kind === "leather") strapSvg += `<rect x="143" y="${y + 5}" width="114" height="140" rx="7" fill="none" stroke="#e8d6c0" stroke-opacity=".55" stroke-dasharray="4 3"/>`;
-    }
-  }
-
-  // luneta
-  let bezelSvg = `<circle cx="200" cy="260" r="132" fill="${bezel.color}"/>`;
-  if (bezel.half) bezelSvg += `<path d="M68 260 A132 132 0 0 1 332 260 Z" fill="${bezel.half}"/>`;
-  if (bezel.topo) bezelSvg += TOPO_PATHS;
-  const [tx, ty] = polar(124, 0);
-  bezelSvg += `<path d="M${tx - 7} ${ty - 5} L${tx + 7} ${ty - 5} L${tx} ${ty + 7} Z" fill="${bezel.ink}"/><circle cx="${tx}" cy="${ty - 0.5}" r="2.4" fill="#cfe9f6"/>`;
-  for (let m = 5; m < 60; m += 5) {
-    const deg = m * 6;
-    const [x, y] = polar(119, deg);
-    bezelSvg += m % 10 === 0
-      ? `<text x="${x}" y="${y + 5}" text-anchor="middle" font-family="Jost, sans-serif" font-size="15" font-weight="500" fill="${bezel.ink}" transform="rotate(${deg} ${x} ${y})">${m}</text>`
-      : `<rect x="${x - 2}" y="${y - 7}" width="4" height="14" rx="1" fill="${bezel.topo ? "#4fb3e8" : bezel.ink}" transform="rotate(${deg} ${x} ${y})"/>`;
-  }
-  for (let m = 1; m < 15; m++) {
-    if (m % 5 === 0) continue;
-    const [x1, y1] = polar(130, m * 6);
-    const [x2, y2] = polar(124, m * 6);
-    bezelSvg += `<line x1="${x1}" y1="${y1}" x2="${x2}" y2="${y2}" stroke="${bezel.ink}" stroke-width="1.4"/>`;
-  }
-
-  // índices e minutos
-  let idx = "";
-  for (let h = 0; h < 12; h++) {
-    if (h === 3) continue; // janela da data
-    const deg = h * 30;
-    const len = h % 3 === 0 ? 18 : 14;
-    const [x, y] = polar(94 - len / 2, deg);
-    const bar = (dx) => `<rect x="${x - 2.5 + dx}" y="${y - len / 2}" width="5" height="${len}" rx="1.2" fill="#f3f6ea" stroke="${hands.color}" stroke-width="1.2" transform="rotate(${deg} ${x} ${y})"/>`;
-    idx += h === 0 ? bar(-4) + bar(4) : bar(0);
-  }
-  for (let m = 0; m < 60; m++) {
-    if (m % 5 === 0) continue;
-    const [x1, y1] = polar(101, m * 6);
-    const [x2, y2] = polar(97, m * 6);
-    idx += `<line x1="${x1}" y1="${y1}" x2="${x2}" y2="${y2}" stroke="${dial.ink}" stroke-width=".8"/>`;
-  }
-
-  const sec = time.s;
-  const min = time.m + sec / 60;
-  const hr = (time.h % 12) + min / 60;
-
-  return `<svg viewBox="0 0 400 520" role="img" aria-label="${escapeHtml(title)}">
-    <g>${strapSvg}</g>
-    <path d="M140 150 L150 120 H250 L260 150 Z M140 370 L150 400 H250 L260 370 Z" fill="url(#steel)"/>
-    <rect x="338" y="246" width="24" height="28" rx="5" fill="url(#steel)"/>
-    <circle cx="200" cy="260" r="140" fill="url(#steel)"/>
-    <circle cx="200" cy="260" r="136" fill="none" stroke="#000" stroke-opacity=".12" stroke-width="2"/>
-    ${bezelSvg}
-    <circle cx="200" cy="260" r="104" fill="#1b1f24"/>
-    <circle cx="200" cy="260" r="102" fill="${dial.color}"/>
-    ${dial.texture ? '<rect x="96" y="156" width="208" height="208" fill="url(#texture)" clip-path="url(#dialClip)"/>' : ""}
-    <circle cx="200" cy="260" r="102" fill="url(#dialShade)"/>
-    ${idx}
-    <rect x="262" y="250" width="26" height="20" rx="2" fill="#f4f4f1" stroke="#999" stroke-width=".8"/>
-    <text x="275" y="265" text-anchor="middle" font-family="Jost, sans-serif" font-size="12" font-weight="500" fill="#111">${new Date().getDate()}</text>
-    <text x="200" y="210" text-anchor="middle" font-family="'Bodoni Moda', Georgia, serif" font-size="11" letter-spacing="1.5" fill="${dial.ink}">Custom Time</text>
-    <text x="200" y="306" text-anchor="middle" font-family="Jost, sans-serif" font-size="6" letter-spacing="1.6" fill="${dial.ink}">AUTOMATIC · 200m</text>
-    <g data-hand="h" transform="rotate(${hr * 30} 200 260)"><path d="M196 268 L196 205 L200 196 L204 205 L204 268 Z" fill="${hands.color}"/><rect x="197.5" y="208" width="5" height="40" rx="1.5" fill="#f3f6ea"/></g>
-    <g data-hand="m" transform="rotate(${min * 6} 200 260)"><path d="M197 270 L197 178 L200 168 L203 178 L203 270 Z" fill="${hands.color}"/><rect x="198.3" y="180" width="3.4" height="62" rx="1.2" fill="#f3f6ea"/></g>
-    <g data-hand="s" transform="rotate(${sec * 6} 200 260)"><rect x="199.2" y="182" width="1.6" height="100" fill="${hands.second}"/><circle cx="200" cy="215" r="4" fill="${hands.second}"/></g>
-    <circle cx="200" cy="260" r="5" fill="${hands.color}"/>
-    <circle cx="200" cy="260" r="2" fill="${hands.second}"/>
-    <ellipse cx="160" cy="200" rx="70" ry="38" fill="#fff" opacity=".06" transform="rotate(-30 160 200)"/>
-  </svg>`;
+function hslHex(h, s, l) {
+  s /= 100; l /= 100;
+  const k = (n) => (n + h / 30) % 12;
+  const a = s * Math.min(l, 1 - l);
+  const f = (n) => l - a * Math.max(-1, Math.min(k(n) - 3, Math.min(9 - k(n), 1)));
+  return Watch.rgbToHex(f(0) * 255, f(8) * 255, f(4) * 255);
 }
 
 // ---------------------------------------------------------------------------
-// Cabeçalho
+// Catálogo de opções e valores (estimativas)
 // ---------------------------------------------------------------------------
+const HAND_STYLES = [
+  { id: "bastao", name: "Bastão", desc: "Retos e finos. Clássicos, discretos e muito legíveis." },
+  { id: "espada", name: "Espada", desc: "Lâmina larga e pontuda. Padrão dos relógios de ferramenta." },
+  { id: "mercedes", name: "Mercedes", desc: "Círculo com estrela de três pontas no ponteiro das horas. Ícone dos relógios de mergulho." },
+  { id: "dauphine", name: "Dauphine", desc: "Triangulares e facetados, refletem a luz. Elegância social." },
+  { id: "folha", name: "Folha", desc: "Curvas finas em forma de folha. Ar vintage e delicado.", price: 40 },
+  { id: "seringa", name: "Seringa", desc: "Corpo reto que termina em agulha. Usados desde os anos 1930." },
+  { id: "catedral", name: "Catedral", desc: "Recortes que lembram vitrais góticos. Aviação e militares.", price: 40 },
+  { id: "breguet", name: "Breguet", desc: "Haste fina com lua vazada. Criados por Breguet em 1783.", price: 60 },
+  { id: "flecha", name: "Flecha", desc: "Ponta larga em seta no ponteiro das horas. Relógios de ferramenta antigos." },
+  { id: "floco", name: "Floco de neve", desc: "Bloco quadrado de lume. Nasceu na Marinha francesa nos anos 1970.", price: 40 },
+];
+
+const MOVEMENTS = {
+  quartzo: { name: "Quartzo", caliber: "Quartzo", text: "Bateria e salto de um em um segundo. Preciso, prático e sem manutenção." },
+  automatico: { name: "Automático", caliber: "Seiko NH35", text: "Dá corda sozinho com o movimento do pulso. Segundos deslizando e reserva de cerca de 41 horas." },
+  manual: { name: "Corda manual", caliber: "Seagull ST3600", text: "Você dá corda girando a coroa. Reserva de mais de 40 horas e visual de relógio de bolso no fundo." },
+};
+
+const PRICES = {
+  movement: { quartzo: 790, automatico: 1190, manual: 1390 },
+  caseShape: { redonda: 0, almofada: 120, octogonal: 280 },
+  dialFinish: { liso: 0, raios: 60, listrado: 90, texturizado: 120, grade: 90 },
+  dialLayout: { data: 0, "sem-data": 0, crono: 380 },
+  indexStyle: { bastao: 0, romanos: 40, arabicos: 40, pontos: 0 },
+  handStyle: Object.fromEntries(HAND_STYLES.map((h) => [h.id, h.price || 0])),
+  bezelType: { mergulho: 0, taquimetro: 60, lisa: 0, canelada: 120 },
+  strapType: { nato: 0, couro: 120, borracha: 90, oyster: 220, jubile: 260, integrada: 320 },
+  dialFume: 40,
+  bezelTwoTone: 60,
+  engraving: 60,
+};
+
+const isOct = (c) => c.caseShape === "octogonal";
+const metalStrap = (c) => ["oyster", "jubile", "integrada"].includes(c.strapType);
+const bezelHasInsert = (c) => !isOct(c) && ["mergulho", "taquimetro"].includes(c.bezelType);
+
+function priceOf(c) {
+  let t = PRICES.movement[c.movement] + PRICES.caseShape[c.caseShape] + PRICES.dialFinish[c.dialFinish] + PRICES.dialLayout[c.dialLayout]
+    + PRICES.indexStyle[c.indexStyle] + PRICES.handStyle[c.handStyle] + PRICES.strapType[c.strapType];
+  if (!isOct(c)) t += PRICES.bezelType[c.bezelType];
+  if (c.dialFume) t += PRICES.dialFume;
+  if (bezelHasInsert(c) && c.bezelTwoTone) t += PRICES.bezelTwoTone;
+  if ((c.engraving || "").trim()) t += PRICES.engraving;
+  return t;
+}
+
+const plus = (v) => (v ? `+ ${brl.format(v)}` : "");
+
+const TABS = [
+  {
+    id: "caixa", title: "Caixa", intro: "O formato e o metal definem o caráter do relógio.",
+    fields: [
+      { type: "choice", key: "caseShape", label: "Formato", options: [
+        ["redonda", "Redonda", "Mergulho, esporte ou social"],
+        ["almofada", "Almofada", "Quadrada de cantos suaves"],
+        ["octogonal", "Octogonal integrada", "Luneta e pulseira integradas"],
+      ] },
+      { type: "choice", key: "size", label: "Diâmetro", options: [[38, "38 mm", "Pulsos finos"], [40, "40 mm", "O mais pedido"], [42, "42 mm", "Mais presença"]] },
+      { type: "color", key: "caseColor", label: "Cor do metal", note: "Aço, dourado, bronze, PVD preto ou o tom que você imaginar." },
+    ],
+  },
+  {
+    id: "mostrador", title: "Mostrador", intro: "A cor exata que você quiser, com o acabamento que der o brilho certo.",
+    fields: [
+      { type: "color", key: "dialColor", label: "Cor do mostrador" },
+      { type: "toggle", key: "dialFume", label: "Degradê fumê", note: "Escurece suavemente em direção às bordas", price: () => PRICES.dialFume },
+      { type: "choice", key: "dialFinish", label: "Acabamento", options: [
+        ["liso", "Liso"], ["raios", "Raios de sol"], ["listrado", "Listrado"], ["texturizado", "Texturizado"], ["grade", "Tapisserie"],
+      ] },
+      { type: "choice", key: "dialLayout", label: "Disposição", options: [["data", "Com data"], ["sem-data", "Sem data"], ["crono", "Cronógrafo", "3 submostradores"]] },
+      { type: "color", key: "subdialColor", label: "Cor dos submostradores", when: (c) => c.dialLayout === "crono" },
+      { type: "choice", key: "indexStyle", label: "Índices", options: [["bastao", "Bastões"], ["romanos", "Romanos"], ["arabicos", "Arábicos"], ["pontos", "Pontos"]] },
+      { type: "color", key: "indexColor", label: "Cor dos índices" },
+      { type: "toggle", key: "lume", label: "Material luminescente", note: "Índices e ponteiros brilham no escuro" },
+    ],
+  },
+  {
+    id: "ponteiros", title: "Ponteiros", intro: "Dez estilos levantados na pesquisa de mercado, todos em qualquer cor.",
+    fields: [
+      { type: "hands", key: "handStyle", label: "Estilo" },
+      { type: "color", key: "handColor", label: "Cor dos ponteiros" },
+      { type: "choice", key: "secondStyle", label: "Ponteiro de segundos", options: [["agulha", "Agulha"], ["pirulito", "Pirulito"], ["seta", "Seta"]] },
+      { type: "color", key: "secondColor", label: "Cor do ponteiro de segundos" },
+    ],
+  },
+  {
+    id: "luneta", title: "Luneta", intro: "O aro em volta do cristal.",
+    fields: [
+      { type: "note", text: "Na caixa octogonal a luneta é integrada à caixa, polida e na mesma cor do metal.", when: isOct },
+      { type: "choice", key: "bezelType", label: "Tipo", when: (c) => !isOct(c), options: [
+        ["mergulho", "Mergulho", "Escala de 60 minutos"], ["taquimetro", "Taquímetro", "Mede velocidade"], ["lisa", "Lisa polida"], ["canelada", "Canelada", "Sulcos verticais"],
+      ] },
+      { type: "color", key: "bezelColor", label: "Cor da luneta", when: bezelHasInsert },
+      { type: "toggle", key: "bezelTwoTone", label: "Luneta bicolor", note: "Metade de cima em outra cor", when: bezelHasInsert, price: () => PRICES.bezelTwoTone },
+      { type: "color", key: "bezelColor2", label: "Segunda cor", when: (c) => bezelHasInsert(c) && c.bezelTwoTone },
+    ],
+  },
+  {
+    id: "pulseira", title: "Pulseira", intro: "Do nylon esportivo ao aço maciço.",
+    fields: [
+      { type: "choice", key: "strapType", label: "Tipo", options: [
+        ["nato", "NATO", "Nylon trançado"], ["couro", "Couro"], ["borracha", "Borracha"], ["oyster", "Aço Oyster", "Três elos"], ["jubile", "Aço Jubilee", "Cinco elos"], ["integrada", "Integrada", "Só na octogonal"],
+      ] },
+      { type: "color", key: "strapColor", label: "Cor da pulseira", when: (c) => !metalStrap(c) },
+      { type: "color", key: "stitchColor", label: "Cor da costura", when: (c) => c.strapType === "couro" },
+      { type: "note", text: "Pulseiras de metal acompanham a cor escolhida para a caixa.", when: metalStrap },
+    ],
+  },
+  {
+    id: "movimento", title: "Movimento", intro: "O coração do relógio. Teste na prévia: cada um anda de um jeito.",
+    fields: [
+      { type: "movement", key: "movement" },
+      { type: "color", key: "rotorColor", label: "Cor do rotor", note: "Aparece pelo fundo de vidro", when: (c) => c.movement === "automatico" },
+    ],
+  },
+  {
+    id: "gravacao", title: "Gravação", intro: "Um nome, uma data ou uma frase no fundo da caixa.",
+    fields: [{ type: "text", key: "engraving", label: "Texto no fundo", placeholder: "Ex.: Para o Lucas · 2026", max: 28 }],
+  },
+  { id: "resumo", title: "Resumo", intro: "Confira o projeto e envie para a gente pelo WhatsApp.", fields: [{ type: "summary" }] },
+];
+
+const LABELS = {
+  caseShape: { redonda: "Redonda", almofada: "Almofada", octogonal: "Octogonal integrada" },
+  dialFinish: { liso: "Liso", raios: "Raios de sol", listrado: "Listrado", texturizado: "Texturizado", grade: "Tapisserie" },
+  dialLayout: { data: "Com data", "sem-data": "Sem data", crono: "Cronógrafo" },
+  indexStyle: { bastao: "Bastões", romanos: "Romanos", arabicos: "Arábicos", pontos: "Pontos" },
+  secondStyle: { agulha: "Agulha", pirulito: "Pirulito", seta: "Seta" },
+  bezelType: { mergulho: "Mergulho", taquimetro: "Taquímetro", lisa: "Lisa polida", canelada: "Canelada" },
+  strapType: { nato: "NATO", couro: "Couro", borracha: "Borracha", oyster: "Aço Oyster", jubile: "Aço Jubilee", integrada: "Integrada" },
+};
+
+// ---------------------------------------------------------------------------
+// Portfólio
+// ---------------------------------------------------------------------------
+const PORTFOLIO = [
+  {
+    id: "carbon", name: "Carbon Edition", img: "assets/carbon-edition.jpg",
+    text: "Mostrador azul texturizado, luneta de aço gravada e fundo de vidro com rotor turquesa.",
+    spec: [["Caixa", "Redonda, aço"], ["Mostrador", "Azul texturizado"], ["Ponteiros", "Espada com lume"], ["Movimento", "Automático"]],
+    cfg: { caseShape: "redonda", dialColor: "#1d4e8f", dialFinish: "texturizado", dialFume: true, dialLayout: "data", indexStyle: "bastao", handStyle: "espada", handColor: "#e6e9ee", secondColor: "#3fc1c9", bezelType: "mergulho", bezelColor: "#575d64", bezelTwoTone: false, strapType: "nato", strapColor: "#1e3a6e", movement: "automatico", rotorColor: "#3fbfbd" },
+  },
+  {
+    id: "verde", name: "Verde Fumê", img: "assets/verde-fume.jpg",
+    text: "Caixa octogonal com pulseira integrada e mostrador verde em degradê, com relevo horizontal.",
+    spec: [["Caixa", "Octogonal integrada, aço"], ["Mostrador", "Verde fumê listrado"], ["Ponteiros", "Bastão com lume"], ["Movimento", "Automático"]],
+    cfg: { caseShape: "octogonal", caseColor: "#c9cdd2", dialColor: "#2f7a64", dialFume: true, dialFinish: "listrado", dialLayout: "sem-data", indexStyle: "bastao", indexColor: "#e9ecef", handStyle: "bastao", handColor: "#e6e9ee", secondColor: "#e6e9ee", strapType: "integrada", movement: "automatico" },
+  },
+  {
+    id: "panda", name: "Panda Reverso", img: "assets/panda-reverso.jpg",
+    text: "Cronógrafo de mostrador preto com submostradores claros e luneta taquimétrica.",
+    spec: [["Caixa", "Redonda, aço"], ["Mostrador", "Preto, submostradores prata"], ["Luneta", "Taquímetro preta"], ["Movimento", "Cronógrafo de quartzo"]],
+    cfg: { caseShape: "redonda", caseColor: "#c9cdd2", dialColor: "#111316", dialFume: false, dialFinish: "liso", dialLayout: "crono", subdialColor: "#d9dad6", indexStyle: "bastao", indexColor: "#e9ecef", handStyle: "bastao", handColor: "#e6e9ee", secondColor: "#e6e9ee", bezelType: "taquimetro", bezelColor: "#141517", bezelTwoTone: false, strapType: "oyster", movement: "quartzo" },
+  },
+];
+
+// ---------------------------------------------------------------------------
+// Laço de animação compartilhado: também atualiza medidores de corda
+// ---------------------------------------------------------------------------
+const frameHooks = new Set();
+(function loop(now) {
+  frameHooks.forEach((fn) => fn(now));
+  requestAnimationFrame(loop);
+})(performance.now());
+
+function renderStack(el, cfg) {
+  el.innerHTML = Watch.layers(cfg).map((l, i) => `<div class="layer" style="--i:${i}" data-name="${l.name}">${l.svg}</div>`).join("");
+}
+
+/** Segurar um botão para dar corda (mouse, toque e teclado). */
+function holdToWind(btn, getMovement) {
+  let timer = null;
+  const stop = () => { clearInterval(timer); timer = null; btn.classList.remove("is-winding"); };
+  btn.addEventListener("pointerdown", (e) => {
+    e.preventDefault();
+    btn.setPointerCapture?.(e.pointerId);
+    btn.classList.add("is-winding");
+    getMovement()?.wind(0.02);
+    timer = setInterval(() => getMovement()?.wind(0.012), 50);
+  });
+  ["pointerup", "pointercancel", "lostpointercapture"].forEach((ev) => btn.addEventListener(ev, stop));
+  btn.addEventListener("keydown", (e) => {
+    if (e.key === " " || e.key === "Enter") { e.preventDefault(); getMovement()?.wind(0.06); }
+  });
+}
+
+/** Girar a coroa arrastando sobre ela ou com a roda do mouse. */
+function bindCrown(container, getMovement) {
+  container.addEventListener("pointerdown", (e) => {
+    const crown = e.target.closest("[data-crown]");
+    const pusher = e.target.closest("[data-pusher]");
+    if (pusher) { getMovement()?.pusher(pusher.dataset.pusher); return; }
+    if (!crown) return;
+    e.preventDefault();
+    let y = e.clientY;
+    container.setPointerCapture(e.pointerId);
+    const move = (ev) => { const d = Math.abs(ev.clientY - y); y = ev.clientY; getMovement()?.wind(d * 0.0016); };
+    const up = () => { container.removeEventListener("pointermove", move); container.removeEventListener("pointerup", up); };
+    container.addEventListener("pointermove", move);
+    container.addEventListener("pointerup", up);
+  });
+  container.addEventListener("wheel", (e) => {
+    if (!e.target.closest("[data-crown]")) return;
+    e.preventDefault();
+    getMovement()?.wind(Math.abs(e.deltaY) * 0.0006);
+  }, { passive: false });
+}
+
+// ---------------------------------------------------------------------------
+// Abertura
+// ---------------------------------------------------------------------------
+function initIntro() {
+  const root = document.documentElement;
+  if (root.dataset.intro !== "on") return;
+  try { sessionStorage.setItem("ct-intro", "1"); } catch { /* sem armazenamento */ }
+  const intro = $("#intro");
+  let done = false;
+  const finish = (state) => { if (done) return; done = true; root.dataset.intro = state; };
+  const natural = setTimeout(() => finish("done"), 4150);
+  const skip = () => {
+    if (done || intro.classList.contains("is-skipping")) return;
+    clearTimeout(natural);
+    root.dataset.intro = "skip";
+    intro.classList.add("is-skipping");
+    setTimeout(() => finish("skipped"), 720);
+  };
+  intro.addEventListener("click", skip);
+  window.addEventListener("keydown", (e) => { if (e.key !== "Tab") skip(); }, { once: true });
+}
+
+// ---------------------------------------------------------------------------
+// Página inicial
+// ---------------------------------------------------------------------------
+const HERO_CFG = { ...DEFAULT_WATCH, dialColor: "#1d4e8f", dialFinish: "raios", bezelColor: "#1a1d22", handStyle: "mercedes", strapType: "oyster" };
+
 function initNav() {
   const menu = $("#menu");
   const btn = $("#menuBtn");
-  const setMenu = (open) => {
-    menu.classList.toggle("is-open", open);
-    btn.setAttribute("aria-expanded", String(open));
+  const set = (open) => { menu.classList.toggle("is-open", open); btn.setAttribute("aria-expanded", String(open)); };
+  btn.addEventListener("click", () => set(!menu.classList.contains("is-open")));
+  $$("a", menu).forEach((a) => a.addEventListener("click", () => set(false)));
+}
+
+function initHero() {
+  const hero = $("#topo");
+  const stack = $("#heroStack");
+  const stage = $(".hero__stage");
+  const callouts = $$("#heroCallouts li");
+  renderStack(stack, HERO_CFG);
+  Clockwork.add(new Movement(stack, HERO_CFG));
+
+  const ease = (t) => (t < 0.5 ? 4 * t * t * t : 1 - Math.pow(-2 * t + 2, 3) / 2);
+  let ticking = false;
+  function update() {
+    ticking = false;
+    if (hero.offsetParent === null) return;
+    const r = hero.getBoundingClientRect();
+    const span = Math.max(1, r.height - window.innerHeight);
+    const p = Math.min(1, Math.max(0, -r.top / span));
+    const e = ease(Math.min(1, p * 1.25));
+    const mobile = window.innerWidth < 860;
+    const gap = (mobile ? 30 : 62) * e;
+    const tilt = 58 * e;
+    const lift = (mobile ? 60 : 150) * e;
+    stack.style.setProperty("--tilt", `${tilt}deg`);
+    stack.style.setProperty("--spin", `${-26 * e}deg`);
+    stack.style.setProperty("--gap", `${gap}px`);
+    stack.style.setProperty("--lift", `${lift}px`);
+
+    // posiciona as legendas na altura de cada camada
+    const sr = stage.getBoundingClientRect();
+    const scene = stack.parentElement.getBoundingClientRect();
+    const cy = scene.top + scene.height / 2 - sr.top + lift;
+    const s = Math.sin((tilt * Math.PI) / 180);
+    callouts.forEach((li, k) => {
+      const i = +li.dataset.layer;
+      const y = cy - i * gap * s * 1.06 - (i === 0 ? -20 * e : 0);
+      li.style.top = `${y - 12}px`;
+      li.classList.toggle("is-on", e > 0.28 + k * 0.07);
+    });
+  }
+  const onScroll = () => { if (!ticking) { ticking = true; requestAnimationFrame(update); } };
+  window.addEventListener("scroll", onScroll, { passive: true });
+  window.addEventListener("resize", onScroll);
+  update();
+}
+
+function initMovements() {
+  const mvs = {};
+  const make = (id, cfg, back) => {
+    const el = $(`#${id}`);
+    el.innerHTML = back ? Watch.back(cfg) : Watch.front(cfg, `Relógio ${cfg.movement}`);
+    mvs[id] = Clockwork.add(new Movement(el, cfg));
+    return el;
   };
-  btn.addEventListener("click", () => setMenu(!menu.classList.contains("is-open")));
-  $$("a", menu).forEach((a) => a.addEventListener("click", () => setMenu(false)));
+  make("mvQuartzo", { ...DEFAULT_WATCH, movement: "quartzo", dialColor: "#ebe8e1", dialFume: false, dialFinish: "raios", indexStyle: "romanos", indexColor: "#1c2c4a", handStyle: "breguet", handColor: "#1c2c4a", secondColor: "#1c2c4a", bezelType: "lisa", strapType: "couro", strapColor: "#5a3420", lume: false });
+  const auto = make("mvAutomatico", { ...DEFAULT_WATCH, movement: "automatico", strapType: "borracha", strapColor: "#22262c" }, true);
+  make("mvManual", { ...DEFAULT_WATCH, movement: "manual", caseColor: "#c7a46a", strapType: "couro", strapColor: "#3d2a1d" }, true);
+  mvs.mvManual.reserve = 0.35;
+
+  let lastX = null;
+  auto.addEventListener("pointermove", (e) => {
+    if (lastX !== null) mvs.mvAutomatico.shake((e.clientX - lastX) * 0.06);
+    lastX = e.clientX;
+  });
+  auto.addEventListener("pointerleave", () => { lastX = null; });
+  holdToWind($("#mvWind"), () => mvs.mvManual);
+
+  const autoMeter = $("#mvAutoMeter");
+  const manualMeter = $("#mvManualMeter");
+  frameHooks.add(() => {
+    autoMeter.style.setProperty("--v", mvs.mvAutomatico.reserve.toFixed(3));
+    manualMeter.style.setProperty("--v", mvs.mvManual.reserve.toFixed(3));
+  });
+}
+
+function initHands() {
+  const grid = $("#handsGrid");
+  const hue = $("#handHue");
+  const paint = () => {
+    const color = hslHex(+hue.value, 55, 34);
+    grid.innerHTML = HAND_STYLES.map((h) => `
+      <a class="hand-tile" href="#personalizar" data-hand-style="${h.id}">
+        <span class="hand-tile__icon">${Watch.handIcon(h.id, color)}</span>
+        <strong>${h.name}</strong>
+        <span>${h.desc}</span>
+      </a>`).join("");
+  };
+  hue.addEventListener("input", paint);
+  paint();
+  grid.addEventListener("click", (e) => {
+    const t = e.target.closest("[data-hand-style]");
+    if (!t) return;
+    Studio.apply({ handStyle: t.dataset.handStyle }, "ponteiros");
+  });
+}
+
+function initPortfolio() {
+  const grid = $("#portfolioGrid");
+  grid.innerHTML = PORTFOLIO.map((p) => `
+    <article class="work reveal">
+      <button class="work__img" type="button" data-open="${p.id}" aria-label="Ver ${p.name}"><img src="${p.img}" alt="${p.name}" loading="lazy" width="900" height="900" /></button>
+      <h3>${p.name}</h3>
+      <p>${p.text}</p>
+      <button class="link-arrow" type="button" data-open="${p.id}">Ver detalhes</button>
+    </article>`).join("");
+
+  const lb = $("#lightbox");
+  let current = null;
+  const open = (p) => {
+    current = p;
+    $("#lbImg").src = p.img;
+    $("#lbImg").alt = p.name;
+    $("#lbTitle").textContent = p.name;
+    $("#lbText").textContent = p.text;
+    $("#lbSpec").innerHTML = p.spec.map(([k, v]) => `<li><span>${k}</span><span>${v}</span></li>`).join("");
+    lb.hidden = false;
+    $("#lbStart").focus();
+  };
+  const close = () => { lb.hidden = true; current = null; };
+  grid.addEventListener("click", (e) => {
+    const b = e.target.closest("[data-open]");
+    if (b) open(PORTFOLIO.find((p) => p.id === b.dataset.open));
+  });
+  $$("[data-close]", lb).forEach((b) => b.addEventListener("click", close));
+  document.addEventListener("keydown", (e) => { if (e.key === "Escape" && !lb.hidden) close(); });
+  $("#lbStart").addEventListener("click", () => {
+    if (current) Studio.apply({ ...DEFAULT_WATCH, ...current.cfg, engraving: "" }, "caixa", `Projeto iniciado a partir do ${current.name}`);
+    close();
+  });
 }
 
 // ---------------------------------------------------------------------------
-// Coleção
+// Ateliê virtual
 // ---------------------------------------------------------------------------
-function productPrice(p) { return p.config ? configPrice(p.config) : p.price; }
-function productStrap(p) { return p.config ? pick("strap", p.config.strap).kind : p.strap; }
+const Studio = {
+  cfg: { ...DEFAULT_WATCH, ...storage.get("ct-design", {}) },
+  tab: "caixa",
+  view: "frente",
+  ready: false,
+  openColor: null,
 
-function initCollection() {
-  const grid = $("#products");
-  const render = (filter) => {
-    const list = COLLECTION.filter((p) => filter === "todos" || productStrap(p) === filter);
-    $("#productCount").textContent = `${list.length} ${list.length === 1 ? "peça" : "peças"}`;
-    grid.innerHTML = list.map((p) => `
-      <article class="item">
-        <a class="item__media" href="${p.link || "#personalizar"}" data-open="${p.id}" aria-label="${p.link ? "Ver" : "Personalizar"} ${escapeHtml(p.name)}">
-          ${p.image ? `<img src="${p.image}" alt="${escapeHtml(p.name)}" loading="lazy" />` : watchSVG(p.config, { title: p.name })}
-          ${p.tag ? `<span class="item__tag">${p.tag}</span>` : ""}
-        </a>
-        <div class="item__body">
-          <h3>${escapeHtml(p.name)}</h3>
-          <p class="item__spec">${escapeHtml(p.spec)}</p>
-          <p class="item__price">${brl.format(productPrice(p))}</p>
-          <div class="item__actions">
-            <button type="button" data-add="${p.id}">Adicionar à sacola</button>
-            ${p.config ? `<a href="#personalizar" data-open="${p.id}">Personalizar</a>` : `<a href="${p.link}">Ver detalhes</a>`}
-          </div>
-        </div>
-      </article>`).join("");
-  };
-  render("todos");
+  init() {
+    if (this.ready) return;
+    this.ready = true;
+    this.stack = $("#studioStack");
+    this.backEl = $("#studioBack");
+    this.canvas = $("#studioCanvas");
+    this.body = $("#studioBody");
+    this.mv = Clockwork.add(new Movement(this.canvas, this.cfg));
 
-  $$(".tabs button").forEach((tab) => tab.addEventListener("click", () => {
-    $$(".tabs button").forEach((t) => t.setAttribute("aria-selected", String(t === tab)));
-    render(tab.dataset.filter);
-  }));
+    $("#steps").innerHTML = TABS.map((t, i) => `<button role="tab" data-tab="${t.id}" aria-selected="false"><small>${i + 1}</small>${t.title}</button>`).join("");
+    $("#steps").addEventListener("click", (e) => { const b = e.target.closest("[data-tab]"); if (b) this.go(b.dataset.tab); });
+    $("#stepPrev").addEventListener("click", () => this.step(-1));
+    $("#stepNext").addEventListener("click", () => this.step(1));
+    $$(".views button").forEach((b) => b.addEventListener("click", () => this.setView(b.dataset.view)));
 
-  grid.addEventListener("click", (e) => {
-    const add = e.target.closest("[data-add]");
-    if (add) {
-      const p = COLLECTION.find((x) => x.id === add.dataset.add);
-      cart.add({ title: p.name, detail: p.config ? configText(p.config) : p.spec, price: productPrice(p) });
+    bindCrown(this.canvas, () => this.mv);
+    holdToWind($("#studioWind"), () => this.mv);
+    $("#studioSetTime").addEventListener("click", () => { this.mv.resetTime(); toast("Hora acertada"); });
+    let lastX = null;
+    this.canvas.addEventListener("pointermove", (e) => {
+      if (e.pointerType === "touch" && !e.target.closest("[data-rotor], .studio__back-view")) return;
+      if (lastX !== null) this.mv.shake((e.clientX - lastX) * 0.05);
+      lastX = e.clientX;
+    });
+    this.canvas.addEventListener("pointerleave", () => { lastX = null; });
+
+    this.body.addEventListener("click", (e) => this.onClick(e));
+    this.body.addEventListener("input", (e) => {
+      const t = e.target.closest("[data-text]");
+      if (!t) return;
+      this.cfg[t.dataset.text] = t.value;
+      this.refresh();
+    });
+    frameHooks.add(() => this.status());
+    this.renderWatch();
+    this.go(this.tab, false);
+  },
+
+  /** Aplica mudanças vindas de fora (portfólio, ponteiros) e abre o ateliê. */
+  apply(patch, tab, message) {
+    Object.assign(this.cfg, patch);
+    this.fix();
+    this.save();
+    this.tab = tab || this.tab;
+    if (this.ready) { this.renderWatch(); this.go(this.tab, false); }
+    if (message) setTimeout(() => toast(message), 400);
+  },
+
+  save() { storage.set("ct-design", this.cfg); },
+
+  /** Mantém combinações coerentes. */
+  fix(changed) {
+    const c = this.cfg;
+    if (c.dialLayout === "crono") c.movement = "quartzo";
+    if (c.strapType === "integrada" && !isOct(c)) c.strapType = "oyster";
+    if (changed === "caseShape" && isOct(c)) c.strapType = "integrada";
+  },
+
+  step(d) {
+    const i = TABS.findIndex((t) => t.id === this.tab);
+    const n = TABS[Math.min(TABS.length - 1, Math.max(0, i + d))];
+    this.go(n.id);
+  },
+
+  go(id, scroll = true) {
+    this.tab = id;
+    this.openColor = null;
+    $$("#steps button").forEach((b) => b.setAttribute("aria-selected", String(b.dataset.tab === id)));
+    $(`#steps [data-tab="${id}"]`)?.scrollIntoView({ block: "nearest", inline: "center" });
+    const i = TABS.findIndex((t) => t.id === id);
+    $("#stepPrev").style.visibility = i === 0 ? "hidden" : "visible";
+    const next = $("#stepNext");
+    next.hidden = i === TABS.length - 1;
+    next.textContent = i < TABS.length - 1 ? `Próximo: ${TABS[i + 1].title}` : "";
+    // vista que mais mostra o que está sendo escolhido
+    if (id === "gravacao" || (id === "movimento" && this.cfg.movement !== "quartzo")) this.setView("fundo");
+    else if (this.view === "fundo") this.setView("frente");
+    this.renderPanel();
+    if (scroll && window.innerWidth < 860) $(".studio__panel").scrollIntoView({ behavior: "smooth", block: "start" });
+    else if (scroll) window.scrollTo({ top: 0, behavior: "smooth" });
+  },
+
+  setView(v) {
+    this.view = v;
+    $$(".views button").forEach((b) => b.setAttribute("aria-selected", String(b.dataset.view === v)));
+    const exploded = v === "explodida";
+    const mobile = window.innerWidth < 860;
+    this.stack.style.setProperty("--tilt", exploded ? "56deg" : "0deg");
+    this.stack.style.setProperty("--spin", exploded ? "-24deg" : "0deg");
+    this.stack.style.setProperty("--gap", exploded ? (mobile ? "22px" : "40px") : "0px");
+    this.stack.style.setProperty("--lift", exploded ? (mobile ? "34px" : "80px") : "0px");
+    this.renderWatch();
+  },
+
+  renderWatch() {
+    const back = this.view === "fundo";
+    this.stack.parentElement.hidden = back;
+    this.backEl.hidden = !back;
+    if (back) this.backEl.innerHTML = Watch.back(this.cfg);
+    else renderStack(this.stack, this.cfg);
+    this.mv.setConfig(this.cfg);
+    $("#studioTotal").textContent = brl.format(priceOf(this.cfg));
+  },
+
+  refresh() {
+    if (this.pending) return;
+    this.pending = true;
+    requestAnimationFrame(() => {
+      this.pending = false;
+      this.renderWatch();
+      this.save();
+      if (this.tab === "resumo") this.renderSummary();
+    });
+  },
+
+  // ---------- painel ----------
+  renderPanel() {
+    const tab = TABS.find((t) => t.id === this.tab);
+    const c = this.cfg;
+    const html = tab.fields.filter((f) => !f.when || f.when(c)).map((f) => this.field(f)).join("");
+    this.body.innerHTML = `<h2>${tab.title}</h2><p class="intro-text">${tab.intro}</p>${html}`;
+    this.body.style.animation = "none"; void this.body.offsetWidth; this.body.style.animation = "";
+    if (tab.id === "resumo") this.renderSummary();
+    if (this.openColor) this.openPicker(this.openColor);
+  },
+
+  field(f) {
+    const c = this.cfg;
+    const head = (extra = "") => `<div class="field__head"><span class="label">${f.label}</span>${extra}</div>`;
+    switch (f.type) {
+      case "choice": {
+        const disabled = (v) => (f.key === "strapType" && v === "integrada" && !isOct(c));
+        const opts = f.options.map(([v, name, sub]) => {
+          const p = PRICES[f.key]?.[v];
+          const small = [sub, p ? plus(p) : ""].filter(Boolean).join(" · ");
+          return `<button type="button" class="choice" data-set="${f.key}" data-value="${v}" aria-pressed="${String(c[f.key]) === String(v)}" ${disabled(v) ? "disabled" : ""}><b>${name}</b>${small ? `<small>${small}</small>` : ""}</button>`;
+        }).join("");
+        return `<div class="field">${head()}<div class="choices">${opts}</div></div>`;
+      }
+      case "hands": {
+        const opts = HAND_STYLES.map((h) => `<button type="button" class="choice" data-set="handStyle" data-value="${h.id}" aria-pressed="${c.handStyle === h.id}" title="${h.desc}">${Watch.handIcon(h.id, "#141b26")}<b>${h.name}</b>${h.price ? `<small>${plus(h.price)}</small>` : ""}</button>`).join("");
+        const cur = HAND_STYLES.find((h) => h.id === c.handStyle);
+        return `<div class="field">${head()}<div class="choices choices--icons">${opts}</div><p class="field__note">${cur.name}: ${cur.desc}</p></div>`;
+      }
+      case "movement": {
+        const crono = c.dialLayout === "crono";
+        const opts = Object.entries(MOVEMENTS).map(([k, m]) => `
+          <button type="button" class="choice" data-set="movement" data-value="${k}" aria-pressed="${c.movement === k}" ${crono && k !== "quartzo" ? "disabled" : ""}>
+            <b>${m.name}${k !== "quartzo" ? ` · ${m.caliber}` : ""}</b><span>${m.text}</span><small>${brl.format(PRICES.movement[k])} com caixa e montagem</small>
+          </button>`).join("");
+        return `<div class="field"><div class="choices choices--cards">${opts}</div>${crono ? `<p class="field__note">Com cronógrafo o movimento é de quartzo. Para automático ou manual, escolha outra disposição em Mostrador.</p>` : ""}</div>`;
+      }
+      case "toggle": {
+        const p = f.price ? plus(f.price()) : "";
+        return `<button type="button" class="toggle" role="switch" aria-checked="${!!c[f.key]}" data-toggle="${f.key}"><span><b>${f.label}</b><small>${[f.note, p].filter(Boolean).join(" · ")}</small></span><span class="toggle__track"></span></button>`;
+      }
+      case "color":
+        return `<div class="color-field" data-color="${f.key}">
+          <button type="button" class="color-field__btn" aria-expanded="false"><span class="color-field__swatch" style="background:${c[f.key]}"></span><span><b>${f.label}</b><small>${c[f.key].toUpperCase()}${f.note ? ` · ${f.note}` : ""}</small></span></button>
+          <div class="color-field__body" hidden></div>
+        </div>`;
+      case "text":
+        return `<div class="field text-field">${head(`<span class="field__note">${plus(PRICES.engraving)}</span>`)}<input type="text" id="f-${f.key}" data-text="${f.key}" maxlength="${f.max}" placeholder="${f.placeholder}" value="${escapeHtml(c[f.key] || "")}" /><p class="field__note">A prévia mudou para a vista do fundo para você ver a gravação.</p></div>`;
+      case "note":
+        return `<p class="field__note">${f.text}</p>`;
+      case "summary":
+        return `<div id="summary"></div>`;
+    }
+    return "";
+  },
+
+  onClick(e) {
+    const set = e.target.closest("[data-set]");
+    if (set && !set.disabled) {
+      const key = set.dataset.set;
+      const raw = set.dataset.value;
+      this.cfg[key] = key === "size" ? +raw : raw;
+      this.fix(key);
+      if (key === "movement") this.setView(raw === "quartzo" ? "frente" : "fundo");
+      this.refresh();
+      this.renderPanel();
       return;
     }
-    const open = e.target.closest("[data-open]");
-    const p = open && COLLECTION.find((x) => x.id === open.dataset.open);
-    if (p?.config) builder.load(p.config);
-  });
-}
-
-// ---------------------------------------------------------------------------
-// Ficha da Carbon Edition
-// ---------------------------------------------------------------------------
-function initCarbon() {
-  $("#carbonPrice").textContent = brl.format(STORE.carbonPrice);
-  $("#carbonDetails").innerHTML = CARBON_DETAILS.map((d, i) => `
-    <details ${i === 0 ? "open" : ""}><summary>${d.title}</summary><p>${d.text}</p></details>`).join("");
-
-  const main = $("#galleryMain");
-  $$(".product__thumbs button").forEach((b) => b.addEventListener("click", () => {
-    $$(".product__thumbs button").forEach((t) => t.setAttribute("aria-selected", String(t === b)));
-    main.src = b.dataset.src;
-    main.alt = b.dataset.alt;
-    main.style.animation = "none"; void main.offsetWidth; main.style.animation = "";
-  }));
-
-  $("#addCarbon").addEventListener("click", () => cart.add({ title: "Carbon Edition", detail: "Ref. CT-001", price: STORE.carbonPrice }));
-  $("#askCarbon").href = whatsUrl("Olá, Custom Time! Quero saber mais sobre o Carbon Edition.");
-}
-
-// ---------------------------------------------------------------------------
-// Personalizar
-// ---------------------------------------------------------------------------
-const builder = {
-  config: { ...DEFAULT_CONFIG },
-
-  init() {
-    for (const [group, opts] of Object.entries(OPTIONS)) {
-      const wrap = $(`.option[data-group="${group}"] .option__swatches`);
-      wrap.innerHTML = opts.map((o) => {
-        const id = `opt-${group}-${o.id}`;
-        const bg = o.half ? `linear-gradient(180deg, ${o.half} 50%, ${o.color} 50%)` : o.color;
-        const title = `${o.label}${o.price ? ` (+${brl.format(o.price)})` : ""}`;
-        return `<span class="sw"><input type="radio" name="${group}" id="${id}" value="${o.id}"><label for="${id}" title="${title}" style="background:${bg}"></label></span>`;
-      }).join("");
-      $$("label", wrap).forEach((l, i) => l.setAttribute("aria-label", opts[i].label));
+    const tg = e.target.closest("[data-toggle]");
+    if (tg) {
+      this.cfg[tg.dataset.toggle] = !this.cfg[tg.dataset.toggle];
+      this.refresh();
+      this.renderPanel();
+      return;
     }
-    $("#engravingPrice").textContent = `opcional, + ${brl.format(STORE.engravingPrice)}`;
-
-    const form = $("#builder");
-    form.addEventListener("change", (e) => {
-      if (e.target.name in OPTIONS) { this.config[e.target.name] = e.target.value; this.render(); }
-    });
-    $("#engraving").addEventListener("input", () => this.render());
-    $("#randomize").addEventListener("click", () => {
-      const cfg = {};
-      for (const g of Object.keys(OPTIONS)) cfg[g] = OPTIONS[g][Math.floor(Math.random() * OPTIONS[g].length)].id;
-      this.load(cfg, false);
-    });
-    form.addEventListener("submit", (e) => {
-      e.preventDefault();
-      const { lines, total } = this.summary();
-      cart.add({ title: "Relógio sob medida", detail: lines.map((l) => l.value).join(" · "), price: total });
-    });
-
-    this.load(this.config, false);
-    this.startClock();
-  },
-
-  load(config, notify = true) {
-    this.config = { ...config };
-    for (const g of Object.keys(OPTIONS)) $(`#opt-${g}-${this.config[g]}`).checked = true;
-    this.render();
-    if (notify) toast("Combinação carregada no configurador");
-  },
-
-  summary() {
-    const lines = Object.keys(OPTIONS).map((g) => {
-      const o = pick(g, this.config[g]);
-      return { label: GROUP_LABEL[g], value: o.label, price: o.price };
-    });
-    const engraving = $("#engraving").value.trim();
-    if (engraving) lines.push({ label: "Gravação", value: `“${engraving}”`, price: STORE.engravingPrice });
-    return { lines, total: STORE.basePrice + lines.reduce((s, l) => s + l.price, 0) };
-  },
-
-  render() {
-    $("#builderWatch").innerHTML = watchSVG(this.config, { time: this.now(), title: "Prévia do seu relógio" });
-    this.hands = {
-      h: $('#builderWatch [data-hand="h"]'),
-      m: $('#builderWatch [data-hand="m"]'),
-      s: $('#builderWatch [data-hand="s"]'),
-    };
-    for (const g of Object.keys(OPTIONS)) {
-      const o = pick(g, this.config[g]);
-      $(`.option[data-group="${g}"] .option__value`).textContent = o.price ? `${o.label} · +${brl.format(o.price)}` : o.label;
+    const cb = e.target.closest(".color-field__btn");
+    if (cb) {
+      const key = cb.closest("[data-color]").dataset.color;
+      if (this.openColor === key) { this.closePickers(); this.openColor = null; }
+      else this.openPicker(key);
+      return;
     }
-
-    const engraving = $("#engraving").value.trim();
-    const preview = $("#engravingPreview");
-    preview.hidden = !engraving;
-    $("em", preview).textContent = `“${engraving}”`;
-
-    const { lines, total } = this.summary();
-    $("#summaryList").innerHTML = `<li><span>Caixa de aço e movimento automático</span><span>${brl.format(STORE.basePrice)}</span></li>` +
-      lines.map((l) => `<li><span>${l.label}: ${escapeHtml(l.value)}</span><span>${l.price ? "+ " + brl.format(l.price) : "incluso"}</span></li>`).join("");
-    $("#total").textContent = brl.format(total);
+    if (e.target.closest("#copySummary")) {
+      navigator.clipboard?.writeText(this.message()).then(() => toast("Resumo copiado"), () => toast("Não foi possível copiar. Selecione o texto e copie."));
+      return;
+    }
+    if (e.target.closest("#resetDesign")) {
+      this.cfg = { ...DEFAULT_WATCH };
+      this.save();
+      this.renderWatch();
+      this.go("caixa");
+      toast("Projeto recomeçado");
+    }
   },
 
-  reduced: window.matchMedia("(prefers-reduced-motion: reduce)").matches,
-
-  now() {
-    const d = new Date();
-    return { h: d.getHours(), m: d.getMinutes(), s: d.getSeconds() + (this.reduced ? 0 : d.getMilliseconds() / 1000) };
+  closePickers() {
+    $$(".color-field", this.body).forEach((f) => { f.classList.remove("is-open"); $(".color-field__body", f).hidden = true; $(".color-field__btn", f).setAttribute("aria-expanded", "false"); });
   },
 
-  startClock() {
-    const frame = () => {
-      const { h, m, s } = this.now();
-      const min = m + s / 60;
-      const hr = (h % 12) + min / 60;
-      this.hands.h.setAttribute("transform", `rotate(${hr * 30} 200 260)`);
-      this.hands.m.setAttribute("transform", `rotate(${min * 6} 200 260)`);
-      this.hands.s.setAttribute("transform", `rotate(${s * 6} 200 260)`);
-      if (this.reduced) setTimeout(frame, 1000); else requestAnimationFrame(frame);
-    };
-    frame();
+  openPicker(key) {
+    this.closePickers();
+    const wrap = $(`[data-color="${key}"]`, this.body);
+    if (!wrap) return;
+    this.openColor = key;
+    wrap.classList.add("is-open");
+    $(".color-field__btn", wrap).setAttribute("aria-expanded", "true");
+    const body = $(".color-field__body", wrap);
+    body.hidden = false;
+    const sw = $(".color-field__swatch", wrap);
+    const small = $(".color-field__btn small", wrap);
+    const note = small.textContent.split(" · ").slice(1).join(" · ");
+    ColorPicker.create(body, {
+      value: this.cfg[key],
+      idPrefix: `pk-${key}`,
+      onInput: (hex) => {
+        this.cfg[key] = hex;
+        sw.style.background = hex;
+        small.textContent = hex.toUpperCase() + (note ? ` · ${note}` : "");
+        this.refresh();
+      },
+      onCommit: () => this.save(),
+    });
+  },
+
+  // ---------- resumo ----------
+  groups() {
+    const c = this.cfg;
+    const color = (hex) => ({ color: hex });
+    const hand = HAND_STYLES.find((h) => h.id === c.handStyle);
+    const g = [
+      ["Caixa", [["Formato", LABELS.caseShape[c.caseShape]], ["Diâmetro", `${c.size} mm`], ["Metal", color(c.caseColor)]]],
+      ["Mostrador", [
+        ["Cor", color(c.dialColor)],
+        ["Acabamento", LABELS.dialFinish[c.dialFinish] + (c.dialFume ? ", degradê fumê" : "")],
+        ["Disposição", LABELS.dialLayout[c.dialLayout]],
+        ...(c.dialLayout === "crono" ? [["Submostradores", color(c.subdialColor)]] : []),
+        ["Índices", LABELS.indexStyle[c.indexStyle]],
+        ["Cor dos índices", color(c.indexColor)],
+        ["Lume", c.lume ? "Sim" : "Não"],
+      ]],
+      ["Ponteiros", [["Estilo", hand.name], ["Cor", color(c.handColor)], ["Segundos", LABELS.secondStyle[c.secondStyle]], ["Cor dos segundos", color(c.secondColor)]]],
+      ["Luneta", isOct(c) ? [["Tipo", "Integrada à caixa"]] : [
+        ["Tipo", LABELS.bezelType[c.bezelType]],
+        ...(bezelHasInsert(c) ? [["Cor", color(c.bezelColor)], ...(c.bezelTwoTone ? [["Segunda cor", color(c.bezelColor2)]] : [])] : []),
+      ]],
+      ["Pulseira", [["Tipo", LABELS.strapType[c.strapType]], ...(metalStrap(c) ? [] : [["Cor", color(c.strapColor)]]), ...(c.strapType === "couro" ? [["Costura", color(c.stitchColor)]] : [])]],
+      ["Movimento", [["Tipo", MOVEMENTS[c.movement].name + (c.dialLayout === "crono" ? " (cronógrafo)" : "")], ...(c.movement !== "quartzo" ? [["Calibre", MOVEMENTS[c.movement].caliber]] : []), ...(c.movement === "automatico" ? [["Rotor", color(c.rotorColor)]] : [])]],
+      ["Gravação", [["Texto", (c.engraving || "").trim() || "Sem gravação"]]],
+    ];
+    return g;
+  },
+
+  message() {
+    const lines = this.groups().map(([title, rows]) => `*${title}*\n` + rows.map(([k, v]) => `- ${k}: ${typeof v === "object" ? v.color.toUpperCase() : v}`).join("\n"));
+    return `Olá, Custom Time! Montei este relógio no ateliê virtual:\n\n${lines.join("\n\n")}\n\nEstimativa: ${brl.format(priceOf(this.cfg))}`;
+  },
+
+  renderSummary() {
+    const el = $("#summary");
+    if (!el) return;
+    el.innerHTML = `<div class="summary">${this.groups().map(([title, rows]) => `
+      <div class="summary__group"><h3>${title}</h3>${rows.map(([k, v]) => `<div class="summary__row"><span>${k}</span><span>${typeof v === "object" ? `<i class="summary__chip" style="background:${v.color}"></i>${v.color.toUpperCase()}` : escapeHtml(v)}</span></div>`).join("")}</div>`).join("")}
+      <div class="summary__total"><span>Estimativa</span><strong>${brl.format(priceOf(this.cfg))}</strong></div>
+    </div>
+    <div class="summary__actions">
+      <a class="btn" href="${whatsUrl(this.message())}" target="_blank" rel="noopener">Enviar projeto pelo WhatsApp</a>
+      <button type="button" class="link-arrow link-arrow--small" id="copySummary">Copiar resumo</button>
+      <button type="button" class="link-arrow link-arrow--small" id="resetDesign">Recomeçar</button>
+    </div>
+    <p class="summary__note">O valor é uma estimativa. Preço final e prazo são confirmados no atendimento, antes de qualquer pagamento. WhatsApp: (48) 99695-0800.</p>`;
+  },
+
+  // ---------- estado do movimento ----------
+  status() {
+    if (!this.ready || $("#viewStudio").hidden) return;
+    const mv = this.mv;
+    const c = this.cfg;
+    const mech = c.movement !== "quartzo";
+    const key = `${c.movement}|${c.dialLayout}|${mv.running}|${Math.round(mv.reserve * 100)}`;
+    if (key === this.lastStatus) return;
+    this.lastStatus = key;
+    $("#statusDot").classList.toggle("is-off", !mv.running);
+    $("#statusMeterWrap").hidden = !mech;
+    $("#studioWind").hidden = !mech;
+    $("#statusMeter").style.setProperty("--v", mv.reserve.toFixed(3));
+    $("#statusText").textContent = !mech
+      ? "Quartzo · ponteiro salta a cada segundo"
+      : mv.running ? `Corda: ${Math.round(mv.reserve * 100)}%` : "Parado: sem corda";
+    $("#statusHint").textContent = c.dialLayout === "crono"
+      ? "Toque nos botões ao lado da coroa: o de cima liga e para o cronógrafo, o de baixo zera."
+      : c.movement === "automatico" ? "Gire a coroa arrastando sobre ela, ou mexa o mouse sobre o relógio para girar o rotor."
+      : c.movement === "manual" ? "Gire a coroa arrastando sobre ela, ou segure o botão. Sem corda, o relógio para."
+      : "Movimento a bateria: não precisa de corda.";
   },
 };
 
 // ---------------------------------------------------------------------------
-// Serviços
+// Navegação entre a página inicial e o ateliê
 // ---------------------------------------------------------------------------
-function initServices() {
-  const all = SERVICE_GROUPS.flatMap((g) => g.items);
-  const wrap = $("#services");
-  wrap.innerHTML = SERVICE_GROUPS.map((g) => `
-    <div class="price-group">
-      <h3>${g.title}</h3>
-      <ul>${g.items.map((s) => `
-        <li class="price-row">
-          <div class="price-row__top">
-            <span class="price-row__name">${s.title}</span>
-            <span class="price-row__dots" aria-hidden="true"></span>
-            <span class="price-row__price">${s.from ? "<small>a partir de</small>" : ""}${brl.format(s.price)}</span>
-          </div>
-          <p>${s.text}</p>
-          ${s.link ? `<a class="price-row__add" href="${s.link}">Personalizar</a>` : `<button type="button" class="price-row__add" data-add="${s.id}">Adicionar à sacola</button>`}
-        </li>`).join("")}
-      </ul>
-    </div>`).join("");
-
-  wrap.addEventListener("click", (e) => {
-    const btn = e.target.closest("[data-add]");
-    if (!btn) return;
-    const s = all.find((x) => x.id === btn.dataset.add);
-    cart.add({ title: s.title, detail: s.from ? "Valor inicial, confirmado na avaliação" : "", price: s.price });
-  });
+function route() {
+  const hash = location.hash.slice(1);
+  const studio = hash.startsWith("personalizar");
+  const wasStudio = !$("#viewStudio").hidden;
+  $("#viewHome").hidden = studio;
+  $("#viewStudio").hidden = !studio;
+  if (studio) {
+    Studio.init();
+    if (!wasStudio) window.scrollTo(0, 0);
+    document.title = "Ateliê virtual · Custom Time";
+  } else {
+    document.title = "Custom Time";
+    if (wasStudio) {
+      const target = hash && document.getElementById(hash);
+      requestAnimationFrame(() => (target ? target.scrollIntoView() : window.scrollTo(0, 0)));
+    }
+  }
 }
 
-// ---------------------------------------------------------------------------
-// Sacola e envio pelo WhatsApp
-// ---------------------------------------------------------------------------
-const cart = {
-  items: storage.get("ct-cart", []),
-
-  init() {
-    $("#cartOpen").addEventListener("click", () => this.open());
-    $$("[data-close]").forEach((el) => el.addEventListener("click", () => this.close()));
-    document.addEventListener("keydown", (e) => { if (e.key === "Escape") this.close(); });
-    $("#cartList").addEventListener("click", (e) => {
-      const btn = e.target.closest("[data-remove]");
-      if (btn) this.remove(Number(btn.dataset.remove));
-    });
-    this.render();
-  },
-
-  add(item) {
-    this.items.push(item);
-    this.save();
-    toast(`${item.title} na sacola`);
-    const btn = $("#cartOpen");
-    btn.classList.remove("bump"); void btn.offsetWidth; btn.classList.add("bump");
-  },
-
-  remove(index) {
-    this.items.splice(index, 1);
-    this.save();
-  },
-
-  save() {
-    storage.set("ct-cart", this.items);
-    this.render();
-  },
-
-  total() { return this.items.reduce((s, i) => s + i.price, 0); },
-
-  render() {
-    const empty = this.items.length === 0;
-    $("#cartCount").textContent = this.items.length;
-    $("#cartEmpty").hidden = !empty;
-    $("#cartTotal").textContent = brl.format(this.total());
-    const checkout = $("#checkout");
-    checkout.setAttribute("aria-disabled", String(empty));
-    checkout.href = empty ? "#" : this.checkoutUrl();
-    $("#cartList").innerHTML = this.items.map((i, idx) => `
-      <li class="drawer__item">
-        <h3>${escapeHtml(i.title)}</h3>
-        <strong>${brl.format(i.price)}</strong>
-        ${i.detail ? `<p>${escapeHtml(i.detail)}</p>` : ""}
-        <button class="drawer__remove" data-remove="${idx}">Remover</button>
-      </li>`).join("");
-  },
-
-  open() {
-    this.lastFocus = document.activeElement;
-    const d = $("#drawer");
-    d.classList.add("is-open");
-    d.setAttribute("aria-hidden", "false");
-    $(".drawer__close").focus();
-  },
-
-  close() {
-    const d = $("#drawer");
-    if (!d.classList.contains("is-open")) return;
-    d.classList.remove("is-open");
-    d.setAttribute("aria-hidden", "true");
-    this.lastFocus?.focus();
-  },
-
-  checkoutUrl() {
-    const lines = this.items.map((i, n) => `${n + 1}. ${i.title} — ${brl.format(i.price)}${i.detail ? `\n   ${i.detail}` : ""}`);
-    const msg = `Olá, Custom Time! Quero fazer este pedido:\n\n${lines.join("\n")}\n\nTotal estimado: ${brl.format(this.total())}`;
-    return whatsUrl(msg);
-  },
-};
-
-// ---------------------------------------------------------------------------
 document.addEventListener("DOMContentLoaded", () => {
   $("#year").textContent = new Date().getFullYear();
-  $("#whatsLink").href = whatsUrl("Olá, Custom Time! Tenho uma ideia de relógio personalizado.");
+  $("#whatsLink").href = whatsUrl("Olá, Custom Time! Quero montar um relógio personalizado.");
   $("#instaLink").href = STORE.instagram;
+  initIntro();
   initNav();
-  initCollection();
-  initCarbon();
-  builder.init();
-  initServices();
-  cart.init();
+  initHero();
+  initMovements();
+  initHands();
+  initPortfolio();
+  window.addEventListener("hashchange", route);
+  route();
 });

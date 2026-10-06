@@ -203,7 +203,7 @@ const frameHooks = new Set();
 })(performance.now());
 
 function renderStack(el, cfg) {
-  el.innerHTML = Watch.layers(cfg).map((l, i) => `<div class="layer" style="--i:${i}" data-name="${l.name}">${l.svg}</div>`).join("");
+  el.innerHTML = Watch.layers(cfg).map((l) => `<div class="layer" style="--i:${l.level}" data-name="${l.name}">${l.svg}</div>`).join("");
 }
 
 /** Segurar um botão para dar corda (mouse, toque e teclado). */
@@ -280,48 +280,147 @@ function initNav() {
   $$("a", menu).forEach((a) => a.addEventListener("click", () => set(false)));
 }
 
+// Como cada peça se afasta na vista explodida da abertura: deslocamento lateral (dx, dy),
+// giro próprio (rot) e altura (level). As medidas valem para um relógio de 330 px de largura.
+const HERO_MOTION = {
+  "pulseira": { level: 0, dx: 0, dy: -40, rot: 0 },
+  "pulseira-baixo": { level: 0, dx: 0, dy: 40, rot: 0, baseY: 185 },
+  "movimento": { level: 1, dx: -80, dy: 16, rot: -75 },
+  "caixa": { level: 2, dx: 10, dy: 0, rot: 0 },
+  "mostrador": { level: 3, dx: 62, dy: -14, rot: 0 },
+  "ponteiros": { level: 4, dx: -40, dy: -6, rot: 0 },
+  "luneta": { level: 5, dx: 86, dy: 4, rot: 135 },
+  "cristal": { level: 6, dx: -58, dy: -16, rot: 0 },
+};
+
 function initHero() {
   const hero = $("#topo");
   const stack = $("#heroStack");
   const stage = $(".hero__stage");
+  const hint = $(".hero__hint");
+  const orbit = $("#heroOrbit");
   const callouts = $$("#heroCallouts li");
   renderStack(stack, HERO_CFG);
   Clockwork.add(new Movement(stack, HERO_CFG));
+  const layers = $$(".layer", stack).map((el) => ({ el, m: HERO_MOTION[el.dataset.name] }));
 
-  const ease = (t) => (t < 0.5 ? 4 * t * t * t : 1 - Math.pow(-2 * t + 2, 3) / 2);
-  let ticking = false;
-  function update() {
-    ticking = false;
-    if (hero.offsetParent === null) return;
+  // mostrador decorativo ao fundo
+  let ticks = "";
+  for (let i = 0; i < 120; i++) {
+    const a = (i * 3 * Math.PI) / 180;
+    const r1 = i % 10 === 0 ? 176 : 184;
+    ticks += `<line x1="${(200 + Math.sin(a) * r1).toFixed(1)}" y1="${(200 - Math.cos(a) * r1).toFixed(1)}" x2="${(200 + Math.sin(a) * 190).toFixed(1)}" y2="${(200 - Math.cos(a) * 190).toFixed(1)}" stroke-width="${i % 10 === 0 ? 1.2 : 0.6}"/>`;
+  }
+  orbit.innerHTML = `<circle cx="200" cy="200" r="196" stroke-width=".8"/><circle cx="200" cy="200" r="150" stroke-width=".6" stroke-dasharray="2 6"/>${ticks}`;
+
+  const smooth = (t) => t * t * (3 - 2 * t);
+  const clamp01 = (t) => Math.min(1, Math.max(0, t));
+  let target = 0;
+  let cur = 0;
+  let last = performance.now();
+  const readScroll = () => {
     const r = hero.getBoundingClientRect();
     const span = Math.max(1, r.height - window.innerHeight);
-    const p = Math.min(1, Math.max(0, -r.top / span));
-    const e = ease(Math.min(1, p * 1.25));
-    const mobile = window.innerWidth < 860;
-    const gap = (mobile ? 30 : 62) * e;
-    const tilt = 58 * e;
-    const lift = (mobile ? 60 : 150) * e;
-    stack.style.setProperty("--tilt", `${tilt}deg`);
-    stack.style.setProperty("--spin", `${-26 * e}deg`);
-    stack.style.setProperty("--gap", `${gap}px`);
-    stack.style.setProperty("--lift", `${lift}px`);
+    target = clamp01(-r.top / span);
+  };
+  window.addEventListener("scroll", readScroll, { passive: true });
+  window.addEventListener("resize", readScroll);
+  readScroll();
 
-    // posiciona as legendas na altura de cada camada
+  frameHooks.add((now) => {
+    const dt = Math.min(0.05, (now - last) / 1000);
+    last = now;
+    if (hero.offsetParent === null) return;
+    const r = hero.getBoundingClientRect();
+    if (r.bottom < 0) return;
+    // segue a rolagem com atraso suave, em vez de pular junto com ela
+    cur += (target - cur) * (1 - Math.exp(-dt * 4.5));
+    const e = smooth(clamp01(cur * 1.35));
+    const t = now / 1000;
+    const mobile = window.innerWidth < 860;
+    const W = stack.offsetWidth;
+    const k = W / 330;
+    const gap = (mobile ? 34 : 62) * k;
+    const tilt = 60 * e;
+    const spin = -20 * e - 18 * cur;
+    const lift = (mobile ? 60 : 125) * k * e;
+    stack.style.setProperty("--tilt", `${tilt.toFixed(2)}deg`);
+    stack.style.setProperty("--spin", `${spin.toFixed(2)}deg`);
+    stack.style.setProperty("--lift", `${lift.toFixed(1)}px`);
+    orbit.style.transform = `rotate(${(cur * 120 + t * 2).toFixed(2)}deg) scale(${(1 + e * 0.08).toFixed(3)})`;
+    hint.style.opacity = String(1 - clamp01(cur * 8));
+
+    const pos = {};
+    for (const { el, m } of layers) {
+      // as peças de cima saem primeiro
+      const ei = smooth(clamp01((e - (6 - m.level) * 0.055) / 0.67));
+      const breathe = Math.sin(t * 1.3 + m.level * 0.9) * 6 * ei;
+      const z = m.level * gap * ei + breathe;
+      const x = (m.dx * k + Math.cos(t * 0.7 + m.level) * 4 * ei) * ei;
+      const y = m.dy * k * ei;
+      const rot = m.rot * ei;
+      el.style.transform = `translate3d(${x.toFixed(1)}px, ${y.toFixed(1)}px, ${z.toFixed(1)}px) rotate(${rot.toFixed(1)}deg)`;
+      pos[m.level === 0 ? (m.baseY ? 0 : -1) : m.level] = { x, y: y + (m.baseY || 0) * (W / 400), z };
+    }
+
+    // legendas acompanham a altura de cada peça na tela
     const sr = stage.getBoundingClientRect();
     const scene = stack.parentElement.getBoundingClientRect();
     const cy = scene.top + scene.height / 2 - sr.top + lift;
-    const s = Math.sin((tilt * Math.PI) / 180);
-    callouts.forEach((li, k) => {
-      const i = +li.dataset.layer;
-      const y = cy - i * gap * s * 1.06 - (i === 0 ? -20 * e : 0);
-      li.style.top = `${y - 12}px`;
-      li.classList.toggle("is-on", e > 0.28 + k * 0.07);
+    const sinT = Math.sin((tilt * Math.PI) / 180);
+    const cosT = Math.cos((tilt * Math.PI) / 180);
+    const sp = (spin * Math.PI) / 180;
+    const minGap = mobile ? 30 : 50;
+    let prevY = -Infinity;
+    callouts.forEach((li, idx) => {
+      const p = pos[+li.dataset.layer];
+      if (!p) return;
+      const yr = p.x * Math.sin(sp) + p.y * Math.cos(sp);
+      // nunca deixa uma legenda encostar na de cima
+      const yScreen = Math.max(cy + yr * cosT - p.z * sinT, prevY + minGap);
+      prevY = yScreen;
+      li.style.top = `${(yScreen - 14).toFixed(1)}px`;
+      li.classList.toggle("is-on", e > 0.32 + idx * 0.075);
     });
-  }
-  const onScroll = () => { if (!ticking) { ticking = true; requestAnimationFrame(update); } };
-  window.addEventListener("scroll", onScroll, { passive: true });
-  window.addEventListener("resize", onScroll);
-  update();
+  });
+}
+
+function initHeroText() {
+  const intro = document.documentElement.dataset.intro === "on";
+  const startAt = intro ? 3600 : 700;
+  const reduced = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+
+  // contadores
+  $$("[data-count]").forEach((el) => {
+    const to = +el.dataset.count;
+    const dec = +(el.dataset.decimals || 0);
+    const fmt = (v) => v.toLocaleString("pt-BR", { minimumFractionDigits: dec, maximumFractionDigits: dec });
+    if (reduced) { el.textContent = fmt(to); return; }
+    setTimeout(() => {
+      const t0 = performance.now();
+      const step = (now) => {
+        const q = Math.min(1, (now - t0) / 1600);
+        el.textContent = fmt(to * (1 - Math.pow(1 - q, 3)));
+        if (q < 1) requestAnimationFrame(step);
+      };
+      requestAnimationFrame(step);
+    }, startAt);
+  });
+
+  // palavra que troca no título
+  const words = $$("#heroRotator .rotator__word");
+  if (reduced || words.length < 2) return;
+  let i = 0;
+  setTimeout(() => setInterval(() => {
+    if (document.hidden) return;
+    const prev = words[i];
+    i = (i + 1) % words.length;
+    prev.classList.remove("is-on");
+    prev.classList.add("is-out");
+    words[i].classList.remove("is-out");
+    words[i].classList.add("is-on");
+    setTimeout(() => prev.classList.remove("is-out"), 900);
+  }, 2800), startAt);
 }
 
 function initMovements() {
@@ -759,6 +858,7 @@ document.addEventListener("DOMContentLoaded", () => {
   initIntro();
   initNav();
   initHero();
+  initHeroText();
   initMovements();
   initHands();
   initPortfolio();

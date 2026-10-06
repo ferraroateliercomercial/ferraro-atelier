@@ -89,19 +89,33 @@
         <div class="hero__sticky">
           <div class="wrap hero__grid">
             <div class="hero__text">
-              <p class="label rise" style="--d:0">Sob encomenda · Montado à mão</p>
-              <h1 class="rise" style="--d:1">Seu relógio,<br /><em>peça por peça.</em></h1>
-              <p class="hero__lead rise" style="--d:2">Você escolhe a caixa, a cor exata do mostrador, o estilo dos ponteiros, a pulseira e o coração do relógio: quartzo, automático ou corda manual. A gente monta na bancada.</p>
-              <div class="hero__cta rise" style="--d:3">
+              <p class="label hero__label rise" style="--d:0">Ateliê de relojoaria<span class="hero__label-extra">&nbsp;· Sob encomenda</span></p>
+              <h1 class="hero__title" aria-label="Seu relógio, peça por peça.">
+                <span class="line" aria-hidden="true"><span class="line__in" style="--d:1">Seu relógio,</span></span>
+                <span class="line" aria-hidden="true"><span class="line__in" style="--d:2"><em class="rotator" id="heroRotator">
+                  <span class="rotator__word is-on">peça por peça.</span>
+                  <span class="rotator__word">na cor exata.</span>
+                  <span class="rotator__word">do seu jeito.</span>
+                  <span class="rotator__word">no seu tempo.</span>
+                </em></span></span>
+              </h1>
+              <p class="hero__lead rise" style="--d:3">Você escolhe cada detalhe: a caixa, a cor do mostrador, o estilo dos ponteiros, a pulseira e o movimento. Nós montamos à mão, na bancada do ateliê.</p>
+              <div class="hero__cta rise" style="--d:4">
                 <a href="#personalizar" class="btn">Começar a personalizar</a>
                 <a href="#movimentos" class="link-arrow">Conhecer os movimentos</a>
               </div>
-              <p class="hero__hint rise" style="--d:4"><span class="hero__mouse" aria-hidden="true"></span> Role para desmontar o relógio</p>
+              <dl class="hero__facts rise" style="--d:5">
+                <div><dt data-count="16.7" data-decimals="1">0</dt><dd>milhões de cores</dd></div>
+                <div><dt data-count="10">0</dt><dd>estilos de ponteiros</dd></div>
+                <div><dt data-count="3">0</dt><dd>tipos de movimento</dd></div>
+              </dl>
             </div>
             <div class="hero__stage rise" style="--d:2">
+              <svg class="hero__orbit" id="heroOrbit" viewBox="0 0 400 400" aria-hidden="true"></svg>
               <div class="stack-scene">
                 <div class="stack" id="heroStack"></div>
               </div>
+              <p class="hero__hint" aria-hidden="true"><span class="hero__mouse"></span> Role para desmontar</p>
               <ol class="callouts" id="heroCallouts" aria-label="Partes do relógio">
                 <li data-layer="6"><strong>Cristal</strong><span>Protege o mostrador</span></li>
                 <li data-layer="5"><strong>Luneta</strong><span>Mergulho, taquímetro, lisa ou canelada</span></li>

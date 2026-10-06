@@ -474,7 +474,7 @@ const Watch = (() => {
   // ---------- cristal ----------
   function crystal(u, c) {
     const d = isOct(c) ? roundRectPath(CX - 99, CY - 99, 198, 198, 50) : circlePath(104);
-    return `<path d="${d}" fill="#fff" fill-opacity=".05"/><path d="${d}" fill="none" stroke="#fff" stroke-opacity=".18"/>
+    return `<path d="${d}" fill="#dfe9f2" fill-opacity=".07"/><path d="${d}" fill="none" stroke="#9fb1c4" stroke-opacity=".45" stroke-width="1.4"/>
       <ellipse cx="${CX - 40}" cy="${CY - 62}" rx="66" ry="34" fill="#fff" opacity=".07" transform="rotate(-30 ${CX - 40} ${CY - 62})"/>`;
   }
 
@@ -540,19 +540,20 @@ const Watch = (() => {
     return wrap(u, c, strap(u, c) + caseBody(u, c) + dial(u, c) + hands(u, c) + bezel(u, c) + crystal(u, c), label);
   }
 
-  /** Camadas separadas, de baixo para cima, para a vista explodida. */
+  /** Camadas separadas, de baixo para cima, para a vista explodida. `level` é a altura de cada uma. */
   function layers(c) {
     const u = `w${++uidCounter}`;
     const parts = [
-      ["pulseira", strap(u, c)],
-      ["movimento", movement(u, c)],
-      ["caixa", caseBody(u, c, true)],
-      ["mostrador", dial(u, c)],
-      ["ponteiros", hands(u, c)],
-      ["luneta", bezel(u, c)],
-      ["cristal", crystal(u, c)],
+      ["pulseira", strapSegment(u, c, true), 0],
+      ["pulseira-baixo", strapSegment(u, c, false), 0],
+      ["movimento", movement(u, c), 1],
+      ["caixa", caseBody(u, c, true), 2],
+      ["mostrador", dial(u, c), 3],
+      ["ponteiros", hands(u, c), 4],
+      ["luneta", bezel(u, c), 5],
+      ["cristal", crystal(u, c), 6],
     ];
-    return parts.map(([name, inner]) => ({ name, svg: wrap(u, c, inner, name) }));
+    return parts.map(([name, inner, level]) => ({ name, level, svg: wrap(u, c, inner, name) }));
   }
 
   function back(c) {

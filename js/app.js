@@ -272,9 +272,14 @@ const HERO_MOTION = {
 };
 
 function initHero() {
-  const hero = $("#topo");
+  const hero = $("#anatomia");
+  const sticky = $(".hero__sticky", hero);
   const stack = $("#heroStack");
-  const stage = $(".hero__stage");
+  const stage = $("#heroStage");
+  const text = $("#heroText");
+  const scene = $("#heroScene");
+  const caption = $("#partCaption");
+  let captionKey = "";
   const hint = $(".hero__hint");
   const orbit = $("#heroOrbit");
   const callouts = $$("#heroCallouts li");
@@ -298,8 +303,9 @@ function initHero() {
   let last = performance.now();
   const readScroll = () => {
     const r = hero.getBoundingClientRect();
-    const span = Math.max(1, r.height - window.innerHeight);
-    target = clamp01(-r.top / span);
+    const top = parseFloat(getComputedStyle(sticky).top) || 0;
+    const span = Math.max(1, r.height - sticky.offsetHeight);
+    target = clamp01((top - r.top) / span);
   };
   window.addEventListener("scroll", readScroll, { passive: true });
   window.addEventListener("resize", readScroll);
@@ -313,15 +319,33 @@ function initHero() {
     if (r.bottom < 0) return;
     // segue a rolagem com atraso suave, em vez de pular junto com ela
     cur += (target - cur) * (1 - Math.exp(-dt * 4.5));
-    const e = smooth(clamp01(cur * 1.35));
-    const t = now / 1000;
     const mobile = window.innerWidth < 860;
+    // no celular, o texto sai de cena primeiro e o relógio toma a tela toda
+    let e;
+    if (mobile) {
+      const q = smooth(clamp01(cur / 0.22));
+      text.style.opacity = String(1 - q);
+      text.style.transform = `translateY(${(-24 * q).toFixed(1)}px)`;
+      text.style.pointerEvents = q > 0.5 ? "none" : "";
+      const H = stage.offsetHeight;
+      const flatH = stack.offsetHeight;
+      const startY = text.offsetTop + text.offsetHeight + 16;
+      const offset = Math.max(0, startY - (H - flatH) / 2);
+      scene.style.transform = `translateY(${((1 - q) * offset).toFixed(1)}px)`;
+      e = smooth(clamp01((cur - 0.16) / 0.62));
+    } else {
+      text.style.opacity = "";
+      text.style.transform = "";
+      scene.style.transform = "";
+      e = smooth(clamp01(cur * 1.35));
+    }
+    const t = now / 1000;
     const W = stack.offsetWidth;
     const k = W / 330;
-    const gap = (mobile ? 34 : 62) * k;
+    const gap = (mobile ? 46 : 62) * k;
     const tilt = 60 * e;
     const spin = -20 * e - 18 * cur;
-    const lift = (mobile ? 60 : 125) * k * e;
+    const lift = (mobile ? 95 : 125) * k * e;
     stack.style.setProperty("--tilt", `${tilt.toFixed(2)}deg`);
     stack.style.setProperty("--spin", `${spin.toFixed(2)}deg`);
     stack.style.setProperty("--lift", `${lift.toFixed(1)}px`);
@@ -334,17 +358,30 @@ function initHero() {
       const ei = smooth(clamp01((e - (6 - m.level) * 0.055) / 0.67));
       const breathe = Math.sin(t * 1.3 + m.level * 0.9) * 6 * ei;
       const z = m.level * gap * ei + breathe;
-      const x = (m.dx * k + Math.cos(t * 0.7 + m.level) * 4 * ei) * ei;
+      const x = (m.dx * k * (mobile ? 0.45 : 1) + Math.cos(t * 0.7 + m.level) * 4 * ei) * ei;
       const y = m.dy * k * ei;
       const rot = m.rot * ei;
       el.style.transform = `translate3d(${x.toFixed(1)}px, ${y.toFixed(1)}px, ${z.toFixed(1)}px) rotate(${rot.toFixed(1)}deg)`;
       pos[m.level === 0 ? (m.baseY ? 0 : -1) : m.level] = { x, y: y + (m.baseY || 0) * (W / 400), z };
     }
 
+    if (mobile) {
+      // uma legenda por vez, embaixo, com a última peça que se soltou
+      let shown = null;
+      callouts.forEach((li, idx) => { if (e > 0.12 + idx * 0.11) shown = li; });
+      const key = shown ? shown.dataset.layer : "";
+      if (key !== captionKey) {
+        captionKey = key;
+        caption.classList.toggle("is-on", !!shown);
+        if (shown) caption.innerHTML = shown.innerHTML;
+      }
+      return;
+    }
+
     // legendas acompanham a altura de cada peça na tela
     const sr = stage.getBoundingClientRect();
-    const scene = stack.parentElement.getBoundingClientRect();
-    const cy = scene.top + scene.height / 2 - sr.top + lift;
+    const sceneRect = scene.getBoundingClientRect();
+    const cy = sceneRect.top + sceneRect.height / 2 - sr.top + lift;
     const sinT = Math.sin((tilt * Math.PI) / 180);
     const cosT = Math.cos((tilt * Math.PI) / 180);
     const sp = (spin * Math.PI) / 180;

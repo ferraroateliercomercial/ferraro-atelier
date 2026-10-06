@@ -7,7 +7,7 @@
   <meta name="description" content="Custom Time, ateliê de relojoaria: monte seu relógio peça por peça, com a cor que quiser, o ponteiro que quiser e movimento quartzo, automático ou de corda manual." />
   <meta property="og:title" content="Custom Time · Ateliê de relojoaria" />
   <meta property="og:description" content="Monte seu relógio peça por peça. A gente monta à mão." />
-  <meta property="og:image" content="assets/atelie.jpg" />
+  <meta property="og:image" content="assets/movimento.jpg" />
   <meta name="theme-color" content="#f6f6f3" />
   <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Ccircle cx='32' cy='32' r='28' fill='%23f6f6f3' stroke='%231c2c4a' stroke-width='3'/%3E%3Cpath d='M32 12v20l12 8' stroke='%231c2c4a' stroke-width='3' fill='none'/%3E%3C/svg%3E" />
   <link rel="preconnect" href="https://fonts.googleapis.com" />
@@ -85,34 +85,47 @@
 
     <main id="conteudo">
       <!-- ABERTURA DA PÁGINA: relógio que se desmonta ao rolar -->
-      <section class="hero" id="topo">
+      <!-- BOAS-VINDAS: foto da bancada em tela cheia -->
+      <section class="welcome" id="topo">
+        <div class="welcome__bg" aria-hidden="true"><img src="assets/movimento.jpg" alt="" width="1024" height="1024" /></div>
+        <div class="wrap welcome__inner">
+          <p class="label welcome__label rise" style="--d:0">Ateliê de relojoaria<span class="welcome__label-extra">&nbsp;· Sob encomenda</span></p>
+          <h1 class="welcome__title" aria-label="Seu relógio, peça por peça.">
+            <span class="line" aria-hidden="true"><span class="line__in" style="--d:1">Seu relógio,</span></span>
+            <span class="line" aria-hidden="true"><span class="line__in" style="--d:2"><em class="rotator" id="heroRotator">
+              <span class="rotator__word is-on">peça por peça.</span>
+              <span class="rotator__word">na cor exata.</span>
+              <span class="rotator__word">do seu jeito.</span>
+              <span class="rotator__word">no seu tempo.</span>
+            </em></span></span>
+          </h1>
+          <p class="welcome__lead rise" style="--d:3">Você escolhe cada detalhe: a caixa, a cor do mostrador, o estilo dos ponteiros, a pulseira e o movimento. Nós montamos à mão, na bancada do ateliê.</p>
+          <div class="welcome__cta rise" style="--d:4">
+            <a href="#personalizar" class="btn btn--light">Começar a personalizar</a>
+            <a href="#anatomia" class="link-arrow">Ver por dentro</a>
+          </div>
+          <dl class="welcome__facts rise" style="--d:5">
+            <div><dt data-count="16.7" data-decimals="1">0</dt><dd>milhões de cores</dd></div>
+            <div><dt data-count="10">0</dt><dd>estilos de ponteiros</dd></div>
+            <div><dt data-count="3">0</dt><dd>tipos de movimento</dd></div>
+          </dl>
+        </div>
+        <a href="#anatomia" class="welcome__scroll" aria-label="Rolar para a próxima seção"><span class="hero__mouse"></span></a>
+      </section>
+
+      <!-- ANATOMIA: relógio que se desmonta ao rolar -->
+      <section class="hero" id="anatomia">
         <div class="hero__sticky">
           <div class="wrap hero__grid">
-            <div class="hero__text">
-              <p class="label hero__label rise" style="--d:0">Ateliê de relojoaria<span class="hero__label-extra">&nbsp;· Sob encomenda</span></p>
-              <h1 class="hero__title" aria-label="Seu relógio, peça por peça.">
-                <span class="line" aria-hidden="true"><span class="line__in" style="--d:1">Seu relógio,</span></span>
-                <span class="line" aria-hidden="true"><span class="line__in" style="--d:2"><em class="rotator" id="heroRotator">
-                  <span class="rotator__word is-on">peça por peça.</span>
-                  <span class="rotator__word">na cor exata.</span>
-                  <span class="rotator__word">do seu jeito.</span>
-                  <span class="rotator__word">no seu tempo.</span>
-                </em></span></span>
-              </h1>
-              <p class="hero__lead rise" style="--d:3">Você escolhe cada detalhe: a caixa, a cor do mostrador, o estilo dos ponteiros, a pulseira e o movimento. Nós montamos à mão, na bancada do ateliê.</p>
-              <div class="hero__cta rise" style="--d:4">
-                <a href="#personalizar" class="btn">Começar a personalizar</a>
-                <a href="#movimentos" class="link-arrow">Conhecer os movimentos</a>
-              </div>
-              <dl class="hero__facts rise" style="--d:5">
-                <div><dt data-count="16.7" data-decimals="1">0</dt><dd>milhões de cores</dd></div>
-                <div><dt data-count="10">0</dt><dd>estilos de ponteiros</dd></div>
-                <div><dt data-count="3">0</dt><dd>tipos de movimento</dd></div>
-              </dl>
+            <div class="hero__text" id="heroText">
+              <p class="label hero__label">Anatomia do relógio</p>
+              <h2 class="hero__heading">Sete peças.<br /><em>Todas escolhidas por você.</em></h2>
+              <p class="hero__lead">Role a página e veja o relógio se desmontar. Cada camada é uma escolha no ateliê virtual.</p>
+              <a href="#personalizar" class="link-arrow">Abrir o ateliê virtual</a>
             </div>
-            <div class="hero__stage rise" style="--d:2">
+            <div class="hero__stage" id="heroStage">
               <svg class="hero__orbit" id="heroOrbit" viewBox="0 0 400 400" aria-hidden="true"></svg>
-              <div class="stack-scene">
+              <div class="stack-scene" id="heroScene">
                 <div class="stack" id="heroStack"></div>
               </div>
               <p class="hero__hint" aria-hidden="true"><span class="hero__mouse"></span> Role para desmontar</p>
@@ -125,6 +138,7 @@
                 <li data-layer="1"><strong>Movimento</strong><span>Quartzo, automático ou manual</span></li>
                 <li data-layer="0"><strong>Pulseira</strong><span>NATO, couro, borracha ou aço</span></li>
               </ol>
+              <p class="part-caption" id="partCaption" aria-hidden="true"><strong></strong><span></span></p>
             </div>
           </div>
         </div>

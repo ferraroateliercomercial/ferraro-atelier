@@ -5,7 +5,8 @@ Site da Custom Time, ateliê de relojoaria. O cliente não compra relógios pron
 ## Página inicial
 
 - **Abertura animada**: um mostrador se desenha, os ponteiros vão até 10:08 e a página se abre a partir do centro. Toca uma vez por visita; clique ou qualquer tecla pula.
-- **Relógio que se desmonta**: ao rolar, o relógio se separa em camadas (pulseira, movimento, caixa, mostrador, ponteiros, luneta, cristal).
+- **Boas-vindas**: foto da bancada em tela cheia (`assets/movimento.jpg`) com o título e os botões por cima.
+- **Anatomia**: ao rolar, o relógio se separa em camadas (pulseira, movimento, caixa, mostrador, ponteiros, luneta, cristal). No celular ele ocupa a tela toda, com uma legenda por vez embaixo.
 - **Movimentos**: quartzo, automático (NH35) e corda manual (ST3600) funcionando como os de verdade. O automático gira o rotor quando o mouse passa por cima; o manual precisa de corda.
 - **Dez estilos de ponteiros**, com um controle para ver todos em qualquer cor.
 - Portfólio, ateliê, dúvidas e contato.

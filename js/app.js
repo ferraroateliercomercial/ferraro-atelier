@@ -164,10 +164,10 @@ const PORTFOLIO = [
     cfg: { caseShape: "redonda", dialColor: "#1d4e8f", dialFinish: "texturizado", dialFume: true, dialLayout: "data", indexStyle: "bastao", handStyle: "espada", handColor: "#e6e9ee", secondColor: "#3fc1c9", bezelType: "mergulho", bezelColor: "#575d64", bezelTwoTone: false, strapType: "nato", strapColor: "#1e3a6e", movement: "automatico", rotorColor: "#3fbfbd" },
   },
   {
-    id: "verde", name: "Verde Fumê", img: "assets/verde-fume.jpg",
-    text: "Caixa octogonal com pulseira integrada e mostrador verde em degradê, com relevo horizontal.",
-    spec: [["Caixa", "Octogonal integrada, aço"], ["Mostrador", "Verde fumê listrado"], ["Ponteiros", "Bastão com lume"], ["Movimento", "Automático"]],
-    cfg: { caseShape: "octogonal", caseColor: "#c9cdd2", dialColor: "#2f7a64", dialFume: true, dialFinish: "listrado", dialLayout: "sem-data", indexStyle: "bastao", indexColor: "#e9ecef", handStyle: "bastao", handColor: "#e6e9ee", secondColor: "#e6e9ee", strapType: "integrada", movement: "automatico" },
+    id: "verde", name: "Verde Fumê", img: "assets/verde-fume.jpg", price: 1600,
+    text: "Caixa octogonal com parafusos na luneta, pulseira integrada e mostrador verde em degradê com relevo horizontal. Fundo de vidro com rotor verde.",
+    spec: [["Caixa", "Octogonal integrada, aço"], ["Mostrador", "Verde fumê listrado, com data"], ["Ponteiros", "Bastão com lume"], ["Movimento", "Automático, fundo de vidro"], ["Rotor", "Verde"]],
+    cfg: { caseShape: "octogonal", caseColor: "#c9cdd2", dialColor: "#2f7a64", dialFume: true, dialFinish: "listrado", dialLayout: "data", indexStyle: "bastao", indexColor: "#e9ecef", lume: true, handStyle: "bastao", handColor: "#e6e9ee", secondColor: "#e6e9ee", secondStyle: "agulha", strapType: "integrada", strapTwoTone: false, braceletColor: "#c9cdd2", movement: "automatico", displayBack: true, skeleton: false, rotorColor: "#6d9474" },
   },
   {
     id: "panda", name: "Panda Reverso", img: "assets/panda-reverso.jpg",

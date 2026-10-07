@@ -42,6 +42,10 @@ Página para a Ferraro Atelier ver o relógio que o cliente montou. Abra o site 
 - `js/app.js`, `PORTFOLIO`: fotos e descrições do portfólio. Fotos ficam em `assets/`. Para pôr uma peça à venda, coloque `price: 1500` nela; para tirar da venda, apague o `price`.
 - `js/watch.js`: desenho do relógio e funcionamento dos movimentos.
 
+## Análise de visitas (Vercel)
+
+O `index.html` já tem o script do Vercel Web Analytics (o equivalente ao pacote `@vercel/analytics` para sites sem build). Ele passa a contar visitas quando o site está publicado na Vercel e a aba **Analytics** do projeto está ativada no painel da Vercel.
+
 ## Rodar no computador
 
 ```sh

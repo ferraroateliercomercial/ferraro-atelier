@@ -1,6 +1,6 @@
-# Custom Time
+# Ferraro Atelier
 
-Site da Custom Time, ateliê de relojoaria. O cliente não compra relógios prontos: ele monta o próprio relógio no **ateliê virtual** e envia o projeto pelo WhatsApp.
+Site da Ferraro Atelier, relojoaria sob encomenda. O cliente não compra relógios prontos: ele monta o próprio relógio no **ateliê virtual** e envia o projeto pelo WhatsApp.
 
 ## Página inicial
 
@@ -24,9 +24,13 @@ Oito etapas: caixa, mostrador, ponteiros, luneta, pulseira, movimento, referênc
 - O relógio da prévia marca a hora real e anda conforme o movimento escolhido. Nos mecânicos dá para dar corda girando a coroa; no cronógrafo os botões laterais ligam, param e zeram.
 - O resumo gera a mensagem do WhatsApp com todas as escolhas, os códigos das cores e a referência.
 
+## Logo
+
+As asas da Ferraro Atelier ficam em `assets/logo/` (SVG e PNG sem fundo, nas versões creme, escura e dourada). No site, a logo é um vetor só (`WINGS_D` em `js/watch.js` e o símbolo `#ferraro-wings` no `index.html`), usado no topo, na abertura, no rodapé, no ícone da aba e nos desenhos dos relógios (mostrador, rotor e fundo).
+
 ## Oficina (`#oficina`, uso interno)
 
-Página para a Custom Time ver o relógio que o cliente montou. Abra o site com `#oficina` no fim do endereço (há também um link discreto "Oficina" no rodapé).
+Página para a Ferraro Atelier ver o relógio que o cliente montou. Abra o site com `#oficina` no fim do endereço (há também um link discreto "Oficina" no rodapé).
 
 - Cole a mensagem que o cliente mandou pelo WhatsApp (ou só o código `CT2-...`; códigos antigos `CT1-...` também funcionam) e o relógio aparece montado, de frente, explodido e de fundo, com a ficha completa.
 - O código do projeto vai no fim de toda mensagem enviada pelo ateliê virtual e reproduz o relógio exatamente. Sem o código, a Oficina lê as linhas da mensagem e avisa para conferir.

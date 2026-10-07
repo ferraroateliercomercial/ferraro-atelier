@@ -1,4 +1,4 @@
-/* Custom Time — desenho do relógio em SVG e o "movimento" que faz os ponteiros andarem.
+/* Ferraro Atelier — desenho do relógio em SVG e o "movimento" que faz os ponteiros andarem.
    Tudo é desenhado a partir de um objeto de configuração (veja DEFAULT_WATCH). */
 
 const DEFAULT_WATCH = {
@@ -36,9 +36,21 @@ const DEFAULT_WATCH = {
   refNotes: "",
 };
 
+/** Logo da Ferraro Atelier (as asas), em caixa de 1000 × 207. */
+const WINGS_D = "M476 145 432 121 263 184 261 186 285 199 305 205 320 207 340 207 355 205 374 200 405 188 449 164 476 147ZM524 145 568 121 737 184 739 186 715 199 695 205 680 207 660 207 645 205 626 200 595 188 551 164 524 147ZM415 109 388 85 385 85 192 135 191 137 234 168 237 169 415 111ZM585 109 612 85 615 85 808 135 809 137 766 168 763 169 585 111ZM373 68 360 52 347 31 345 30 257 48 110 75 108 76 165 117 169 117 373 69ZM627 68 640 52 653 31 655 30 743 48 890 75 892 76 835 117 831 117 627 69ZM0 0 1 2 72 50 343 25 343 23 334 7 328 2 320 0ZM1000 0 999 2 928 50 657 25 657 23 666 7 672 2 680 0Z";
+const WINGS_RATIO = 0.207;
+
 const Watch = (() => {
   const CX = 200;
   const CY = 260;
+
+  /** Asas centradas em (x, y), com largura w. `stroke` desenha um contorno fino por trás. */
+  function wings(x, y, w, fill, stroke) {
+    const k = w / 1000;
+    const h = w * WINGS_RATIO;
+    const outline = stroke ? ` stroke="${stroke}" stroke-width="${(1.4 / k).toFixed(1)}" stroke-opacity=".55" paint-order="stroke" stroke-linejoin="round"` : "";
+    return `<path d="${WINGS_D}" fill="${fill}"${outline} transform="translate(${(x - w / 2).toFixed(2)} ${(y - h / 2).toFixed(2)}) scale(${k.toFixed(4)})"/>`;
+  }
   let uidCounter = 0;
 
   // ---------- cores ----------
@@ -387,10 +399,13 @@ const Watch = (() => {
       const off = dr * 0.5;
       const r = dr * 0.27;
       s += subdial(c, CX + off, CY, r, "cm") + subdial(c, CX, CY + off, r, "ch") + subdial(c, CX - off, CY, r, "sub");
-      s += `<text x="${CX}" y="${CY - dr * 0.44}" text-anchor="middle" font-family="'Bodoni Moda', Georgia, serif" font-size="11" letter-spacing="1.4" fill="${tk}">Custom Time</text>`;
-      s += `<text x="${CX}" y="${CY - dr * 0.33}" text-anchor="middle" font-family="Jost, sans-serif" font-size="5.6" letter-spacing="1.6" fill="${tk}" opacity=".85">CRONÓGRAFO</text>`;
+      s += wings(CX, CY - dr * 0.62, 34, tk);
+      s += `<text x="${CX}" y="${CY - dr * 0.44}" text-anchor="middle" font-family="'Bodoni Moda', Georgia, serif" font-size="8.5" letter-spacing="1.6" fill="${tk}">FERRARO</text>`;
+      s += `<text x="${CX}" y="${CY - dr * 0.34}" text-anchor="middle" font-family="Jost, sans-serif" font-size="5.2" letter-spacing="1.6" fill="${tk}" opacity=".85">CRONÓGRAFO</text>`;
     } else {
-      s += `<text x="${CX}" y="${CY - dr * 0.47}" text-anchor="middle" font-family="'Bodoni Moda', Georgia, serif" font-size="11.5" letter-spacing="1.4" fill="${tk}">Custom Time</text>`;
+      s += wings(CX, CY - dr * 0.6, 40, tk);
+      s += `<text x="${CX}" y="${CY - dr * 0.42}" text-anchor="middle" font-family="'Bodoni Moda', Georgia, serif" font-size="9.5" letter-spacing="2" fill="${tk}">FERRARO</text>`;
+      s += `<text x="${CX}" y="${CY - dr * 0.34}" text-anchor="middle" font-family="Jost, sans-serif" font-size="4.6" letter-spacing="2.2" fill="${tk}" opacity=".8">ATELIER</text>`;
       s += `<text x="${CX}" y="${CY + dr * 0.45}" text-anchor="middle" font-family="Jost, sans-serif" font-size="6" letter-spacing="1.8" fill="${tk}" opacity=".85">${MOVEMENT_LABEL[c.movement]}</text>`;
       if (c.dialLayout === "data") {
         const x = CX + dr * 0.66;
@@ -421,7 +436,7 @@ const Watch = (() => {
       const r = dr * 0.27;
       s += subdial(c, CX + off, CY, r, "cm") + subdial(c, CX, CY + off, r, "ch") + subdial(c, CX - off, CY, r, "sub");
     }
-    s += `<text x="${CX}" y="${CY - inner + 15}" text-anchor="middle" font-family="'Bodoni Moda', Georgia, serif" font-size="8" letter-spacing="1.2" fill="#f4f4f1" stroke="#14171b" stroke-width="1.4" stroke-opacity=".6" paint-order="stroke">Custom Time</text>`;
+    s += wings(CX, CY - inner + 12, 30, "#f4f4f1", "#14171b");
     return s;
   }
 
@@ -575,7 +590,7 @@ const Watch = (() => {
       }
       s += `<clipPath id="${u}-rotor"><path d="M${CX - r + 4} ${CY} A${r - 4} ${r - 4} 0 0 1 ${CX + r - 4} ${CY} L${CX + 16} ${CY} A16 16 0 0 0 ${CX - 16} ${CY}Z"/></clipPath>`;
       s += `<g data-rotor><path d="M${CX - r + 4} ${CY} A${r - 4} ${r - 4} 0 0 1 ${CX + r - 4} ${CY} L${CX + 16} ${CY} A16 16 0 0 0 ${CX - 16} ${CY}Z" fill="${rc}" stroke="${shade(rc, -0.35)}"/><g clip-path="url(#${u}-rotor)">${waves}</g>
-        <text x="${CX}" y="${CY - r * 0.66}" text-anchor="middle" font-family="'Bodoni Moda', Georgia, serif" font-size="10" letter-spacing="1.2" fill="${ink(rc)}">Custom Time</text></g>`;
+        ${wings(CX, CY - r * 0.66, 46, ink(rc))}</g>`;
       s += `<circle cx="${CX}" cy="${CY}" r="9" fill="#9aa0a6" stroke="#6f757c"/><circle cx="${CX}" cy="${CY}" r="3" fill="${ruby}"/>`;
     } else if (c.movement === "manual") {
       s += `<text x="${CX}" y="${CY + r - 14}" text-anchor="middle" font-family="Jost, sans-serif" font-size="7" letter-spacing="1.4" fill="#5b6067">17 JEWELS · CORDA MANUAL</text>`;
@@ -629,12 +644,13 @@ const Watch = (() => {
       // fundo fechado
       s += `<circle cx="${CX}" cy="${CY}" r="112" fill="${m}"/>`;
       for (let r = 20; r < 110; r += 6) s += `<circle cx="${CX}" cy="${CY}" r="${r}" fill="none" stroke="#fff" stroke-opacity=".08"/>`;
-      s += `<text x="${CX}" y="${CY - 8}" text-anchor="middle" font-family="'Bodoni Moda', Georgia, serif" font-size="18" fill="${shade(c.caseColor, -0.55)}">Custom Time</text>`;
+      s += wings(CX, CY - 34, 84, shade(c.caseColor, -0.5));
+      s += `<text x="${CX}" y="${CY - 2}" text-anchor="middle" font-family="'Bodoni Moda', Georgia, serif" font-size="17" letter-spacing="1" fill="${shade(c.caseColor, -0.55)}">Ferraro Atelier</text>`;
       s += `<text x="${CX}" y="${CY + 14}" text-anchor="middle" font-family="Jost, sans-serif" font-size="8" letter-spacing="2" fill="${shade(c.caseColor, -0.5)}">${MOVEMENT_LABEL[c.movement]} · AÇO · 100 M</text>`;
     } else {
       s += `<circle cx="${CX}" cy="${CY}" r="112" fill="${m}"/>`;
       s += `<path id="${u}-arc" d="M${CX - 103} ${CY} A103 103 0 0 1 ${CX + 103} ${CY}" fill="none"/>`;
-      s += `<text font-family="'Bodoni Moda', Georgia, serif" font-style="italic" font-size="11" fill="${shade(c.caseColor, -0.6)}"><textPath href="#${u}-arc" startOffset="50%" text-anchor="middle">Custom Time · ateliê de relojoaria</textPath></text>`;
+      s += `<text font-family="'Bodoni Moda', Georgia, serif" font-style="italic" font-size="11" fill="${shade(c.caseColor, -0.6)}"><textPath href="#${u}-arc" startOffset="50%" text-anchor="middle">Ferraro Atelier · relojoaria sob encomenda</textPath></text>`;
       s += `<circle cx="${CX}" cy="${CY}" r="92" fill="#0d0f12"/>`;
       s += movement(u, c, 90);
       s += `<circle cx="${CX}" cy="${CY}" r="91" fill="none" stroke="#fff" stroke-opacity=".25" stroke-width="2"/>`;
@@ -649,7 +665,7 @@ const Watch = (() => {
     return `<svg viewBox="140 160 120 130" aria-hidden="true"><g transform="rotate(-50 200 260)">${hand(style, "h", c)}</g><g transform="rotate(48 200 260)">${hand(style, "m", c)}</g><circle cx="200" cy="260" r="4" fill="${color}"/></svg>`;
   }
 
-  return { front, back, layers, handIcon, shade, ink, mix, hexToRgb, rgbToHex, luminance };
+  return { front, back, layers, handIcon, wings, shade, ink, mix, hexToRgb, rgbToHex, luminance };
 })();
 
 // ---------------------------------------------------------------------------

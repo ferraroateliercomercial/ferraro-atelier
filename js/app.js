@@ -1,4 +1,4 @@
-/* Custom Time — página inicial e ateliê virtual */
+/* Ferraro Atelier — página inicial e ateliê virtual */
 
 // ---------------------------------------------------------------------------
 // Configurações da loja
@@ -155,7 +155,7 @@ const LABELS = {
 // Para vender outra peça, coloque `price: 1500` nela; para tirar da venda, apague o `price`.
 // ---------------------------------------------------------------------------
 const brl = new Intl.NumberFormat("pt-BR", { style: "currency", currency: "BRL", maximumFractionDigits: 0 });
-const buyUrl = (p) => whatsUrl(`Olá, Custom Time! Quero comprar o ${p.name} (${brl.format(p.price)}). Ainda está disponível?`);
+const buyUrl = (p) => whatsUrl(`Olá, Ferraro Atelier! Quero comprar o ${p.name} (${brl.format(p.price)}). Ainda está disponível?`);
 const PORTFOLIO = [
   {
     id: "carbon", name: "Carbon Edition", img: "assets/carbon-edition.jpg", price: 1799,
@@ -1033,7 +1033,7 @@ const Studio = {
     const lines = this.groups().map(([title, rows]) => `*${title}*\n` + rows.map(([k, v]) => `- ${k}: ${typeof v === "object" ? v.color.toUpperCase() : v}`).join("\n"));
     const n = this.refImages.length;
     const pics = n ? `\n\nVou mandar ${n === 1 ? "1 imagem" : `${n} imagens`} de referência aqui na conversa.` : "";
-    return `Olá, Custom Time! Montei este relógio no ateliê virtual:\n\n${lines.join("\n\n")}${pics}\n\nCódigo do projeto: ${encodeProject(this.cfg)}\n\nPodem me passar o valor e o prazo?`;
+    return `Olá, Ferraro Atelier! Montei este relógio no ateliê virtual:\n\n${lines.join("\n\n")}${pics}\n\nCódigo do projeto: ${encodeProject(this.cfg)}\n\nPodem me passar o valor e o prazo?`;
   },
 
   renderSummary() {
@@ -1227,13 +1227,13 @@ function route() {
   if (workshop) {
     Workshop.init();
     window.scrollTo(0, 0);
-    document.title = "Oficina · Custom Time";
+    document.title = "Oficina · Ferraro Atelier";
   } else if (studio) {
     Studio.init();
     if (!wasStudio) window.scrollTo(0, 0);
-    document.title = "Ateliê virtual · Custom Time";
+    document.title = "Ateliê virtual · Ferraro Atelier";
   } else {
-    document.title = "Custom Time";
+    document.title = "Ferraro Atelier";
     if (wasStudio) {
       const target = hash && document.getElementById(hash);
       requestAnimationFrame(() => (target ? target.scrollIntoView() : window.scrollTo(0, 0)));
@@ -1243,7 +1243,7 @@ function route() {
 
 document.addEventListener("DOMContentLoaded", () => {
   $("#year").textContent = new Date().getFullYear();
-  $("#whatsLink").href = whatsUrl("Olá, Custom Time! Quero montar um relógio personalizado.");
+  $("#whatsLink").href = whatsUrl("Olá, Ferraro Atelier! Quero montar um relógio personalizado.");
   $("#instaLink").href = STORE.instagram;
   initIntro();
   initNav();

@@ -166,6 +166,10 @@ html[data-intro="on"] .rise, html[data-intro="done"] .rise { animation-delay: ca
 .header__nav a { white-space: nowrap; }
 @media (max-width: 1320px) { .header__nav { gap: 22px; } .header__nav-extra { display: none; } }
 .brand { text-align: center; text-decoration: none; display: grid; gap: 5px; justify-items: center; }
+.lockup { display: block; height: auto; aspect-ratio: 1000 / 409; color: var(--ink); }
+.header .lockup { width: 148px; }
+.lockup--footer { width: 260px; color: var(--on-ink); margin-bottom: 6px; }
+.lockup--welcome { width: 230px; color: #efe9d8; }
 .brand__mark { width: 46px; height: auto; aspect-ratio: 1000 / 207; color: var(--ink); display: block; }
 .brand--small .brand__mark { width: 34px; }
 .footer .brand__mark { color: var(--on-ink); }
@@ -611,6 +615,8 @@ html[data-intro="on"] .welcome__bg img, html[data-intro="done"] .welcome__bg img
   .header__inner { min-height: 66px; }
   .brand__name { font-size: 1.12rem; }
   .brand__mark { width: 34px; }
+  .header .lockup { width: 116px; }
+  .lockup--welcome { width: 200px; }
   .brand__tag { font-size: .52rem; letter-spacing: .24em; }
   .header__nav {
     position: absolute; top: 100%; left: 0; right: 0; flex-direction: column; gap: 0; background: var(--paper); border-bottom: 1px solid var(--line);

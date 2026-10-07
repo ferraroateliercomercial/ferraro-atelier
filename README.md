@@ -26,7 +26,7 @@ Oito etapas: caixa, mostrador, ponteiros, luneta, pulseira, movimento, referênc
 
 ## Logo
 
-As asas da Ferraro Atelier ficam em `assets/logo/` (SVG e PNG sem fundo, nas versões creme, escura e dourada). No site, a logo é um vetor só (`WINGS_D` em `js/watch.js` e o símbolo `#ferraro-wings` no `index.html`), usado no topo, na abertura, no rodapé, no ícone da aba e nos desenhos dos relógios (mostrador, rotor e fundo).
+Ficam em `assets/logo/`, em SVG e PNG sem fundo, nas versões creme, escura e dourada: `ferraro-asas-*` (só as asas, usada nos relógios) e `ferraro-atelier-*` (logo completa com o nome, usada no topo, nas boas-vindas e no rodapé). No site, a logo é um vetor só (`WINGS_D` em `js/watch.js` e o símbolo `#ferraro-wings` no `index.html`), usado no topo, na abertura, no rodapé, no ícone da aba e nos desenhos dos relógios (mostrador, rotor e fundo).
 
 ## Oficina (`#oficina`, uso interno)
 

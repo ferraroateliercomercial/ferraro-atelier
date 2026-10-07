@@ -46,6 +46,8 @@ Página para a Ferraro Atelier ver o relógio que o cliente montou. Abra o site 
 
 O `index.html` já tem o script do Vercel Web Analytics (o equivalente ao pacote `@vercel/analytics` para sites sem build). Ele passa a contar visitas quando o site está publicado na Vercel e a aba **Analytics** do projeto está ativada no painel da Vercel.
 
+Também tem o script do Vercel Speed Insights (equivalente ao pacote `@vercel/speed-insights`), que mede a velocidade do site para os visitantes. Ele funciona quando a aba **Speed Insights** do projeto está ativada na Vercel.
+
 ## Rodar no computador
 
 ```sh

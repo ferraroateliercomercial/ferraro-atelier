@@ -30,7 +30,7 @@ const DEFAULT_WATCH = {
   stitchColor: "#e8d6c0",
   movement: "automatico",    // quartzo | automatico | manual
   rotorColor: "#3fbfbd",
-  swiss: false,              // movimento suíço (Sellita / Ronda)
+  swiss: false,              // movimento suíço (Sellita SW200-1 / SW210-1)
   displayBack: true,         // fundo de vidro (só automático e manual)
   skeleton: false,           // mostrador esqueleto (só automático e manual)
   refWatch: "",
@@ -393,7 +393,7 @@ const Watch = (() => {
 
   const MOVEMENT_LABEL = { quartzo: "QUARTZO", automatico: "AUTOMÁTICO", manual: "CORDA MANUAL" };
 
-  const isSkeleton = (c) => !!c.skeleton && c.movement !== "quartzo";
+  const isSkeleton = (c) => !!c.skeleton && !!c.swiss && c.movement !== "quartzo";
 
   function dial(u, c) {
     const dr = dialRadius(c);

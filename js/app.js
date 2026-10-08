@@ -55,17 +55,15 @@ const MOVEMENTS = {
 };
 
 // Versão suíça (premium) de cada movimento
+// O suíço só tem automático e corda manual (sem quartzo).
 const SWISS = {
-  quartzo: { caliber: "Ronda 715", crono: "Ronda 5040.D", text: "Quartzo suíço com 5 rubis e bateria de cerca de 5 anos. No cronógrafo, Ronda 5040.D com 13 rubis." },
   automatico: { caliber: "Sellita SW200-1", text: "Automático suíço com 26 rubis, 28.800 alternâncias/h (o ponteiro de segundos dá 8 passos por segundo) e reserva de cerca de 38 horas." },
   manual: { caliber: "Sellita SW210-1", text: "Corda manual suíça com 28.800 alternâncias/h e reserva de cerca de 42 horas. Fino e elegante, com acabamento suíço." },
 };
 
 /** Calibre que vai no relógio, conforme o tipo, a origem e a disposição do mostrador. */
 function caliberOf(c) {
-  if (!c.swiss) return MOVEMENTS[c.movement].caliber;
-  const sw = SWISS[c.movement];
-  return c.movement === "quartzo" && c.dialLayout === "crono" ? sw.crono : sw.caliber;
+  return c.swiss && SWISS[c.movement] ? SWISS[c.movement].caliber : MOVEMENTS[c.movement].caliber;
 }
 
 const isOct = (c) => c.caseShape === "octogonal";
@@ -142,8 +140,9 @@ const TABS = [
     fields: [
       { type: "movement", key: "movement" },
       { type: "toggle", key: "displayBack", label: "Fundo de vidro", note: "Mostra o mecanismo na parte de trás. Desligado, o fundo é fechado.", when: (c) => c.movement !== "quartzo" },
-      { type: "toggle", key: "skeleton", label: "Mostrador esqueleto", note: "Abre o centro do mostrador e mostra o mecanismo pela frente", when: (c) => c.movement !== "quartzo" },
-      { type: "note", text: "No quartzo o fundo é fechado e o mostrador é inteiro. Fundo de vidro e mostrador esqueleto estão disponíveis no automático e na corda manual.", when: (c) => c.movement === "quartzo" },
+      { type: "toggle", key: "skeleton", label: "Mostrador esqueleto", note: "Abre o centro do mostrador e mostra o mecanismo suíço pela frente", when: (c) => c.swiss },
+      { type: "note", text: "No quartzo o fundo é fechado e o mostrador é inteiro.", when: (c) => c.movement === "quartzo" },
+      { type: "note", text: "O mostrador esqueleto está disponível com os movimentos suíços.", when: (c) => !c.swiss },
       { type: "color", key: "rotorColor", label: "Cor do rotor", note: "Aparece pelo fundo de vidro", when: (c) => c.movement === "automatico" && c.displayBack !== false },
     ],
   },
@@ -604,9 +603,10 @@ function projectGroups(c, nImages = 0) {
     ]],
     ["Movimento", [
       ["Tipo", MOVEMENTS[c.movement].name + (c.dialLayout === "crono" ? " (cronógrafo)" : "")],
-      ...(c.movement === "quartzo" ? [["Calibre", c.swiss ? `${caliberOf(c)} (suíço)` : "Quartzo padrão"]] : []),
+      ["Origem", c.swiss ? "Suíço" : "Japonês"],
+      ...(c.movement === "quartzo" ? [["Calibre", "Quartzo"]] : []),
       ...(c.movement !== "quartzo" ? [
-        ["Calibre", caliberOf(c) + (c.swiss ? " (suíço)" : "")],
+        ["Calibre", caliberOf(c)],
         ["Frente", c.skeleton ? "Mostrador esqueleto" : "Mostrador inteiro"],
         ["Fundo", c.displayBack !== false ? "De vidro" : "Fechado"],
       ] : []),
@@ -707,7 +707,8 @@ function parseProjectMessage(text) {
       case "Pulseira|Costura": set("stitchColor", hex(v)); break;
       case "Movimento|Tipo": set("movement", Object.keys(MOVEMENTS).find((m) => v.toLowerCase().startsWith(MOVEMENTS[m].name.toLowerCase()))); break;
       case "Movimento|Rotor": set("rotorColor", hex(v)); break;
-      case "Movimento|Calibre": set("swiss", /su[ií]ço|sellita|ronda/i.test(v)); break;
+      case "Movimento|Calibre": set("swiss", /su[ií]ço|sellita/i.test(v)); break;
+      case "Movimento|Origem": set("swiss", /su[ií]ço/i.test(v)); break;
       case "Movimento|Frente": set("skeleton", /esqueleto/i.test(v)); break;
       case "Movimento|Fundo": set("displayBack", /vidro/i.test(v)); break;
       case "Referência|Relógio": set("refWatch", v); break;
@@ -798,6 +799,9 @@ const Studio = {
   /** Mantém combinações coerentes. */
   fix(changed) {
     const c = this.cfg;
+    // suíço não tem quartzo; esqueleto só existe no suíço
+    if (c.swiss && c.movement === "quartzo") c.movement = "automatico";
+    if (!c.swiss) c.skeleton = false;
     if (c.strapType === "integrada" && !isOct(c)) c.strapType = "oyster";
     if (changed === "caseShape" && isOct(c)) c.strapType = "integrada";
   },
@@ -887,20 +891,24 @@ const Studio = {
         return `<div class="field">${head()}<div class="choices choices--icons">${opts}</div><p class="field__note">${cur.name}: ${cur.desc}</p></div>`;
       }
       case "movement": {
-        const opts = Object.entries(MOVEMENTS).map(([k, m]) => `
-          <button type="button" class="choice" data-set="movement" data-value="${k}" aria-pressed="${c.movement === k}">
-            <b>${m.name}${k !== "quartzo" || c.swiss ? ` · ${caliberOf({ ...c, movement: k })}` : ""}</b><span>${c.swiss ? SWISS[k].text : m.text}</span>
-          </button>`).join("");
-        const sw = SWISS[c.movement];
+        // 1) origem  2) movimentos daquela origem
         const origin = `
           <button type="button" class="choice" data-set="swiss" data-value="0" aria-pressed="${!c.swiss}">
-            <b>Padrão</b><span>${c.movement === "quartzo" ? "Quartzo japonês, confiável e econômico." : `${MOVEMENTS[c.movement].caliber}. Confiável e fácil de manter.`}</span>
+            <b>Japonês</b><span>Quartzo, automático Seiko NH35 ou corda manual Seagull ST3600. Confiáveis e fáceis de manter.</span>
           </button>
           <button type="button" class="choice choice--premium" data-set="swiss" data-value="1" aria-pressed="${!!c.swiss}">
-            <b>Suíço · ${caliberOf({ ...c, swiss: true })}</b><span>${sw.text}</span><small class="premium-tag">Premium</small>
+            <b>Suíço</b><span>Automático Sellita SW200-1 ou corda manual Sellita SW210-1. Única origem com mostrador esqueleto.</span><small class="premium-tag">Premium</small>
           </button>`;
-        return `<div class="field"><div class="choices choices--cards">${opts}</div></div>
-          <div class="field"><div class="field__head"><span class="label">Origem do movimento</span></div><div class="choices choices--cards">${origin}</div></div>`;
+        const list = c.swiss ? Object.keys(SWISS) : Object.keys(MOVEMENTS);
+        const opts = list.map((k) => {
+          const m = MOVEMENTS[k];
+          return `
+          <button type="button" class="choice" data-set="movement" data-value="${k}" aria-pressed="${c.movement === k}">
+            <b>${m.name}${k !== "quartzo" ? ` · ${caliberOf({ ...c, movement: k })}` : ""}</b><span>${c.swiss ? SWISS[k].text : m.text}</span>
+          </button>`;
+        }).join("");
+        return `<div class="field"><div class="field__head"><span class="label">Origem do movimento</span></div><div class="choices choices--cards">${origin}</div></div>
+          <div class="field"><div class="field__head"><span class="label">Movimento</span></div><div class="choices choices--cards">${opts}</div></div>`;
       }
       case "toggle": {
         return `<button type="button" class="toggle" role="switch" aria-checked="${!!c[f.key]}" data-toggle="${f.key}"><span><b>${f.label}</b><small>${f.note || ""}</small></span><span class="toggle__track"></span></button>`;

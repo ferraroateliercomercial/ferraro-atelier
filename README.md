@@ -19,6 +19,7 @@ Oito etapas: caixa, mostrador, ponteiros, luneta, pulseira, movimento, referênc
 - Todas as cores são livres (seletor de espectro completo e código HEX), inclusive a do aço da pulseira.
 - Pulseira em duas cores: laterais de uma cor e centro de outra (no aço, elos de fora e elos do centro).
 - Vistas de frente, explodida e de fundo.
+- Origem do movimento: padrão ou suíço (premium) — quartzo Ronda 715 (Ronda 5040.D no cronógrafo), automático Sellita SW200-1 e corda manual Sellita SW210-1. Na prévia, os Sellita andam a 8 passos por segundo (28.800 alternâncias/h).
 - No automático e na corda manual: fundo de vidro ou fechado, e mostrador inteiro ou esqueleto (centro aberto mostrando o mecanismo).
 - Referência: o cliente informa um relógio de referência, anexa até 6 imagens e escreve observações. No celular, o envio já leva as imagens junto (compartilhamento do sistema); no computador, o cliente anexa as imagens na conversa do WhatsApp.
 - O relógio da prévia marca a hora real e anda conforme o movimento escolhido. Nos mecânicos dá para dar corda girando a coroa; no cronógrafo os botões laterais ligam, param e zeram.

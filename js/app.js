@@ -54,6 +54,20 @@ const MOVEMENTS = {
   manual: { name: "Corda manual", caliber: "Seagull ST3600", text: "Você dá corda girando a coroa. Reserva de mais de 40 horas e visual de relógio de bolso no fundo." },
 };
 
+// Versão suíça (premium) de cada movimento
+const SWISS = {
+  quartzo: { caliber: "Ronda 715", crono: "Ronda 5040.D", text: "Quartzo suíço com 5 rubis e bateria de cerca de 5 anos. No cronógrafo, Ronda 5040.D com 13 rubis." },
+  automatico: { caliber: "Sellita SW200-1", text: "Automático suíço com 26 rubis, 28.800 alternâncias/h (o ponteiro de segundos dá 8 passos por segundo) e reserva de cerca de 38 horas." },
+  manual: { caliber: "Sellita SW210-1", text: "Corda manual suíça com 28.800 alternâncias/h e reserva de cerca de 42 horas. Fino e elegante, com acabamento suíço." },
+};
+
+/** Calibre que vai no relógio, conforme o tipo, a origem e a disposição do mostrador. */
+function caliberOf(c) {
+  if (!c.swiss) return MOVEMENTS[c.movement].caliber;
+  const sw = SWISS[c.movement];
+  return c.movement === "quartzo" && c.dialLayout === "crono" ? sw.crono : sw.caliber;
+}
+
 const isOct = (c) => c.caseShape === "octogonal";
 const metalStrap = (c) => ["oyster", "jubile", "integrada"].includes(c.strapType);
 const bezelHasInsert = (c) => !isOct(c) && ["mergulho", "taquimetro"].includes(c.bezelType);
@@ -590,8 +604,9 @@ function projectGroups(c, nImages = 0) {
     ]],
     ["Movimento", [
       ["Tipo", MOVEMENTS[c.movement].name + (c.dialLayout === "crono" ? " (cronógrafo)" : "")],
+      ...(c.movement === "quartzo" ? [["Calibre", c.swiss ? `${caliberOf(c)} (suíço)` : "Quartzo padrão"]] : []),
       ...(c.movement !== "quartzo" ? [
-        ["Calibre", MOVEMENTS[c.movement].caliber],
+        ["Calibre", caliberOf(c) + (c.swiss ? " (suíço)" : "")],
         ["Frente", c.skeleton ? "Mostrador esqueleto" : "Mostrador inteiro"],
         ["Fundo", c.displayBack !== false ? "De vidro" : "Fechado"],
       ] : []),
@@ -623,11 +638,13 @@ const CODE_FIELDS = [
   ["movement", ["quartzo", "automatico", "manual"]], ["rotorColor"],
   // CT2
   ["displayBack", "bool"], ["skeleton", "bool"],
+  // CT3
+  ["swiss", "bool"],
 ];
-const CODE_VERSIONS = { 1: 28, 2: 30 };
+const CODE_VERSIONS = { 1: 28, 2: 30, 3: 31 };
 
 function encodeProject(c) {
-  return "CT2-" + CODE_FIELDS.map(([k, kind]) => {
+  return "CT3-" + CODE_FIELDS.map(([k, kind]) => {
     if (kind === "bool") return c[k] === undefined ? (DEFAULT_WATCH[k] ? "1" : "0") : c[k] ? "1" : "0";
     if (Array.isArray(kind)) return Math.max(0, kind.indexOf(c[k])).toString(36);
     return String(c[k] || "#000000").replace("#", "").toLowerCase().padEnd(6, "0").slice(0, 6);
@@ -635,7 +652,7 @@ function encodeProject(c) {
 }
 
 function decodeProject(text) {
-  const m = String(text).match(/CT([12])-([0-9a-z]+)/i);
+  const m = String(text).match(/CT([123])-([0-9a-z]+)/i);
   if (!m) return null;
   const raw = m[2].toLowerCase();
   const cfg = {};
@@ -690,6 +707,7 @@ function parseProjectMessage(text) {
       case "Pulseira|Costura": set("stitchColor", hex(v)); break;
       case "Movimento|Tipo": set("movement", Object.keys(MOVEMENTS).find((m) => v.toLowerCase().startsWith(MOVEMENTS[m].name.toLowerCase()))); break;
       case "Movimento|Rotor": set("rotorColor", hex(v)); break;
+      case "Movimento|Calibre": set("swiss", /su[ií]ço|sellita|ronda/i.test(v)); break;
       case "Movimento|Frente": set("skeleton", /esqueleto/i.test(v)); break;
       case "Movimento|Fundo": set("displayBack", /vidro/i.test(v)); break;
       case "Referência|Relógio": set("refWatch", v); break;
@@ -871,9 +889,18 @@ const Studio = {
       case "movement": {
         const opts = Object.entries(MOVEMENTS).map(([k, m]) => `
           <button type="button" class="choice" data-set="movement" data-value="${k}" aria-pressed="${c.movement === k}">
-            <b>${m.name}${k !== "quartzo" ? ` · ${m.caliber}` : ""}</b><span>${m.text}</span>
+            <b>${m.name}${k !== "quartzo" || c.swiss ? ` · ${caliberOf({ ...c, movement: k })}` : ""}</b><span>${c.swiss ? SWISS[k].text : m.text}</span>
           </button>`).join("");
-        return `<div class="field"><div class="choices choices--cards">${opts}</div></div>`;
+        const sw = SWISS[c.movement];
+        const origin = `
+          <button type="button" class="choice" data-set="swiss" data-value="0" aria-pressed="${!c.swiss}">
+            <b>Padrão</b><span>${c.movement === "quartzo" ? "Quartzo japonês, confiável e econômico." : `${MOVEMENTS[c.movement].caliber}. Confiável e fácil de manter.`}</span>
+          </button>
+          <button type="button" class="choice choice--premium" data-set="swiss" data-value="1" aria-pressed="${!!c.swiss}">
+            <b>Suíço · ${caliberOf({ ...c, swiss: true })}</b><span>${sw.text}</span><small class="premium-tag">Premium</small>
+          </button>`;
+        return `<div class="field"><div class="choices choices--cards">${opts}</div></div>
+          <div class="field"><div class="field__head"><span class="label">Origem do movimento</span></div><div class="choices choices--cards">${origin}</div></div>`;
       }
       case "toggle": {
         return `<button type="button" class="toggle" role="switch" aria-checked="${!!c[f.key]}" data-toggle="${f.key}"><span><b>${f.label}</b><small>${f.note || ""}</small></span><span class="toggle__track"></span></button>`;
@@ -917,7 +944,7 @@ const Studio = {
     if (set && !set.disabled) {
       const key = set.dataset.set;
       const raw = set.dataset.value;
-      this.cfg[key] = key === "size" ? +raw : raw;
+      this.cfg[key] = key === "size" ? +raw : key === "swiss" ? raw === "1" : raw;
       this.fix(key);
       if (key === "movement") this.setView(raw === "quartzo" ? "frente" : "fundo");
       this.refresh();

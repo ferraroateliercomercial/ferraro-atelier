@@ -295,6 +295,10 @@ html[data-intro="on"] .welcome__bg img, html[data-intro="done"] .welcome__bg img
 .movement__spec li { display: flex; justify-content: space-between; gap: 12px; padding: 9px 0; border-top: 1px solid var(--line-ink); }
 .movement__spec li span:first-child { color: var(--on-ink-muted); }
 .movement__spec li span:last-child { text-align: right; }
+.movement__swiss span:first-child { color: var(--brass) !important; }
+.choice--premium { position: relative; border-color: color-mix(in srgb, var(--brass) 55%, var(--line)); }
+.choice--premium[aria-pressed="true"] { border-color: var(--brass); box-shadow: inset 0 0 0 1px var(--brass); }
+.premium-tag { position: absolute; top: 14px; right: 16px; font-size: .62rem !important; font-weight: 500; letter-spacing: .18em; text-transform: uppercase; color: var(--brass) !important; }
 .movement .btn--line { color: var(--on-ink); border-color: var(--on-ink-muted); justify-self: start; }
 .movement .btn--line:hover, .movement .btn--line.is-winding { background: var(--on-ink); color: var(--ink); }
 .movements__note { margin-top: 26px; text-align: center; font-size: .78rem; color: var(--on-ink-muted); }

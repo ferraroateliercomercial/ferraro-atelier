@@ -30,6 +30,7 @@ const DEFAULT_WATCH = {
   stitchColor: "#e8d6c0",
   movement: "automatico",    // quartzo | automatico | manual
   rotorColor: "#3fbfbd",
+  swiss: false,              // movimento suíço (Sellita / Ronda)
   displayBack: true,         // fundo de vidro (só automático e manual)
   skeleton: false,           // mostrador esqueleto (só automático e manual)
   refWatch: "",
@@ -598,7 +599,7 @@ const Watch = (() => {
         ${wings(CX, CY - r * 0.66, 46, ink(rc))}</g>`;
       s += `<circle cx="${CX}" cy="${CY}" r="9" fill="#9aa0a6" stroke="#6f757c"/><circle cx="${CX}" cy="${CY}" r="3" fill="${ruby}"/>`;
     } else if (c.movement === "manual") {
-      s += `<text x="${CX}" y="${CY + r - 14}" text-anchor="middle" font-family="Jost, sans-serif" font-size="7" letter-spacing="1.4" fill="#5b6067">17 JEWELS · CORDA MANUAL</text>`;
+      s += `<text x="${CX}" y="${CY + r - 14}" text-anchor="middle" font-family="Jost, sans-serif" font-size="7" letter-spacing="1.4" fill="#5b6067">${c.swiss ? "SWISS · SELLITA SW210-1" : "17 JEWELS · CORDA MANUAL"}</text>`;
     }
     if (front) s += `<circle cx="${CX}" cy="${CY}" r="7" fill="#9aa0a6" stroke="#6f757c"/>`;
     return s;
@@ -754,7 +755,9 @@ class Movement {
     const t = new Date(Date.now() - this.offset - (this.stoppedAt !== null ? now - this.stoppedAt : 0));
     const ms = t.getMilliseconds() / 1000;
     let sec = t.getSeconds() + ms;
-    sec = this.cfg.movement === "quartzo" ? Math.floor(sec) : Math.floor(sec * 6) / 6;
+    // quartzo: 1 passo/s · NH35 e ST3600: 6 passos/s (21.600/h) · Sellita suíço: 8 passos/s (28.800/h)
+    const steps = this.cfg.movement === "quartzo" ? 1 : this.cfg.swiss ? 8 : 6;
+    sec = Math.floor(sec * steps) / steps;
     const min = t.getMinutes() + sec / 60;
     const hr = (t.getHours() % 12) + min / 60;
 
@@ -774,7 +777,7 @@ class Movement {
     this.rotor += this.rotorVel * dt * 60;
     if (this.cfg.movement === "automatico" && Math.abs(this.rotorVel) > 0.2) this.reserve = Math.min(1, this.reserve + Math.abs(this.rotorVel) * dt * 0.004);
     rot(this.el.rotor, this.rotor);
-    const swing = this.running ? Math.sin(now / 1000 * Math.PI * 2 * 3) * 160 : 0;
+    const swing = this.running ? Math.sin(now / 1000 * Math.PI * 2 * (this.cfg.swiss ? 4 : 3)) * 160 : 0;
     rot(this.el.balance, swing);
     rot(this.el.ratchet, this.ratchet);
     this.el.knurl.forEach((k) => k.setAttribute("transform", `translate(0 ${this.knurl.toFixed(2)})`));

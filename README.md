@@ -38,7 +38,7 @@ Página para a Ferraro Atelier ver o relógio que o cliente montou. Abra o site 
 
 ## Como editar
 
-- `js/app.js`, começo do arquivo: `STORE.whatsapp` e `STORE.instagram`.
+- `js/app.js`, começo do arquivo: `STORE.whatsapp` e `STORE.instagram` (@ferraro_atelier).
 - `js/app.js`, `PORTFOLIO`: fotos e descrições do portfólio. Fotos ficam em `assets/`. Para pôr uma peça à venda, coloque `price: 1500` nela; para tirar da venda, apague o `price`.
 - `js/watch.js`: desenho do relógio e funcionamento dos movimentos.
 

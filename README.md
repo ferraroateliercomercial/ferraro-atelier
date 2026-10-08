@@ -19,6 +19,8 @@ Oito etapas: caixa, mostrador, ponteiros, luneta, pulseira, movimento, referênc
 - Todas as cores são livres (seletor de espectro completo e código HEX), inclusive a do aço da pulseira.
 - Pulseira em duas cores: laterais de uma cor e centro de outra (no aço, elos de fora e elos do centro).
 - Vistas de frente, explodida e de fundo. Ao passar da frente para o fundo, o relógio vira no próprio eixo (meio segundo).
+- **Surpreenda-me** (botão com o dado na prévia): sorteia uma combinação que funciona (metal, mostrador, ponteiros, luneta e pulseira) e as peças trocam uma a uma na prévia. Movimento, tamanho e referência continuam como o cliente escolheu.
+- **Aviso de combinação**: quando uma cor some sobre a outra (ponteiros, índices, segundos ou ponteirinhos do cronógrafo sobre o mostrador, ou pulseira bicolor com cores quase iguais), aparece um aviso discreto na etapa, com um botão que corrige. A etapa com aviso ganha um pontinho, e o resumo lista todos.
 - **Modo noite** (botão com a lua na prévia): o fundo escurece, o relógio apaga e os índices e ponteiros com lume brilham em verde. Se o projeto estiver sem lume, o site avisa onde ativar.
 - Origem do movimento: japonês (quartzo, Seiko NH35, Seagull ST3600) ou suíço premium (Sellita SW200-1 automático e Sellita SW210-1 corda manual). O mostrador esqueleto só existe no suíço. Na prévia, os Sellita andam a 8 passos por segundo (28.800 alternâncias/h).
 - No automático e na corda manual: fundo de vidro ou fechado, e mostrador inteiro ou esqueleto (centro aberto mostrando o mecanismo).

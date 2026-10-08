@@ -225,6 +225,113 @@ function flipWatch(outEl, inEl, toBack, swap) {
   }).catch(() => swap());
 }
 
+// ---------------------------------------------------------------------------
+// Aviso de combinação: cores que somem umas sobre as outras
+// ---------------------------------------------------------------------------
+function luminance(hex) {
+  const n = parseInt(String(hex).replace("#", "").padEnd(6, "0").slice(0, 6), 16);
+  const ch = (v) => { v /= 255; return v <= 0.03928 ? v / 12.92 : ((v + 0.055) / 1.055) ** 2.4; };
+  return 0.2126 * ch((n >> 16) & 255) + 0.7152 * ch((n >> 8) & 255) + 0.0722 * ch(n & 255);
+}
+function contrast(a, b) {
+  const [x, y] = [luminance(a), luminance(b)].sort((m, n) => n - m);
+  return (x + 0.05) / (y + 0.05);
+}
+/** Distância entre duas cores (0 a 441): para tons de matiz diferente com o mesmo brilho. */
+function colorDistance(a, b) {
+  const rgb = (h) => { const n = parseInt(String(h).replace("#", "").padEnd(6, "0").slice(0, 6), 16); return [(n >> 16) & 255, (n >> 8) & 255, n & 255]; };
+  const [x, y] = [rgb(a), rgb(b)];
+  return Math.hypot(x[0] - y[0], x[1] - y[1], x[2] - y[2]);
+}
+/** Tom que aparece bem sobre `bg`: claro em mostrador escuro, azul-marinho em mostrador claro. */
+const readableOn = (bg) => (luminance(bg) < 0.28 ? "#e6e9ee" : "#1c2c4a");
+
+function adviceFor(c) {
+  const out = [];
+  const dial = c.dialColor;
+  if (contrast(c.handColor, dial) < 1.5) {
+    out.push({ tab: "ponteiros", text: "Os ponteiros quase somem sobre o mostrador: a hora fica difícil de ler.", label: "Usar um tom que aparece", patch: { handColor: readableOn(dial) } });
+  }
+  if (!c.lume && contrast(c.indexColor, dial) < 1.5) {
+    out.push({ tab: "mostrador", text: "Os índices estão muito próximos da cor do mostrador.", label: "Destacar os índices", patch: { indexColor: readableOn(dial) } });
+  }
+  if (contrast(c.secondColor, dial) < 1.3) {
+    out.push({ tab: "ponteiros", text: "O ponteiro de segundos desaparece no mostrador.", label: "Usar um tom que aparece", patch: { secondColor: readableOn(dial) } });
+  }
+  if (c.dialLayout === "crono" && contrast(c.handColor, c.subdialColor) < 1.5) {
+    out.push({ tab: "mostrador", text: "Os ponteirinhos do cronógrafo somem nos submostradores.", label: "Ajustar os submostradores", patch: { subdialColor: luminance(c.handColor) < 0.28 ? "#d9dad6" : "#22262d" } });
+  }
+  if (c.strapTwoTone) {
+    const [a, b] = metalStrap(c) ? [c.braceletColor, c.braceletColor2] : [c.strapColor, c.strapColor2];
+    if (colorDistance(a, b) < 40) {
+      out.push({ tab: "pulseira", text: "As duas cores da pulseira estão quase iguais: o efeito bicolor quase não aparece.", label: "Deixar de uma cor só", patch: { strapTwoTone: false } });
+    }
+  }
+  return out;
+}
+
+// ---------------------------------------------------------------------------
+// Surpreenda-me: sorteia uma combinação que funciona
+// ---------------------------------------------------------------------------
+const pick = (list) => list[Math.floor(Math.random() * list.length)];
+const rnd = (a, b) => a + Math.random() * (b - a);
+const METALS = [
+  { case: "#c9cdd2", light: "#e6e9ee", w: 5 }, // aço
+  { case: "#c8a55a", light: "#e3c98a", w: 2 }, // dourado
+  { case: "#a97a4a", light: "#d8b48a", w: 1 }, // bronze
+  { case: "#2c2e33", light: "#e6e9ee", w: 2 }, // PVD preto
+  { case: "#c49480", light: "#ead0c4", w: 1 }, // rosé
+];
+
+/** Devolve a combinação em etapas, na ordem do ateliê, para as peças trocarem em sequência. */
+function surpriseSteps(current) {
+  const metal = pick(METALS.flatMap((m) => Array(m.w).fill(m)));
+  const hue = Math.round(rnd(0, 360));
+  const mood = pick(["esportivo", "esportivo", "social", "noturno"]);
+  const dial = mood === "social" ? hslHex(hue, rnd(8, 28), rnd(84, 92))
+    : mood === "noturno" ? hslHex(hue, rnd(10, 30), rnd(7, 13))
+    : hslHex(hue, rnd(40, 72), rnd(20, 36));
+  const dark = luminance(dial) < 0.28;
+  const ink = dark ? metal.light : pick(["#1c2c4a", "#1a1b1f", metal.case].filter((x) => contrast(x, dial) >= 2.5));
+  const accent = pick([ink, hslHex((hue + 180) % 360, 70, 55), "#c7372f", "#e2902f"]);
+  const caseShape = pick(["redonda", "redonda", "almofada", "octogonal"]);
+  const sporty = mood !== "social";
+
+  const caixa = { caseShape, caseColor: metal.case };
+  const mostrador = {
+    dialColor: dial, dialFume: sporty && Math.random() < 0.5,
+    dialFinish: pick(["liso", "raios", "listrado", "texturizado", "grade"]),
+    dialLayout: pick(["data", "data", "sem-data", "crono"]),
+    // os ponteirinhos do cronógrafo usam a cor dos ponteiros: o submostrador precisa contrastar com ela
+    subdialColor: luminance(ink) < 0.28 ? hslHex(hue, 10, 86) : hslHex(hue, 25, 16),
+    indexStyle: mood === "social" ? pick(["romanos", "bastao", "pontos"]) : pick(["bastao", "pontos", "arabicos"]),
+    indexColor: ink, lume: sporty,
+  };
+  const ponteiros = {
+    handStyle: pick(HAND_STYLES.map((h) => h.id)), handColor: ink,
+    secondStyle: pick(["agulha", "pirulito", "seta"]), secondColor: contrast(accent, dial) < 1.6 ? ink : accent,
+  };
+  const twoBezel = sporty && Math.random() < 0.2;
+  const luneta = {
+    bezelType: sporty ? pick(["mergulho", "mergulho", "taquimetro", "canelada"]) : pick(["lisa", "canelada"]),
+    bezelColor: pick(["#1a1d22", dial, hslHex(hue, 35, 16)]), bezelTwoTone: twoBezel, bezelColor2: hslHex((hue + 180) % 360, 60, 42),
+  };
+  let pulseira;
+  if (Math.random() < 0.4) {
+    pulseira = { strapType: caseShape === "octogonal" ? "integrada" : pick(["oyster", "jubile"]), braceletColor: metal.case, strapTwoTone: false };
+  } else {
+    const kind = sporty ? pick(["nato", "borracha", "couro"]) : "couro";
+    const color = kind === "couro" ? hslHex(rnd(14, 32), rnd(35, 60), rnd(14, 34)) : kind === "borracha" ? pick(["#1a1b1f", hslHex(hue, 40, 26)]) : hslHex(hue, rnd(30, 60), rnd(18, 34));
+    const two = kind === "nato" && Math.random() < 0.35;
+    const strapType = caseShape === "octogonal" && Math.random() < 0.5 ? "integrada" : kind;
+    pulseira = { strapType, strapColor: color, strapColor2: hslHex((hue + 180) % 360, 55, 40), strapTwoTone: two && strapType === "nato", stitchColor: pick(["#e8d6c0", ink, color]), braceletColor: metal.case };
+  }
+  // movimento, tamanho e referência ficam como o cliente escolheu
+  const steps = [caixa, mostrador, ponteiros, luneta, pulseira];
+  if (current.swiss) steps.push({ skeleton: Math.random() < 0.25 });
+  return steps;
+}
+
 /** Link que abre o projeto já montado no ateliê. */
 function shareLink(cfg) {
   let base = location.href.split("#")[0];
@@ -779,6 +886,7 @@ const Studio = {
     $("#stepNext").addEventListener("click", () => this.step(1));
     $$(".views button").forEach((b) => b.addEventListener("click", () => this.setView(b.dataset.view)));
     $("#studioNight").addEventListener("click", () => this.setNight(!this.night));
+    $("#studioSurprise").addEventListener("click", () => this.surprise());
 
     bindCrown(this.canvas, () => this.mv);
     holdToWind($("#studioWind"), () => this.mv);
@@ -894,6 +1002,44 @@ const Studio = {
     this.mv.setConfig(this.cfg);
   },
 
+  surprise() {
+    if (this.surprising) return;
+    const btn = $("#studioSurprise");
+    this.surprising = true;
+    btn.disabled = true;
+    const steps = surpriseSteps(this.cfg);
+    const reduced = matchMedia("(prefers-reduced-motion: reduce)").matches;
+    const wait = (ms) => new Promise((r) => setTimeout(r, ms));
+    (async () => {
+      if (this.view !== "frente") { this.setView("frente"); await wait(560); }
+      for (const patch of reduced ? [Object.assign({}, ...steps)] : steps) {
+        Object.assign(this.cfg, patch);
+        this.fix();
+        this.renderWatch();
+        if (!reduced) await wait(170);
+      }
+      this.save();
+      this.openColor = null;
+      this.renderPanel();
+      this.surprising = false;
+      btn.disabled = false;
+      toast("Combinação sorteada. Ajuste o que quiser.");
+    })();
+  },
+
+  /** Mostra os avisos de combinação da etapa aberta (no resumo, todos). */
+  advise() {
+    const slot = this.body.querySelector(".advice-slot");
+    this.advice = adviceFor(this.cfg);
+    $$("#steps button").forEach((b) => b.classList.toggle("has-advice", this.advice.some((a) => a.tab === b.dataset.tab)));
+    if (!slot) return;
+    const list = this.advice.map((a, i) => ({ ...a, i })).filter((a) => this.tab === "resumo" || a.tab === this.tab);
+    const key = list.map((a) => a.text).join("|");
+    if (slot.dataset.key === key) return;
+    slot.dataset.key = key;
+    slot.innerHTML = list.map((a) => `<div class="advice"><p>${a.text}</p><button type="button" class="link-arrow link-arrow--small" data-advice-fix="${a.i}">${a.label}</button></div>`).join("");
+  },
+
   setNight(on) {
     this.night = on;
     const btn = $("#studioNight");
@@ -911,6 +1057,7 @@ const Studio = {
       this.pending = false;
       if (!this.flipping) this.renderWatch();
       this.save();
+      this.advise();
       if (this.tab === "resumo") this.renderSummary();
     });
   },
@@ -920,7 +1067,8 @@ const Studio = {
     const tab = TABS.find((t) => t.id === this.tab);
     const c = this.cfg;
     const html = tab.fields.filter((f) => !f.when || f.when(c)).map((f) => this.field(f)).join("");
-    this.body.innerHTML = `<h2>${tab.title}</h2><p class="intro-text">${tab.intro}</p>${html}`;
+    this.body.innerHTML = `<h2>${tab.title}</h2><p class="intro-text">${tab.intro}</p><div class="advice-slot" role="status" aria-live="polite"></div>${html}`;
+    this.advise();
     this.body.style.animation = "none"; void this.body.offsetWidth; this.body.style.animation = "";
     if (tab.id === "resumo") this.renderSummary();
     if (this.openColor) this.openPicker(this.openColor);
@@ -1001,6 +1149,12 @@ const Studio = {
   },
 
   onClick(e) {
+    const fixBtn = e.target.closest("[data-advice-fix]");
+    if (fixBtn) {
+      const a = this.advice?.[+fixBtn.dataset.adviceFix];
+      if (a) { Object.assign(this.cfg, a.patch); this.fix(); this.save(); this.renderWatch(); this.openColor = null; this.renderPanel(); toast("Ajustado"); }
+      return;
+    }
     const set = e.target.closest("[data-set]");
     if (set && !set.disabled) {
       const key = set.dataset.set;

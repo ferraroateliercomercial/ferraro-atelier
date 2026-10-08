@@ -445,14 +445,35 @@ html[data-intro="on"] .welcome__bg img, html[data-intro="done"] .welcome__bg img
 
 /* Vista e modo noite */
 .stage__top { position: relative; display: flex; justify-content: center; align-items: center; }
-.night-toggle {
+.stage-btn {
   position: absolute; right: 0; top: 50%; translate: 0 -50%; display: inline-flex; align-items: center; gap: 8px; min-height: 36px; padding: 6px 12px;
   font-size: .7rem; letter-spacing: .16em; text-transform: uppercase; color: var(--muted); border: 1px solid var(--line); border-radius: 999px;
-  transition: color .2s var(--ease-out), background-color .2s var(--ease-out), border-color .2s var(--ease-out), transform .16s var(--ease-out);
+  transition: color .2s var(--ease-out), background-color .2s var(--ease-out), border-color .2s var(--ease-out), transform .16s var(--ease-out), opacity .2s;
 }
-.night-toggle svg { width: 16px; height: 16px; flex: none; }
-.night-toggle:active { transform: scale(.97); }
-@media (hover: hover) and (pointer: fine) { .night-toggle:hover { color: var(--ink); border-color: var(--ink); } }
+.stage-btn--left { right: auto; left: 0; }
+.stage-btn svg { width: 16px; height: 16px; flex: none; }
+.stage-btn:active { transform: scale(.97); }
+.stage-btn:disabled { opacity: .5; cursor: progress; }
+@media (hover: hover) and (pointer: fine) { .stage-btn:not(:disabled):hover { color: var(--ink); border-color: var(--ink); } }
+.studio__stage.is-night .stage-btn--left { color: var(--on-ink-muted); border-color: rgba(236, 235, 230, .25); }
+@media (hover: hover) and (pointer: fine) { .studio__stage.is-night .stage-btn--left:not(:disabled):hover { color: var(--on-ink); border-color: var(--on-ink); } }
+#studioSurprise:disabled svg { animation: dice .5s var(--ease-out) infinite; }
+@keyframes dice { to { rotate: 90deg; } }
+
+@media (max-width: 1199px) { .stage-btn { padding: 6px; min-width: 36px; justify-content: center; } .stage-btn span { display: none; } }
+
+/* Aviso de combinação */
+.advice-slot { display: grid; gap: 10px; margin-top: -10px; }
+.advice-slot:empty { display: none; }
+.advice {
+  display: grid; gap: 6px; padding: 12px 14px; border-left: 2px solid var(--brass-ink); background: rgba(164, 131, 69, .08);
+  animation: advice-in .22s var(--ease-out);
+}
+.advice p { font-size: .9rem; line-height: 1.45; }
+.advice .link-arrow { justify-self: start; }
+@keyframes advice-in { from { opacity: 0; transform: translateY(-4px); } }
+.steps button.has-advice small { position: relative; }
+.steps button.has-advice small::after { content: ""; position: absolute; top: -1px; right: -5px; width: 5px; height: 5px; border-radius: 50%; background: var(--brass-ink); }
 .night-toggle[aria-pressed="true"] { color: #d9f5c8; border-color: rgba(201, 245, 180, .45); background: rgba(201, 245, 180, .08); }
 .night-toggle[aria-pressed="true"] svg path { fill: currentColor; }
 
@@ -755,8 +776,8 @@ html[data-intro="on"] .welcome__bg img, html[data-intro="done"] .welcome__bg img
   .views button { padding: 4px 10px; }
 }
 @media (max-width: 560px) {
-  .night-toggle { padding: 6px; min-width: 36px; justify-content: center; }
-  .night-toggle span { display: none; }
+  .stage-btn { padding: 6px; min-width: 36px; justify-content: center; }
+  .stage-btn span { display: none; }
   .hands-grid { grid-template-columns: repeat(2, 1fr); }
   .footer__grid { grid-template-columns: 1fr; }
   .cta-band__inner { flex-direction: column; align-items: flex-start; }

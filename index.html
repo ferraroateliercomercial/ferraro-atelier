@@ -30,7 +30,7 @@
       var d = document.documentElement, seen = false;
       try { seen = sessionStorage.getItem("ct-intro") === "1"; } catch (e) {}
       var reduced = window.matchMedia && matchMedia("(prefers-reduced-motion: reduce)").matches;
-      var studio = /^#(personalizar|oficina)/.test(location.hash);
+      var studio = /^#(personalizar|oficina|p-)/.test(location.hash);
       if (!seen && !reduced && !studio) d.setAttribute("data-intro", "on");
     })();
   </script>
@@ -339,10 +339,16 @@
 
     <div class="studio__grid">
       <section class="studio__stage" aria-label="Prévia do relógio">
-        <div class="views" role="tablist" aria-label="Vista">
-          <button role="tab" aria-selected="true" data-view="frente">Frente</button>
-          <button role="tab" aria-selected="false" data-view="explodida">Explodida</button>
-          <button role="tab" aria-selected="false" data-view="fundo">Fundo</button>
+        <div class="stage__top">
+          <div class="views" role="tablist" aria-label="Vista">
+            <button role="tab" aria-selected="true" data-view="frente">Frente</button>
+            <button role="tab" aria-selected="false" data-view="explodida">Explodida</button>
+            <button role="tab" aria-selected="false" data-view="fundo">Fundo</button>
+          </div>
+          <button type="button" class="night-toggle" id="studioNight" aria-pressed="false" aria-label="Modo noite: ver o lume no escuro">
+            <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M20 14.5A8.5 8.5 0 0 1 9.5 4a8.5 8.5 0 1 0 10.5 10.5Z" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linejoin="round"/></svg>
+            <span>Modo noite</span>
+          </button>
         </div>
         <div class="studio__canvas" id="studioCanvas">
           <div class="stack-scene"><div class="stack" id="studioStack"></div></div>

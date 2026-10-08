@@ -18,12 +18,14 @@ Oito etapas: caixa, mostrador, ponteiros, luneta, pulseira, movimento, referênc
 
 - Todas as cores são livres (seletor de espectro completo e código HEX), inclusive a do aço da pulseira.
 - Pulseira em duas cores: laterais de uma cor e centro de outra (no aço, elos de fora e elos do centro).
-- Vistas de frente, explodida e de fundo.
+- Vistas de frente, explodida e de fundo. Ao passar da frente para o fundo, o relógio vira no próprio eixo (meio segundo).
+- **Modo noite** (botão com a lua na prévia): o fundo escurece, o relógio apaga e os índices e ponteiros com lume brilham em verde. Se o projeto estiver sem lume, o site avisa onde ativar.
 - Origem do movimento: japonês (quartzo, Seiko NH35, Seagull ST3600) ou suíço premium (Sellita SW200-1 automático e Sellita SW210-1 corda manual). O mostrador esqueleto só existe no suíço. Na prévia, os Sellita andam a 8 passos por segundo (28.800 alternâncias/h).
 - No automático e na corda manual: fundo de vidro ou fechado, e mostrador inteiro ou esqueleto (centro aberto mostrando o mecanismo).
 - Referência: o cliente informa um relógio de referência, anexa até 6 imagens e escreve observações. No celular, o envio já leva as imagens junto (compartilhamento do sistema); no computador, o cliente anexa as imagens na conversa do WhatsApp.
 - O relógio da prévia marca a hora real e anda conforme o movimento escolhido. Nos mecânicos dá para dar corda girando a coroa; no cronógrafo os botões laterais ligam, param e zeram.
 - O resumo gera a mensagem do WhatsApp com todas as escolhas, os códigos das cores e a referência.
+- **Link do projeto**: o botão "Copiar link do projeto" (no celular, abre o compartilhar do sistema) gera um endereço `#p-CT3-…` que abre o ateliê com o relógio já montado, direto no resumo. O mesmo link vai na mensagem do WhatsApp, em "Ver montado".
 
 ## Logo
 

@@ -199,8 +199,39 @@ const frameHooks = new Set();
   requestAnimationFrame(loop);
 })(performance.now());
 
-function renderStack(el, cfg) {
-  el.innerHTML = Watch.layers(cfg).map((l) => `<div class="layer" style="--i:${l.level}" data-name="${l.name}">${l.svg}</div>`).join("");
+const LUME = "#eef3df";
+/** Desenha as camadas. No modo noite, as camadas com lume ganham uma cópia só com o lume, que brilha por cima. */
+function renderStack(el, cfg, night = false) {
+  el.innerHTML = Watch.layers(cfg).map((l) => {
+    const glow = night && l.svg.includes(LUME) ? `<div class="layer__lume" aria-hidden="true">${l.svg}</div>` : "";
+    return `<div class="layer" style="--i:${l.level}" data-name="${l.name}">${l.svg}${glow}</div>`;
+  }).join("");
+}
+
+/** Vira o relógio no eixo vertical entre frente e fundo (meia volta para sair, meia para entrar). */
+function flipWatch(outEl, inEl, toBack, swap) {
+  const reduced = matchMedia("(prefers-reduced-motion: reduce)").matches;
+  const dir = toBack ? 1 : -1;
+  const half = reduced ? 140 : 240;
+  const out = reduced
+    ? [{ opacity: 1 }, { opacity: 0 }]
+    : [{ transform: "rotateY(0deg)" }, { transform: `rotateY(${90 * dir}deg)`, opacity: 0.7 }];
+  const enter = reduced
+    ? [{ opacity: 0 }, { opacity: 1 }]
+    : [{ transform: `rotateY(${-90 * dir}deg)`, opacity: 0.7 }, { transform: "rotateY(0deg)" }];
+  return outEl.animate(out, { duration: half, easing: "cubic-bezier(.55,0,1,.45)" }).finished.then(() => {
+    swap();
+    return inEl.animate(enter, { duration: half, easing: "cubic-bezier(.23,1,.32,1)" }).finished;
+  }).catch(() => swap());
+}
+
+/** Link que abre o projeto já montado no ateliê. */
+function shareLink(cfg) {
+  let base = location.href.split("#")[0];
+  try {
+    if (window.top !== window && /^https:\/\/claude\.ai\//.test(document.referrer)) base = document.referrer.split("#")[0];
+  } catch { /* sem acesso à janela de cima */ }
+  return `${base}#p-${encodeProject(cfg)}`;
 }
 
 /** Segurar um botão para dar corda (mouse, toque e teclado). */
@@ -726,6 +757,8 @@ const Studio = {
   cfg: { ...DEFAULT_WATCH, ...storage.get("ct-design", {}) },
   tab: "caixa",
   view: "frente",
+  night: false,
+  flipping: null,
   ready: false,
   openColor: null,
   refImages: [],
@@ -745,6 +778,7 @@ const Studio = {
     $("#toSummary").addEventListener("click", () => this.go("resumo"));
     $("#stepNext").addEventListener("click", () => this.step(1));
     $$(".views button").forEach((b) => b.addEventListener("click", () => this.setView(b.dataset.view)));
+    $("#studioNight").addEventListener("click", () => this.setNight(!this.night));
 
     bindCrown(this.canvas, () => this.mv);
     holdToWind($("#studioWind"), () => this.mv);
@@ -839,7 +873,16 @@ const Studio = {
     this.stack.style.setProperty("--spin", exploded ? "-24deg" : "0deg");
     this.stack.style.setProperty("--gap", exploded ? (mobile ? "22px" : "40px") : "0px");
     this.stack.style.setProperty("--lift", exploded ? (mobile ? "34px" : "80px") : "0px");
-    this.renderWatch();
+    const scene = this.stack.parentElement;
+    const toBack = v === "fundo";
+    const showingBack = !this.backEl.hidden;
+    if (toBack === showingBack || this.flipping || !this.canvas.offsetParent) { if (!this.flipping) this.renderWatch(); return; }
+    this.flipping = flipWatch(toBack ? scene : this.backEl, toBack ? this.backEl : scene, toBack, () => this.renderWatch())
+      .then(() => {
+        this.flipping = null;
+        // o cliente pode ter trocado de vista no meio da virada
+        if ((this.view === "fundo") !== !this.backEl.hidden) this.setView(this.view); else this.renderWatch();
+      });
   },
 
   renderWatch() {
@@ -847,8 +890,18 @@ const Studio = {
     this.stack.parentElement.hidden = back;
     this.backEl.hidden = !back;
     if (back) this.backEl.innerHTML = Watch.back(this.cfg);
-    else renderStack(this.stack, this.cfg);
+    else renderStack(this.stack, this.cfg, this.night);
     this.mv.setConfig(this.cfg);
+  },
+
+  setNight(on) {
+    this.night = on;
+    const btn = $("#studioNight");
+    btn.setAttribute("aria-pressed", String(on));
+    $(".studio__stage").classList.toggle("is-night", on);
+    if (!this.flipping) this.renderWatch();
+    if (on && !this.cfg.lume) toast("Este projeto está sem lume. Ative em Mostrador › Material luminescente.");
+    else if (on && this.view === "fundo") toast("O lume fica na frente. Vire o relógio para ver.");
   },
 
   refresh() {
@@ -856,7 +909,7 @@ const Studio = {
     this.pending = true;
     requestAnimationFrame(() => {
       this.pending = false;
-      this.renderWatch();
+      if (!this.flipping) this.renderWatch();
       this.save();
       if (this.tab === "resumo") this.renderSummary();
     });
@@ -986,6 +1039,16 @@ const Studio = {
       return;
     }
     if (e.target.closest("#shareProject")) { this.shareProject(); return; }
+    if (e.target.closest("#copyLink")) {
+      const url = shareLink(this.cfg);
+      const done = () => toast("Link copiado. Quem abrir vê este relógio montado.");
+      if (navigator.share && matchMedia("(pointer: coarse)").matches) {
+        navigator.share({ title: "Meu relógio · Ferraro Atelier", url }).catch(() => {});
+      } else {
+        navigator.clipboard?.writeText(url).then(done, () => toast(url));
+      }
+      return;
+    }
     if (e.target.closest("#copySummary")) {
       navigator.clipboard?.writeText(this.message()).then(() => toast("Resumo copiado"), () => toast("Não foi possível copiar. Selecione o texto e copie."));
       return;
@@ -1068,7 +1131,7 @@ const Studio = {
     const lines = this.groups().map(([title, rows]) => `*${title}*\n` + rows.map(([k, v]) => `- ${k}: ${typeof v === "object" ? v.color.toUpperCase() : v}`).join("\n"));
     const n = this.refImages.length;
     const pics = n ? `\n\nVou mandar ${n === 1 ? "1 imagem" : `${n} imagens`} de referência aqui na conversa.` : "";
-    return `Olá, Ferraro Atelier! Montei este relógio no ateliê virtual:\n\n${lines.join("\n\n")}${pics}\n\nCódigo do projeto: ${encodeProject(this.cfg)}\n\nPodem me passar o valor e o prazo?`;
+    return `Olá, Ferraro Atelier! Montei este relógio no ateliê virtual:\n\n${lines.join("\n\n")}${pics}\n\nCódigo do projeto: ${encodeProject(this.cfg)}\nVer montado: ${shareLink(this.cfg)}\n\nPodem me passar o valor e o prazo?`;
   },
 
   renderSummary() {
@@ -1081,6 +1144,7 @@ const Studio = {
       ${this.refImages.length && this.canShareFiles()
         ? `<button type="button" class="btn" id="shareProject">Enviar projeto com as imagens</button><a class="link-arrow link-arrow--small" href="${whatsUrl(this.message())}" target="_blank" rel="noopener">Enviar só o texto pelo WhatsApp</a>`
         : `<a class="btn" href="${whatsUrl(this.message())}" target="_blank" rel="noopener">Enviar projeto pelo WhatsApp</a>`}
+      <button type="button" class="link-arrow link-arrow--small" id="copyLink">Copiar link do projeto</button>
       <button type="button" class="link-arrow link-arrow--small" id="copySummary">Copiar resumo</button>
       <button type="button" class="link-arrow link-arrow--small" id="resetDesign">Recomeçar</button>
     </div>
@@ -1207,7 +1271,12 @@ const Workshop = {
     this.stack.style.setProperty("--spin", ex ? "-24deg" : "0deg");
     this.stack.style.setProperty("--gap", ex ? (mobile ? "24px" : "40px") : "0px");
     this.stack.style.setProperty("--lift", ex ? (mobile ? "40px" : "80px") : "0px");
-    if (this.cfg) this.render();
+    if (!this.cfg) return;
+    const scene = this.stack.parentElement;
+    const toBack = v === "fundo";
+    if (toBack === !this.back.hidden || this.flipping) { if (!this.flipping) this.render(); return; }
+    this.flipping = flipWatch(toBack ? scene : this.back, toBack ? this.back : scene, toBack, () => this.render())
+      .then(() => { this.flipping = null; if ((this.view === "fundo") !== !this.back.hidden) this.setView(this.view); });
   },
 
   render() {
@@ -1252,7 +1321,13 @@ const Workshop = {
 // Navegação entre a página inicial e o ateliê
 // ---------------------------------------------------------------------------
 function route() {
-  const hash = location.hash.slice(1);
+  let hash = location.hash.slice(1);
+  if (hash.startsWith("p-")) {
+    const cfg = decodeProject(hash.slice(2));
+    Studio.apply(cfg ? { ...DEFAULT_WATCH, ...cfg } : {}, cfg ? "resumo" : null, cfg ? "Projeto aberto a partir do link" : "Link de projeto inválido");
+    hash = "personalizar";
+    try { history.replaceState(null, "", "#personalizar"); } catch { /* segue com o hash antigo */ }
+  }
   const studio = hash.startsWith("personalizar");
   const workshop = hash === "oficina";
   const wasStudio = !$("#viewStudio").hidden || !$("#viewWorkshop").hidden;

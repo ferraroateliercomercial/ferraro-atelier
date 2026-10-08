@@ -440,7 +440,42 @@ html[data-intro="on"] .welcome__bg img, html[data-intro="done"] .welcome__bg img
 .studio__canvas { position: relative; min-height: 0; touch-action: pan-y; }
 .studio__canvas .stack-scene, .studio__back-view { position: absolute; inset: 0; display: grid; place-items: center; }
 .studio__canvas .stack { width: auto; height: 96%; max-height: 600px; }
-.studio__back-view { animation: fade-in .5s; }
+.studio__canvas, .workshop__canvas { perspective: 1800px; }
+.studio__canvas > .stack-scene, .studio__back-view { backface-visibility: hidden; }
+
+/* Vista e modo noite */
+.stage__top { position: relative; display: flex; justify-content: center; align-items: center; }
+.night-toggle {
+  position: absolute; right: 0; top: 50%; translate: 0 -50%; display: inline-flex; align-items: center; gap: 8px; min-height: 36px; padding: 6px 12px;
+  font-size: .7rem; letter-spacing: .16em; text-transform: uppercase; color: var(--muted); border: 1px solid var(--line); border-radius: 999px;
+  transition: color .2s var(--ease-out), background-color .2s var(--ease-out), border-color .2s var(--ease-out), transform .16s var(--ease-out);
+}
+.night-toggle svg { width: 16px; height: 16px; flex: none; }
+.night-toggle:active { transform: scale(.97); }
+@media (hover: hover) and (pointer: fine) { .night-toggle:hover { color: var(--ink); border-color: var(--ink); } }
+.night-toggle[aria-pressed="true"] { color: #d9f5c8; border-color: rgba(201, 245, 180, .45); background: rgba(201, 245, 180, .08); }
+.night-toggle[aria-pressed="true"] svg path { fill: currentColor; }
+
+.studio__stage { transition: background-color .5s var(--ease); }
+.studio__stage::before {
+  content: ""; position: absolute; inset: 0; z-index: 0; pointer-events: none; opacity: 0;
+  background: radial-gradient(circle at 50% 42%, #1d2638, #0a0e16 72%); transition: opacity .5s var(--ease);
+}
+.studio__stage > * { position: relative; z-index: 1; }
+.studio__stage.is-night::before { opacity: 1; }
+.studio__stage.is-night .views button { color: var(--on-ink-muted); }
+.studio__stage.is-night .views button[aria-selected="true"] { color: var(--on-ink); border-color: var(--on-ink); }
+.studio__stage.is-night .status, .studio__stage.is-night .status__hint { color: var(--on-ink-muted); }
+.studio__stage.is-night .status__head, .studio__stage.is-night .status .link-arrow { color: var(--on-ink); }
+.studio__stage.is-night .btn--line { color: var(--on-ink); border-color: rgba(236, 235, 230, .4); }
+.studio__canvas .layer > svg, .studio__back-view svg { transition: filter .5s var(--ease); }
+.studio__stage.is-night .layer > svg, .studio__stage.is-night .studio__back-view svg { filter: brightness(.2) saturate(.55); }
+.layer__lume { position: absolute; inset: 0; pointer-events: none; animation: lume-on .9s var(--ease) both; }
+.layer__lume svg { width: 100%; height: 100%; display: block; overflow: visible; filter: drop-shadow(0 0 2px rgba(190, 255, 160, .9)) drop-shadow(0 0 9px rgba(130, 235, 120, .45)); }
+.layer__lume svg * { visibility: hidden; }
+.layer__lume svg [fill="#eef3df"] { visibility: visible; fill: #cdf7b8; stroke: none; }
+@keyframes lume-on { from { opacity: 0; } 40% { opacity: .4; } }
+@media (prefers-reduced-motion: reduce) { .layer__lume { animation-duration: .3s; } }
 .studio__back-view svg { height: 96%; max-height: 600px; width: auto; max-width: 100%; }
 @keyframes fade-in { from { opacity: 0; } }
 [data-crown] { cursor: grab; }
@@ -720,6 +755,8 @@ html[data-intro="on"] .welcome__bg img, html[data-intro="done"] .welcome__bg img
   .views button { padding: 4px 10px; }
 }
 @media (max-width: 560px) {
+  .night-toggle { padding: 6px; min-width: 36px; justify-content: center; }
+  .night-toggle span { display: none; }
   .hands-grid { grid-template-columns: repeat(2, 1fr); }
   .footer__grid { grid-template-columns: 1fr; }
   .cta-band__inner { flex-direction: column; align-items: flex-start; }

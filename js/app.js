@@ -275,60 +275,93 @@ function adviceFor(c) {
 // ---------------------------------------------------------------------------
 const pick = (list) => list[Math.floor(Math.random() * list.length)];
 const rnd = (a, b) => a + Math.random() * (b - a);
-const METALS = [
-  { case: "#c9cdd2", light: "#e6e9ee", w: 5 }, // aço
-  { case: "#c8a55a", light: "#e3c98a", w: 2 }, // dourado
-  { case: "#a97a4a", light: "#d8b48a", w: 1 }, // bronze
-  { case: "#2c2e33", light: "#e6e9ee", w: 2 }, // PVD preto
-  { case: "#c49480", light: "#ead0c4", w: 1 }, // rosé
-];
+const STEEL = "#c9cdd2", GOLD = "#c8a55a", BRONZE = "#a97a4a", PVD = "#2c2e33", ROSE = "#c49480";
+const WHITE = "#e9ecef", NAVY = "#1c2c4a";
 
-/** Devolve a combinação em etapas, na ordem do ateliê, para as peças trocarem em sequência. */
-function surpriseSteps(current) {
-  const metal = pick(METALS.flatMap((m) => Array(m.w).fill(m)));
-  const hue = Math.round(rnd(0, 360));
-  const mood = pick(["esportivo", "esportivo", "social", "noturno"]);
-  const dial = mood === "social" ? hslHex(hue, rnd(8, 28), rnd(84, 92))
-    : mood === "noturno" ? hslHex(hue, rnd(10, 30), rnd(7, 13))
-    : hslHex(hue, rnd(40, 72), rnd(20, 36));
-  const dark = luminance(dial) < 0.28;
-  const ink = dark ? metal.light : pick(["#1c2c4a", "#1a1b1f", metal.case].filter((x) => contrast(x, dial) >= 2.5));
-  const accent = pick([ink, hslHex((hue + 180) % 360, 70, 55), "#c7372f", "#e2902f"]);
-  const caseShape = pick(["redonda", "redonda", "almofada", "octogonal"]);
-  const sporty = mood !== "social";
-
-  const caixa = { caseShape, caseColor: metal.case };
-  const mostrador = {
-    dialColor: dial, dialFume: sporty && Math.random() < 0.5,
-    dialFinish: pick(["liso", "raios", "listrado", "texturizado", "grade"]),
-    dialLayout: pick(["data", "data", "sem-data", "crono"]),
-    // os ponteirinhos do cronógrafo usam a cor dos ponteiros: o submostrador precisa contrastar com ela
-    subdialColor: luminance(ink) < 0.28 ? hslHex(hue, 10, 86) : hslHex(hue, 25, 16),
-    indexStyle: mood === "social" ? pick(["romanos", "bastao", "pontos"]) : pick(["bastao", "pontos", "arabicos"]),
-    indexColor: ink, lume: sporty,
-  };
-  const ponteiros = {
-    handStyle: pick(HAND_STYLES.map((h) => h.id)), handColor: ink,
-    secondStyle: pick(["agulha", "pirulito", "seta"]), secondColor: contrast(accent, dial) < 1.6 ? ink : accent,
-  };
-  const twoBezel = sporty && Math.random() < 0.2;
-  const luneta = {
-    bezelType: sporty ? pick(["mergulho", "mergulho", "taquimetro", "canelada"]) : pick(["lisa", "canelada"]),
-    bezelColor: pick(["#1a1d22", dial, hslHex(hue, 35, 16)]), bezelTwoTone: twoBezel, bezelColor2: hslHex((hue + 180) % 360, 60, 42),
-  };
-  let pulseira;
-  if (Math.random() < 0.4) {
-    pulseira = { strapType: caseShape === "octogonal" ? "integrada" : pick(["oyster", "jubile"]), braceletColor: metal.case, strapTwoTone: false };
-  } else {
-    const kind = sporty ? pick(["nato", "borracha", "couro"]) : "couro";
-    const color = kind === "couro" ? hslHex(rnd(14, 32), rnd(35, 60), rnd(14, 34)) : kind === "borracha" ? pick(["#1a1b1f", hslHex(hue, 40, 26)]) : hslHex(hue, rnd(30, 60), rnd(18, 34));
-    const two = kind === "nato" && Math.random() < 0.35;
-    const strapType = caseShape === "octogonal" && Math.random() < 0.5 ? "integrada" : kind;
-    pulseira = { strapType, strapColor: color, strapColor2: hslHex((hue + 180) % 360, 55, 40), strapTwoTone: two && strapType === "nato", stitchColor: pick(["#e8d6c0", ink, color]), braceletColor: metal.case };
+/** Mexe um pouco no tom (matiz e luz) para cada sorteio sair único sem perder a receita. */
+function jitter(hex, dh = 6, dl = 3) {
+  const n = parseInt(hex.slice(1), 16);
+  let r = ((n >> 16) & 255) / 255, g = ((n >> 8) & 255) / 255, b = (n & 255) / 255;
+  const max = Math.max(r, g, b), min = Math.min(r, g, b), l = (max + min) / 2, d = max - min;
+  let h = 0, sat = 0;
+  if (d) {
+    sat = d / (1 - Math.abs(2 * l - 1));
+    h = max === r ? ((g - b) / d) % 6 : max === g ? (b - r) / d + 2 : (r - g) / d + 4;
+    h *= 60;
   }
+  return hslHex((h + rnd(-dh, dh) + 360) % 360, sat * 100, Math.min(96, Math.max(4, l * 100 + rnd(-dl, dl))));
+}
+
+/**
+ * Receitas do Surpreenda-me, inspiradas em relógios clássicos.
+ * Valores em lista são sorteados; cores de mostrador e pulseira variam um pouco a cada vez.
+ */
+const SURPRISES = [
+  { name: "Azul de mergulho", caseShape: ["redonda"], caseColor: STEEL, dialColor: "#1d3f7a", dialFume: true, dialFinish: ["raios", "liso"], dialLayout: ["data", "sem-data"],
+    indexStyle: ["bastao", "pontos"], indexColor: WHITE, lume: true, handStyle: ["espada", "mercedes", "bastao"], handColor: "#e6e9ee", secondStyle: ["agulha", "pirulito"], secondColor: ["#c7372f", "#e6e9ee"],
+    bezelType: "mergulho", bezelColor: "#15213b", strap: [{ strapType: "oyster" }, { strapType: "nato", strapColor: "#1e3060" }, { strapType: "borracha", strapColor: "#16213a" }] },
+  { name: "Verde floresta", caseShape: ["redonda", "almofada"], caseColor: STEEL, dialColor: "#23523f", dialFume: true, dialFinish: ["raios", "liso", "listrado"], dialLayout: ["data", "sem-data"],
+    indexStyle: ["bastao", "pontos"], indexColor: WHITE, lume: true, handStyle: ["dauphine", "espada", "bastao"], handColor: "#e6e9ee", secondStyle: ["agulha"], secondColor: ["#e6e9ee", "#d9bf7a"],
+    bezelType: ["lisa", "mergulho"], bezelColor: "#1a2b23", strap: [{ strapType: "couro", strapColor: "#5a3420", stitchColor: "#e8d6c0" }, { strapType: "jubile" }] },
+  { name: "Noite dourada", caseShape: ["redonda", "almofada"], caseColor: GOLD, dialColor: "#141518", dialFume: false, dialFinish: ["liso", "raios"], dialLayout: ["sem-data", "data"],
+    indexStyle: ["romanos", "bastao"], indexColor: "#e3c98a", lume: false, handStyle: ["dauphine", "folha", "breguet"], handColor: "#e3c98a", secondStyle: ["agulha"], secondColor: "#e3c98a",
+    bezelType: ["lisa", "canelada"], bezelColor: "#141518", strap: [{ strapType: "couro", strapColor: "#1c1a19", stitchColor: "#1c1a19" }, { strapType: "jubile" }] },
+  { name: "Salmão clássico", caseShape: ["almofada", "redonda"], caseColor: [STEEL, ROSE], dialColor: "#e7ae94", dialFume: false, dialFinish: ["liso", "raios"], dialLayout: ["sem-data", "data"],
+    indexStyle: ["romanos", "arabicos"], indexColor: NAVY, lume: false, handStyle: ["breguet", "folha", "dauphine"], handColor: NAVY, secondStyle: ["agulha"], secondColor: NAVY,
+    bezelType: "lisa", bezelColor: "#1a1d22", strap: [{ strapType: "couro", strapColor: "#6b3a22", stitchColor: "#e8d6c0" }, { strapType: "couro", strapColor: "#24324f", stitchColor: "#e8d6c0" }] },
+  { name: "Panda de corrida", caseShape: ["redonda"], caseColor: STEEL, dialColor: "#16171a", dialFume: false, dialFinish: ["liso"], dialLayout: "crono", subdialColor: "#e9e8e3",
+    indexStyle: ["bastao"], indexColor: WHITE, lume: true, handStyle: ["bastao", "espada"], handColor: "#c7372f", secondStyle: ["agulha"], secondColor: "#c7372f",
+    bezelType: "taquimetro", bezelColor: "#141518", strap: [{ strapType: "borracha", strapColor: "#1a1b1f" }, { strapType: "oyster" }, { strapType: "couro", strapColor: "#3a2416", stitchColor: "#e8d6c0" }] },
+  { name: "Gelo", caseShape: ["octogonal", "redonda"], caseColor: STEEL, dialColor: "#bcd6e4", dialFume: false, dialFinish: ["raios", "listrado", "grade"], dialLayout: ["data", "sem-data"],
+    indexStyle: ["bastao"], indexColor: "#2b3440", lume: false, handStyle: ["bastao", "dauphine"], handColor: "#2b3440", secondStyle: ["agulha"], secondColor: "#2b3440",
+    bezelType: "lisa", bezelColor: "#1a1d22", strap: [{ strapType: "oyster" }] },
+  { name: "Turquesa", caseShape: ["octogonal", "redonda"], caseColor: STEEL, dialColor: "#7fcfc6", dialFume: false, dialFinish: ["liso", "listrado"], dialLayout: ["sem-data", "data"],
+    indexStyle: ["bastao"], indexColor: NAVY, lume: false, handStyle: ["bastao", "espada"], handColor: NAVY, secondStyle: ["agulha"], secondColor: NAVY,
+    bezelType: "lisa", bezelColor: "#1a1d22", strap: [{ strapType: "oyster" }, { strapType: "jubile" }] },
+  { name: "GMT Pepsi", caseShape: ["redonda"], caseColor: STEEL, dialColor: "#121316", dialFume: false, dialFinish: ["liso"], dialLayout: "data",
+    indexStyle: ["pontos", "bastao"], indexColor: WHITE, lume: true, handStyle: ["mercedes"], handColor: "#e6e9ee", secondStyle: ["pirulito", "agulha"], secondColor: "#c7372f",
+    bezelType: "mergulho", bezelColor: "#1e3f8a", bezelTwoTone: true, bezelColor2: "#b0262e", strap: [{ strapType: "jubile" }, { strapType: "oyster" }] },
+  { name: "Militar", caseShape: ["redonda"], caseColor: [BRONZE, STEEL], dialColor: "#3e4930", dialFume: true, dialFinish: ["texturizado", "liso"], dialLayout: ["sem-data", "data"],
+    indexStyle: ["arabicos"], indexColor: "#e8e0c8", lume: true, handStyle: ["seringa", "flecha", "espada"], handColor: "#e8e0c8", secondStyle: ["agulha", "seta"], secondColor: ["#e8e0c8", "#c7372f"],
+    bezelType: ["lisa", "mergulho"], bezelColor: "#262b20", strap: [{ strapType: "nato", strapColor: "#4b5338" }, { strapType: "couro", strapColor: "#6b4a2b", stitchColor: "#e8e0c8" }] },
+  { name: "Vinho", caseShape: ["almofada", "redonda"], caseColor: [ROSE, GOLD], dialColor: "#5a1a24", dialFume: true, dialFinish: ["raios"], dialLayout: ["sem-data", "data"],
+    indexStyle: ["bastao", "romanos"], indexColor: "#ead0c4", lume: false, handStyle: ["dauphine", "folha"], handColor: "#ead0c4", secondStyle: ["agulha"], secondColor: "#ead0c4",
+    bezelType: "lisa", bezelColor: "#1a1d22", strap: [{ strapType: "couro", strapColor: "#2a1a14", stitchColor: "#ead0c4" }] },
+  { name: "Furtivo", caseShape: ["redonda", "octogonal"], caseColor: PVD, dialColor: "#1a1b1e", dialFume: false, dialFinish: ["grade", "texturizado"], dialLayout: ["sem-data", "data"],
+    indexStyle: ["bastao", "arabicos"], indexColor: "#d9dad6", lume: true, handStyle: ["seringa", "espada"], handColor: "#d9dad6", secondStyle: ["seta", "agulha"], secondColor: "#e2902f",
+    bezelType: "mergulho", bezelColor: "#1a1b1e", strap: [{ strapType: "borracha", strapColor: "#1a1b1f" }] },
+  { name: "Sol de verão", caseShape: ["redonda"], caseColor: STEEL, dialColor: "#c4601f", dialFume: true, dialFinish: ["raios"], dialLayout: ["data", "sem-data"],
+    indexStyle: ["bastao"], indexColor: WHITE, lume: true, handStyle: ["bastao", "espada"], handColor: "#e6e9ee", secondStyle: ["agulha"], secondColor: "#e6e9ee",
+    bezelType: "mergulho", bezelColor: "#1a1d22", strap: [{ strapType: "borracha", strapColor: "#1a1b1f" }, { strapType: "oyster" }] },
+];
+let lastSurprise = -1;
+const DICE_ICON = `<svg class="dice" viewBox="0 0 24 24" aria-hidden="true"><rect x="4" y="4" width="16" height="16" rx="3.5" fill="none" stroke="currentColor" stroke-width="1.4"/><circle cx="9" cy="9" r="1.3" fill="currentColor"/><circle cx="15" cy="15" r="1.3" fill="currentColor"/><circle cx="12" cy="12" r="1.3" fill="currentColor"/></svg>`;
+
+/** Devolve a receita em etapas, na ordem do ateliê, para as peças trocarem em sequência. */
+function surpriseSteps(current) {
+  let i;
+  do { i = Math.floor(Math.random() * SURPRISES.length); } while (i === lastSurprise);
+  lastSurprise = i;
+  const r = SURPRISES[i];
+  const v = (x) => (Array.isArray(x) ? pick(x) : x);
+  const caseColor = v(r.caseColor);
+  const caseShape = v(r.caseShape);
+  const strap = { ...v(r.strap) };
+  if (strap.strapColor) strap.strapColor = jitter(strap.strapColor, 4, 2);
+  if (["oyster", "jubile"].includes(strap.strapType) && caseShape === "octogonal") strap.strapType = "integrada";
+  const steps = [
+    { caseShape, caseColor },
+    { dialColor: jitter(r.dialColor), dialFume: r.dialFume, dialFinish: v(r.dialFinish), dialLayout: v(r.dialLayout), subdialColor: r.subdialColor || current.subdialColor,
+      indexStyle: v(r.indexStyle), indexColor: r.indexColor, lume: r.lume },
+    { handStyle: v(r.handStyle), handColor: r.handColor, secondStyle: v(r.secondStyle), secondColor: v(r.secondColor) },
+    { bezelType: v(r.bezelType), bezelColor: r.bezelColor, bezelTwoTone: !!r.bezelTwoTone, bezelColor2: r.bezelColor2 || current.bezelColor2 },
+    { strapTwoTone: false, braceletColor: caseColor, ...strap },
+  ];
+  // o cronógrafo usa os ponteiros nos submostradores: sem receita própria, o submostrador acompanha
+  if (steps[1].dialLayout === "crono" && !r.subdialColor) steps[1].subdialColor = luminance(r.handColor) < 0.28 ? "#e9e8e3" : "#1d1f24";
   // movimento, tamanho e referência ficam como o cliente escolheu
-  const steps = [caixa, mostrador, ponteiros, luneta, pulseira];
-  if (current.swiss) steps.push({ skeleton: Math.random() < 0.25 });
+  if (current.swiss) steps.push({ skeleton: Math.random() < 0.2 });
+  steps.name = r.name;
   return steps;
 }
 
@@ -1007,6 +1040,7 @@ const Studio = {
     const btn = $("#studioSurprise");
     this.surprising = true;
     btn.disabled = true;
+    $$("[data-surprise]").forEach((b) => { b.disabled = true; });
     const steps = surpriseSteps(this.cfg);
     const reduced = matchMedia("(prefers-reduced-motion: reduce)").matches;
     const wait = (ms) => new Promise((r) => setTimeout(r, ms));
@@ -1023,7 +1057,7 @@ const Studio = {
       this.renderPanel();
       this.surprising = false;
       btn.disabled = false;
-      toast("Combinação sorteada. Ajuste o que quiser.");
+      toast(`Sorteado: ${steps.name}. Ajuste o que quiser.`);
     })();
   },
 
@@ -1067,7 +1101,8 @@ const Studio = {
     const tab = TABS.find((t) => t.id === this.tab);
     const c = this.cfg;
     const html = tab.fields.filter((f) => !f.when || f.when(c)).map((f) => this.field(f)).join("");
-    this.body.innerHTML = `<h2>${tab.title}</h2><p class="intro-text">${tab.intro}</p><div class="advice-slot" role="status" aria-live="polite"></div>${html}`;
+    const kick = tab.id === "caixa" ? `<div class="kickstart"><p><b>Sem ideia por onde começar?</b> Sorteie uma combinação pronta, inspirada em relógios clássicos, e ajuste depois.</p><button type="button" class="btn btn--line btn--small" data-surprise>${DICE_ICON}Surpreenda-me</button></div>` : "";
+    this.body.innerHTML = `<h2>${tab.title}</h2><p class="intro-text">${tab.intro}</p>${kick}<div class="advice-slot" role="status" aria-live="polite"></div>${html}`;
     this.advise();
     this.body.style.animation = "none"; void this.body.offsetWidth; this.body.style.animation = "";
     if (tab.id === "resumo") this.renderSummary();
@@ -1149,6 +1184,7 @@ const Studio = {
   },
 
   onClick(e) {
+    if (e.target.closest("[data-surprise]")) { this.surprise(); return; }
     const fixBtn = e.target.closest("[data-advice-fix]");
     if (fixBtn) {
       const a = this.advice?.[+fixBtn.dataset.adviceFix];

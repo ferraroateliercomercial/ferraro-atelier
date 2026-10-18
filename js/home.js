@@ -107,7 +107,7 @@ const Home = (() => {
       const deg = m * 6;
       const [x, y] = polar(119 * K, deg);
       s += m % 10 === 0
-        ? `<text x="${x}" y="${y + 26}" text-anchor="middle" font-family="Archivo, sans-serif" font-size="74" font-weight="600" fill="${PRINT}" transform="rotate(${deg} ${x} ${y})">${m}</text>`
+        ? `<text x="${x}" y="${y + 26}" text-anchor="middle" font-family="Saira, sans-serif" font-size="74" font-weight="600" fill="${PRINT}" transform="rotate(${deg} ${x} ${y})">${m}</text>`
         : `<rect x="${x - 10}" y="${y - 34}" width="20" height="68" rx="4" fill="${PRINT}" transform="rotate(${deg} ${x} ${y})"/>`;
     }
     for (let m = 1; m < 15; m++) {
@@ -200,7 +200,12 @@ const Home = (() => {
     }
   }
   function clockFrame() {
-    if (clock.live) paintHands(timeAngles());
+    if (!clock.live) return;
+    // horas e minutos andam a cada segundo; só o ponteiro de segundos bate 8 vezes por segundo
+    const now = Date.now();
+    const a = timeAngles(now);
+    const whole = timeAngles(now - (now % 1000), 1);
+    paintHands({ h: whole.h, m: whole.m, s: a.s });
   }
 
   // luz dos raios de sol: segue o ponteiro do mouse; no celular, oscila devagar sozinha

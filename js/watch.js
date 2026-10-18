@@ -274,7 +274,7 @@ const Watch = (() => {
         const deg = m * 6;
         const [x, y] = polar(119, deg);
         s += m % 10 === 0
-          ? `<text x="${x}" y="${y + 5}" text-anchor="middle" font-family="Archivo, sans-serif" font-size="15" font-weight="500" fill="${inkAt(deg)}" transform="rotate(${deg} ${x} ${y})">${m}</text>`
+          ? `<text x="${x}" y="${y + 5}" text-anchor="middle" font-family="Saira, sans-serif" font-size="15" font-weight="500" fill="${inkAt(deg)}" transform="rotate(${deg} ${x} ${y})">${m}</text>`
           : `<rect x="${x - 2}" y="${y - 7}" width="4" height="14" rx="1" fill="${inkAt(deg)}" transform="rotate(${deg} ${x} ${y})"/>`;
       }
       for (let m = 1; m < 15; m++) {
@@ -292,7 +292,7 @@ const Watch = (() => {
         const [l1x, l1y] = polar(131, deg);
         const [l2x, l2y] = polar(126, deg);
         s += `<line x1="${l1x}" y1="${l1y}" x2="${l2x}" y2="${l2y}" stroke="${inkAt(deg % 360)}" stroke-width="1.2"/>`;
-        s += `<text x="${x}" y="${y + 4}" text-anchor="middle" font-family="Archivo, sans-serif" font-size="11" fill="${inkAt(deg % 360)}" transform="rotate(${deg} ${x} ${y})">${v}</text>`;
+        s += `<text x="${x}" y="${y + 4}" text-anchor="middle" font-family="Saira, sans-serif" font-size="11" fill="${inkAt(deg % 360)}" transform="rotate(${deg} ${x} ${y})">${v}</text>`;
       }
       for (let v = 400; v > 60; v -= v > 200 ? 20 : v > 100 ? 10 : 5) {
         if (marks.includes(v)) continue;
@@ -353,7 +353,7 @@ const Watch = (() => {
       if (c.indexStyle === "romanos" || c.indexStyle === "arabicos") {
         const [x, y] = polar(dr * 0.8, deg);
         const txt = c.indexStyle === "romanos" ? ROMAN[h] : String(h || 12);
-        const fam = c.indexStyle === "romanos" ? "'Bodoni Moda', Georgia, serif" : "Archivo, sans-serif";
+        const fam = c.indexStyle === "romanos" ? "'Bodoni Moda', Georgia, serif" : "Saira, sans-serif";
         const fs = c.indexStyle === "romanos" ? (txt.length > 2 ? 12 : 14) : 16;
         s += `<text x="${x}" y="${y + fs * 0.36}" text-anchor="middle" font-family="${fam}" font-size="${fs}" font-weight="500" fill="${body}">${txt}</text>`;
       } else if (c.indexStyle === "pontos") {
@@ -409,14 +409,14 @@ const Watch = (() => {
       const r = dr * 0.27;
       s += subdial(c, CX + off, CY, r, "cm") + subdial(c, CX, CY + off, r, "ch") + subdial(c, CX - off, CY, r, "sub");
       s += mark(CX, CY - dr * 0.52, 40, tk);
-      s += `<text x="${CX}" y="${CY - dr * 0.3}" text-anchor="middle" font-family="Archivo, sans-serif" font-size="4.8" letter-spacing="1.6" fill="${tk}" opacity=".8">CRONÓGRAFO</text>`;
+      s += `<text x="${CX}" y="${CY - dr * 0.3}" text-anchor="middle" font-family="Saira, sans-serif" font-size="4.8" letter-spacing="1.6" fill="${tk}" opacity=".8">CRONÓGRAFO</text>`;
     } else {
       s += mark(CX, CY - dr * 0.5, 50, tk);
-      s += `<text x="${CX}" y="${CY + dr * 0.45}" text-anchor="middle" font-family="Archivo, sans-serif" font-size="6" letter-spacing="1.8" fill="${tk}" opacity=".85">${MOVEMENT_LABEL[c.movement]}</text>`;
+      s += `<text x="${CX}" y="${CY + dr * 0.45}" text-anchor="middle" font-family="Saira, sans-serif" font-size="6" letter-spacing="1.8" fill="${tk}" opacity=".85">${MOVEMENT_LABEL[c.movement]}</text>`;
       if (c.dialLayout === "data") {
         const x = CX + dr * 0.66;
         s += `<rect x="${x - 12}" y="${CY - 9.5}" width="24" height="19" rx="2" fill="#f4f4f1" stroke="${shade(c.dialColor, -0.4)}" stroke-width="1"/>`;
-        s += `<text x="${x}" y="${CY + 4.5}" text-anchor="middle" font-family="Archivo, sans-serif" font-size="12" font-weight="500" fill="#16191e">${dateNum()}</text>`;
+        s += `<text x="${x}" y="${CY + 4.5}" text-anchor="middle" font-family="Saira, sans-serif" font-size="12" font-weight="500" fill="#16191e">${dateNum()}</text>`;
       }
     }
     return s;
@@ -560,10 +560,10 @@ const Watch = (() => {
     let s = `<circle cx="${CX}" cy="${CY}" r="${r}" fill="${plate}"/>`;
     if (c.movement === "quartzo") {
       s = `<circle cx="${CX}" cy="${CY}" r="${r}" fill="#2a2d33"/>`;
-      s += `<circle cx="${CX - 28}" cy="${CY + 28}" r="${r * 0.32}" fill="#d5d8dc" stroke="#9aa0a6" stroke-width="2"/><text x="${CX - 28}" y="${CY + 32}" text-anchor="middle" font-family="Archivo, sans-serif" font-size="9" fill="#5b6067">SR920SW</text>`;
+      s += `<circle cx="${CX - 28}" cy="${CY + 28}" r="${r * 0.32}" fill="#d5d8dc" stroke="#9aa0a6" stroke-width="2"/><text x="${CX - 28}" y="${CY + 32}" text-anchor="middle" font-family="Saira, sans-serif" font-size="9" fill="#5b6067">SR920SW</text>`;
       s += `<rect x="${CX + 14}" y="${CY - 48}" width="46" height="22" rx="4" fill="#b8743a"/><g stroke="#8a5222">${Array.from({ length: 10 }, (_, i) => `<line x1="${CX + 18 + i * 4}" y1="${CY - 46}" x2="${CX + 18 + i * 4}" y2="${CY - 28}"/>`).join("")}</g>`;
       s += `<rect x="${CX + 10}" y="${CY + 4}" width="40" height="26" rx="3" fill="#3c6b4a"/><circle cx="${CX - 40}" cy="${CY - 40}" r="10" fill="#8c9096"/>`;
-      s += `<text x="${CX}" y="${CY - 66}" text-anchor="middle" font-family="Archivo, sans-serif" font-size="8" letter-spacing="1.5" fill="#9aa0a6">QUARTZ · 0 JEWELS</text>`;
+      s += `<text x="${CX}" y="${CY - 66}" text-anchor="middle" font-family="Saira, sans-serif" font-size="8" letter-spacing="1.5" fill="#9aa0a6">QUARTZ · 0 JEWELS</text>`;
       return s;
     }
     // perlage
@@ -599,7 +599,7 @@ const Watch = (() => {
         ${wings(CX, CY - r * 0.66, 46, ink(rc))}</g>`;
       s += `<circle cx="${CX}" cy="${CY}" r="9" fill="#9aa0a6" stroke="#6f757c"/><circle cx="${CX}" cy="${CY}" r="3" fill="${ruby}"/>`;
     } else if (c.movement === "manual") {
-      s += `<text x="${CX}" y="${CY + r - 14}" text-anchor="middle" font-family="Archivo, sans-serif" font-size="7" letter-spacing="1.4" fill="#5b6067">${c.swiss ? "SWISS · SELLITA SW210-1" : "17 JEWELS · CORDA MANUAL"}</text>`;
+      s += `<text x="${CX}" y="${CY + r - 14}" text-anchor="middle" font-family="Saira, sans-serif" font-size="7" letter-spacing="1.4" fill="#5b6067">${c.swiss ? "SWISS · SELLITA SW210-1" : "17 JEWELS · CORDA MANUAL"}</text>`;
     }
     if (front) s += `<circle cx="${CX}" cy="${CY}" r="7" fill="#9aa0a6" stroke="#6f757c"/>`;
     return s;
@@ -651,12 +651,12 @@ const Watch = (() => {
       s += `<circle cx="${CX}" cy="${CY}" r="112" fill="${m}"/>`;
       for (let r = 20; r < 110; r += 6) s += `<circle cx="${CX}" cy="${CY}" r="${r}" fill="none" stroke="#fff" stroke-opacity=".08"/>`;
       s += wings(CX, CY - 34, 84, shade(c.caseColor, -0.5));
-      s += `<text x="${CX}" y="${CY - 2}" text-anchor="middle" font-family="Archivo, sans-serif" font-size="15" font-weight="500" letter-spacing="2.4" fill="${shade(c.caseColor, -0.55)}">Ferraro Atelier</text>`;
-      s += `<text x="${CX}" y="${CY + 14}" text-anchor="middle" font-family="Archivo, sans-serif" font-size="8" letter-spacing="2" fill="${shade(c.caseColor, -0.5)}">${MOVEMENT_LABEL[c.movement]} · AÇO · 100 M</text>`;
+      s += `<text x="${CX}" y="${CY - 2}" text-anchor="middle" font-family="Saira, sans-serif" font-size="15" font-weight="500" letter-spacing="2.4" fill="${shade(c.caseColor, -0.55)}">Ferraro Atelier</text>`;
+      s += `<text x="${CX}" y="${CY + 14}" text-anchor="middle" font-family="Saira, sans-serif" font-size="8" letter-spacing="2" fill="${shade(c.caseColor, -0.5)}">${MOVEMENT_LABEL[c.movement]} · AÇO · 100 M</text>`;
     } else {
       s += `<circle cx="${CX}" cy="${CY}" r="112" fill="${m}"/>`;
       s += `<path id="${u}-arc" d="M${CX - 103} ${CY} A103 103 0 0 1 ${CX + 103} ${CY}" fill="none"/>`;
-      s += `<text font-family="Archivo, sans-serif" font-size="9.5" letter-spacing="1.6" fill="${shade(c.caseColor, -0.6)}"><textPath href="#${u}-arc" startOffset="50%" text-anchor="middle">Ferraro Atelier · relojoaria sob encomenda</textPath></text>`;
+      s += `<text font-family="Saira, sans-serif" font-size="9.5" letter-spacing="1.6" fill="${shade(c.caseColor, -0.6)}"><textPath href="#${u}-arc" startOffset="50%" text-anchor="middle">Ferraro Atelier · relojoaria sob encomenda</textPath></text>`;
       s += `<circle cx="${CX}" cy="${CY}" r="92" fill="#0d0f12"/>`;
       s += movement(u, c, 90);
       s += `<circle cx="${CX}" cy="${CY}" r="91" fill="none" stroke="#fff" stroke-opacity=".25" stroke-width="2"/>`;

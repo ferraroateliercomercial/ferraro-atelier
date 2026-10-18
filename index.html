@@ -4,15 +4,15 @@
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
   <title>Ferraro Atelier</title>
-  <meta name="description" content="Ferraro Atelier, relojoaria sob encomenda: monte seu relógio peça por peça, com a cor que quiser, o ponteiro que quiser e movimento quartzo, automático ou de corda manual." />
+  <meta name="description" content="Ferraro Atelier, relojoaria sob encomenda: monte seu relógio peça por peça, com a cor que quiser, o ponteiro que quiser e movimento japonês ou suíço. A gente monta à mão." />
   <meta property="og:title" content="Ferraro Atelier · Relojoaria sob encomenda" />
   <meta property="og:description" content="Monte seu relógio peça por peça. A gente monta à mão." />
-  <meta property="og:image" content="assets/movimento.jpg" />
-  <meta name="theme-color" content="#f6f6f3" />
-  <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Crect width='64' height='64' rx='14' fill='%23141b26'/%3E%3Cpath fill='%23efe9d8' transform='translate%285 26%29 scale%28.054%29' d='M476 145 432 121 263 184 261 186 285 199 305 205 320 207 340 207 355 205 374 200 405 188 449 164 476 147ZM524 145 568 121 737 184 739 186 715 199 695 205 680 207 660 207 645 205 626 200 595 188 551 164 524 147ZM415 109 388 85 385 85 192 135 191 137 234 168 237 169 415 111ZM585 109 612 85 615 85 808 135 809 137 766 168 763 169 585 111ZM373 68 360 52 347 31 345 30 257 48 110 75 108 76 165 117 169 117 373 69ZM627 68 640 52 653 31 655 30 743 48 890 75 892 76 835 117 831 117 627 69ZM0 0 1 2 72 50 343 25 343 23 334 7 328 2 320 0ZM1000 0 999 2 928 50 657 25 657 23 666 7 672 2 680 0Z'/%3E%3C/svg%3E" />
+  <meta property="og:image" content="assets/carbon-edition.jpg" />
+  <meta name="theme-color" content="#05070b" />
+  <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Crect width='64' height='64' rx='14' fill='%2305070b'/%3E%3Cpath fill='%23f2f0e9' transform='translate%285 26%29 scale%28.054%29' d='M476 145 432 121 263 184 261 186 285 199 305 205 320 207 340 207 355 205 374 200 405 188 449 164 476 147ZM524 145 568 121 737 184 739 186 715 199 695 205 680 207 660 207 645 205 626 200 595 188 551 164 524 147ZM415 109 388 85 385 85 192 135 191 137 234 168 237 169 415 111ZM585 109 612 85 615 85 808 135 809 137 766 168 763 169 585 111ZM373 68 360 52 347 31 345 30 257 48 110 75 108 76 165 117 169 117 373 69ZM627 68 640 52 653 31 655 30 743 48 890 75 892 76 835 117 831 117 627 69ZM0 0 1 2 72 50 343 25 343 23 334 7 328 2 320 0ZM1000 0 999 2 928 50 657 25 657 23 666 7 672 2 680 0Z'/%3E%3C/svg%3E" />
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-  <link href="https://fonts.googleapis.com/css2?family=Bodoni+Moda:ital,opsz,wght@0,6..96,400;0,6..96,500;1,6..96,400&family=Jost:wght@300;400;500&display=swap" rel="stylesheet" />
+  <link href="https://fonts.googleapis.com/css2?family=Archivo:wdth,wght@62..125,100..900&family=Michroma&display=swap" rel="stylesheet" />
   <link rel="stylesheet" href="css/styles.css" />
   <!-- Vercel Web Analytics (só funciona com o site publicado na Vercel) -->
   <script>
@@ -26,130 +26,107 @@
   <script defer src="/_vercel/speed-insights/script.js"></script>
   <script>
     // Decide a abertura antes de pintar a página, para não piscar.
+    // on: primeira visita da sessão · short: voltou na mesma sessão · off: sem abertura
     (function () {
       var d = document.documentElement, seen = false;
+      d.classList.add("js");
       try { seen = sessionStorage.getItem("ct-intro") === "1"; } catch (e) {}
       var reduced = window.matchMedia && matchMedia("(prefers-reduced-motion: reduce)").matches;
-      var studio = /^#(personalizar|oficina|p-)/.test(location.hash);
-      if (!seen && !reduced && !studio) d.setAttribute("data-intro", "on");
+      var deep = location.hash && location.hash !== "#topo";
+      d.setAttribute("data-intro", reduced || deep ? "off" : seen ? "short" : "on");
+      // garantia: se algum script falhar, a página aparece mesmo assim
+      setTimeout(function () { if (d.getAttribute("data-intro") !== "off") d.setAttribute("data-intro", "done"); }, 8000);
     })();
   </script>
 </head>
 <body>
-  <!-- Logo da Ferraro Atelier, usada pelo site inteiro -->
+  <!-- Logo da Ferraro Atelier e ícones, usados pelo site inteiro -->
   <svg width="0" height="0" style="position:absolute" aria-hidden="true" focusable="false">
     <symbol id="ferraro-lockup" viewBox="0 0 1000 402"><path fill="currentColor" fill-rule="evenodd" d="M876.2 278.2 875.7 277.3 874.8 277.3 873.5 279.0 871.2 279.9 867.2 279.9 872.6 280.4 875.7 282.6ZM629.0 283.1 629.0 277.3 628.1 277.3 626.3 279.0 621.8 279.9 611.9 279.9 625.4 280.4ZM432.9 258.9 432.0 259.8 430.7 264.2 429.8 265.1 426.2 274.6 424.0 278.6 420.4 288.9 419.5 289.8 415.4 299.7 413.2 301.9 413.6 302.4 418.1 302.4 418.6 301.9 417.2 300.1 417.2 298.3 420.8 289.4 423.1 287.6 424.0 288.0 428.0 287.6 424.9 287.1 423.5 287.6 422.2 286.2 422.2 285.3 423.5 283.5 427.1 274.1 428.0 273.2 428.0 271.9 430.2 267.4 430.7 264.7 432.0 264.2 433.4 266.0 436.5 274.6 441.5 284.9 441.5 287.6 444.1 291.2 446.8 298.8 446.4 301.9 454.0 302.4 451.3 299.2 438.8 268.7 434.7 261.1 434.3 258.9ZM943.0 258.4 942.6 258.9 943.9 260.7 943.9 299.7 942.6 301.9 943.5 302.4 948.9 302.4 949.3 301.9 948.0 300.1 948.0 282.6 948.9 281.7 948.0 280.4 948.0 260.2 949.3 258.9 957.8 258.9 961.4 259.3 964.6 261.1 966.8 263.3 968.1 266.5 968.6 271.0 967.7 275.0 965.0 278.6 961.0 281.3 954.2 281.7 955.6 282.2 958.3 285.3 967.2 301.5 968.6 302.4 974.0 302.4 974.0 301.5 970.4 297.9 963.2 284.9 961.4 283.1 962.3 281.3 964.1 281.3 968.6 278.6 972.6 273.7 973.1 268.3 970.8 263.3 969.0 261.6 964.1 258.9ZM784.2 258.4 785.6 260.7 785.6 299.7 784.2 302.4 790.5 302.4 790.9 301.5 789.6 299.7 789.6 265.6 790.0 265.1 789.6 261.1 790.9 258.9 790.5 258.4ZM694.9 258.4 696.3 261.6 695.8 265.1 696.3 266.5 696.3 297.4 695.8 300.1 694.5 301.9 694.9 302.4 724.5 302.4 725.4 300.6 725.9 296.5 721.8 301.0 720.5 301.5 713.8 301.5 713.3 301.9 712.9 301.5 701.7 301.5 700.3 300.1 700.3 260.7 701.7 259.3 701.7 258.4ZM605.2 258.4 606.1 263.8 605.7 264.7 606.1 267.4 606.1 288.0 605.7 289.4 606.1 290.7 605.7 291.2 605.7 300.1 604.3 301.5 604.3 302.4 634.4 302.4 635.3 300.6 635.7 297.0 631.7 301.0 627.6 301.9 620.0 301.9 619.6 301.5 612.8 301.9 611.0 301.5 609.7 299.7 609.7 281.3 610.1 280.8 609.7 260.2 611.0 258.9 618.7 258.9 619.1 258.4 629.0 259.3 631.7 260.7 633.5 262.4 633.5 258.9 633.0 258.4ZM534.3 258.9 537.9 258.9 541.9 259.8 545.5 263.3 546.4 263.3 545.5 258.4 535.2 258.4ZM511.0 258.4 510.1 259.3 510.5 263.3 512.8 260.2 516.4 258.9 524.5 258.9 525.8 261.1 525.3 265.6 525.8 291.2 525.3 291.6 525.3 300.1 524.5 301.9 524.9 302.4 530.3 302.4 531.2 301.5 529.4 299.7 529.4 277.7 529.8 277.3 529.4 260.7 530.7 258.9 530.3 258.4ZM880.7 258.4 877.5 258.0 876.2 258.4 852.8 258.4 853.7 262.0 853.3 264.7 853.7 281.7 853.3 282.2 853.3 300.1 852.0 301.5 852.4 302.4 881.1 302.4 882.5 301.5 883.4 296.5 882.5 296.5 881.6 298.8 878.0 301.5 860.9 301.5 860.0 301.9 858.7 301.5 857.3 299.7 857.3 288.5 857.8 288.0 857.3 281.7 858.7 279.9 857.3 278.6 857.3 260.2 859.1 258.9 859.6 259.3 862.3 258.9 875.7 259.3 878.9 260.7 880.7 262.9 881.6 262.9 881.6 260.7ZM165.1 213.5 166.0 214.9 168.2 215.8 176.8 221.6 186.2 226.6 192.9 229.3 203.7 232.4 210.0 233.3 210.4 232.8 218.9 232.8 225.2 231.0 232.4 227.5 232.4 226.6 223.4 223.4 218.9 221.2 208.2 218.0 205.9 216.7 195.2 213.1 180.3 206.8 177.2 206.8 171.8 210.4ZM149.4 214.0 140.9 209.5 136.4 206.4 135.0 206.4 122.9 211.8 107.2 217.1 96.5 221.6 95.1 221.6 82.5 226.1 81.7 227.0 85.2 229.3 95.1 232.8 104.5 233.3 111.3 232.4 119.8 230.1 127.0 227.5 135.0 223.4 148.9 214.9ZM130.6 202.3 125.6 198.7 122.0 195.2 118.4 194.7 105.4 198.7 94.7 201.0 71.8 207.7 61.9 210.0 60.6 211.3 73.1 220.7 75.8 220.7 82.5 218.0 84.3 218.0 92.0 214.9 104.1 211.3 109.0 209.1 110.4 209.1 127.4 203.2 129.2 203.2ZM184.4 202.3 200.5 207.3 201.9 208.2 203.2 208.2 239.6 220.7 242.3 220.7 254.8 211.3 254.8 210.9 249.0 209.1 247.2 209.1 241.4 206.8 234.2 205.5 223.4 201.9 211.3 199.2 210.0 198.3 202.3 196.9 201.0 196.1 193.4 194.3 189.3 198.7ZM116.2 188.9 111.7 183.0 109.5 178.6 106.8 178.6 95.1 180.3 87.9 182.1 82.5 182.6 75.4 184.4 67.7 185.3 65.5 186.2 55.6 187.5 52.9 188.4 34.5 191.1 33.6 192.0 50.2 203.7 52.9 204.1 67.3 200.1 69.5 200.1 73.6 198.7 84.3 196.9 101.8 192.5 110.8 191.1 115.7 189.8ZM198.7 188.9 200.1 190.2 204.1 190.7 216.7 193.8 218.9 193.8 226.1 196.1 246.3 200.1 248.1 201.0 261.6 204.1 264.2 204.1 280.8 192.0 280.4 191.1 277.7 191.1 275.5 190.2 265.1 188.9 263.3 188.0 260.7 188.0 240.0 183.9 235.1 183.5 228.4 181.7 211.8 179.5 207.3 178.1 205.9 178.1 205.0 179.0 203.2 182.6 201.9 183.9 201.9 184.8ZM0.0 168.2 0.4 169.6 3.6 170.9 21.1 182.6 32.8 182.1 43.1 180.8 48.9 180.8 60.1 179.5 66.4 179.5 70.4 178.6 89.7 177.7 107.2 175.9 107.2 174.5 103.6 168.2ZM314.0 167.8 313.1 168.2 210.4 168.2 206.8 175.4 207.7 176.3 221.2 176.8 226.1 177.7 254.8 179.5 259.8 180.3 277.3 181.2 293.4 183.0 314.5 169.1ZM941.7 147.2 940.8 149.4 936.7 153.4 934.5 154.8 934.9 155.7 936.7 156.1 940.3 159.7 941.7 162.4 942.6 162.4 946.2 157.5 949.8 154.8 944.4 150.3 942.6 147.2ZM812.5 102.3 816.1 106.3 817.9 112.6 817.9 184.4 817.4 184.8 817.9 197.4 816.5 202.3 812.5 206.8 812.9 207.3 838.0 207.3 838.5 206.8 835.8 204.1 834.0 201.0 833.6 183.9 834.0 183.5 834.0 171.4 834.9 170.5 840.7 170.9 845.7 173.2 849.7 176.8 855.1 184.8 860.5 196.1 866.3 203.2 871.7 205.9 877.5 207.3 889.6 207.3 890.5 206.8 890.1 205.9 888.7 205.9 886.5 204.6 882.0 200.1 868.6 177.7 864.1 173.2 858.2 169.6 859.1 168.2 865.4 166.0 872.6 160.6 876.2 156.6 880.7 147.6 882.0 138.2 881.6 129.7 878.9 122.0 874.8 115.7 871.7 112.2 866.8 108.6 858.2 104.5 853.3 103.2 850.2 103.2 846.6 102.3ZM835.4 104.1 843.4 104.5 847.0 105.4 853.7 109.0 858.7 114.4 862.7 121.6 865.0 131.9 865.0 143.1 863.2 150.7 860.9 156.1 858.2 159.7 853.3 164.2 847.0 167.3 842.5 168.2 834.9 168.2 834.0 167.3 834.0 115.3 833.6 112.6 834.0 112.2 834.0 105.4ZM640.6 102.3 644.2 106.3 646.0 112.2 646.0 198.3 644.7 202.8 641.1 206.8 641.5 207.3 659.9 207.3 660.4 206.8 666.2 207.3 667.1 206.8 664.0 204.1 662.6 201.4 662.2 198.7 662.2 171.4 663.1 170.5 667.6 170.5 672.1 172.3 677.9 177.2 682.4 183.5 687.8 194.7 690.9 199.2 695.8 204.1 704.4 207.3 717.4 207.3 718.3 206.8 717.8 205.9 715.6 205.0 711.5 201.9 708.8 198.7 700.8 184.4 696.3 178.1 690.4 172.7 684.6 169.6 686.0 168.2 694.5 165.1 699.0 162.0 703.9 156.6 707.9 148.9 709.7 141.3 709.7 130.6 707.0 122.0 703.9 117.5 703.9 116.6 699.4 111.7 694.5 108.1 687.8 105.0 681.9 103.2 676.1 102.3ZM663.1 104.5 672.9 105.0 677.0 106.3 683.7 111.3 688.2 117.1 690.4 121.6 692.7 130.1 693.1 134.1 692.7 144.9 691.3 150.7 688.6 156.6 681.9 164.2 677.0 166.9 671.6 168.2 663.1 168.2 662.2 167.3 662.2 162.9 661.7 162.4 661.7 156.1 662.2 155.7 661.7 109.5 662.2 105.4ZM561.2 102.3 564.4 105.4 565.7 108.1 566.6 112.6 566.6 197.8 566.2 201.0 563.9 204.1 561.2 206.4 562.6 207.3 563.5 206.8 565.7 207.3 581.4 207.3 581.9 206.8 586.8 207.3 587.3 206.8 584.6 204.1 583.2 201.0 582.8 171.4 583.7 170.5 587.7 170.5 594.0 173.2 598.5 176.8 603.4 183.9 609.2 196.1 611.0 198.7 615.1 202.8 623.1 206.8 637.5 207.3 638.0 205.9 633.9 203.7 628.1 196.5 621.8 185.3 616.9 178.1 611.9 173.2 605.7 169.6 606.6 168.2 609.2 167.8 613.3 166.0 619.6 162.0 625.4 155.7 629.4 147.6 630.8 141.3 630.8 130.6 628.1 121.6 625.8 118.0 620.9 112.2 614.6 107.7 603.0 103.2 596.2 102.3ZM586.4 104.1 592.2 104.5 598.0 106.3 600.7 107.7 606.6 112.6 611.9 121.6 611.9 122.9 612.8 124.3 614.2 130.1 614.6 140.4 613.3 147.2 611.5 152.1 608.3 157.9 604.3 162.4 600.7 165.1 595.3 167.3 588.2 168.7 584.1 168.7 582.8 167.3 582.8 105.4 583.7 104.5ZM489.5 102.3 489.0 103.2 491.7 105.4 493.9 110.8 493.9 198.7 493.5 201.4 492.1 203.7 489.0 206.8 489.5 207.3 492.6 206.8 495.3 207.3 496.2 206.8 498.0 207.3 519.5 207.3 520.0 206.8 552.7 207.3 553.6 206.4 554.1 198.7 556.3 187.1 555.9 185.7 555.0 186.2 552.3 192.5 548.2 197.4 542.4 201.9 539.3 203.2 534.3 204.1 532.5 205.0 514.6 205.0 511.9 204.6 510.5 201.9 510.5 157.9 511.4 157.0 520.9 157.0 526.2 158.4 529.8 160.6 532.5 163.3 534.3 166.0 535.2 169.6 536.1 170.0 536.6 169.1 536.1 166.0 536.6 142.2 536.1 141.3 535.2 141.8 532.1 148.5 529.4 151.2 524.5 153.9 520.4 154.8 511.4 154.8 510.5 153.9 510.5 105.4 511.4 104.5 515.0 104.1 515.9 104.5 533.4 104.5 540.2 106.3 546.0 109.9 550.0 114.0 554.1 121.1 554.5 118.9 551.8 102.7 551.4 102.3ZM478.7 102.3 453.1 102.3 452.7 102.7 449.1 102.3 416.3 102.7 415.4 102.3 414.5 102.7 417.2 105.4 419.5 112.6 419.5 198.3 418.6 201.9 417.2 204.1 414.1 206.8 415.0 207.3 416.8 206.8 441.0 207.3 441.0 206.4 437.9 204.6 435.6 199.6 435.6 157.9 436.5 157.0 448.2 157.0 452.2 157.9 457.2 160.6 461.6 165.5 462.1 168.7 463.0 169.1 463.4 166.9 463.0 166.4 463.0 161.5 463.4 161.1 463.4 156.6 463.0 156.1 463.4 144.0 463.0 142.2 462.1 142.7 460.7 147.2 456.7 151.2 452.2 153.9 448.2 154.8 436.5 154.8 435.2 153.4 435.6 152.1 435.2 149.8 435.6 147.6 435.6 121.6 435.2 121.1 435.6 105.4 436.5 104.5 455.8 104.1 465.2 105.9 470.2 108.1 476.9 114.4 481.8 122.5 480.9 112.6ZM762.7 101.8 760.0 107.2 752.4 127.9 751.5 131.9 746.1 145.8 741.6 160.2 739.8 163.3 739.8 165.1 728.1 197.4 724.5 203.2 719.2 206.8 720.1 207.3 735.3 207.3 735.8 206.8 731.7 204.1 730.4 201.0 730.4 197.8 733.1 188.9 737.6 178.1 742.9 170.5 744.7 169.6 758.6 169.6 759.1 170.0 769.4 169.6 772.5 170.0 774.3 171.4 776.1 177.7 777.5 179.9 783.8 196.5 784.7 201.9 783.8 204.1 782.0 205.9 780.6 206.4 781.1 207.3 808.4 207.3 808.9 206.4 805.7 205.0 802.6 201.0 791.8 174.1 791.8 172.7 789.6 168.2 789.6 166.9 782.4 149.8 782.4 148.5 778.8 139.1 777.0 135.9 775.2 130.1 774.3 129.2 773.9 127.0 770.7 120.2 768.1 112.2 763.6 101.8ZM772.5 166.9 771.2 168.2 745.2 167.8 744.3 166.9 748.8 161.5 754.6 156.6 759.1 153.4 763.6 151.6 766.7 152.1ZM756.4 124.7 758.2 128.3 758.2 129.7 759.1 130.6 765.4 148.5 764.0 149.8 758.2 152.1 748.8 158.8 745.2 163.3 742.5 165.5 742.0 163.3 742.9 162.0 743.8 157.9 748.8 145.4 749.2 142.2 753.3 131.9 754.6 126.5ZM954.7 101.8 943.0 101.4 942.6 101.8 935.8 101.8 928.7 103.2 920.1 105.9 910.7 110.8 910.3 111.7 908.9 112.2 904.0 116.2 897.7 122.9 893.2 130.1 888.3 143.1 887.4 148.0 887.8 163.3 890.5 174.1 894.6 182.6 901.7 192.0 906.7 196.5 913.4 201.0 919.7 204.1 921.0 204.1 925.1 205.9 934.1 207.7 941.2 207.7 941.7 208.2 948.9 207.7 960.5 205.5 970.8 201.4 980.3 195.2 991.0 183.5 996.0 173.6 998.7 165.5 998.7 162.9 999.6 159.7 999.1 145.4 996.9 136.4 991.0 124.7 985.2 117.5 980.3 112.6 966.4 105.0ZM935.8 104.1 944.8 104.1 950.2 105.4 957.8 108.6 965.5 114.0 972.2 121.1 978.5 130.6 982.1 139.1 984.3 148.0 984.7 162.4 983.8 168.7 980.7 179.9 977.1 187.1 973.5 192.0 966.4 198.7 958.3 203.2 950.2 205.5 942.6 205.5 933.6 203.2 927.3 200.1 918.3 193.4 912.1 185.7 907.1 176.8 903.1 165.5 901.7 157.5 901.7 143.6 902.6 139.1 905.3 130.1 909.8 121.6 913.9 116.2 920.1 110.4 927.3 106.3ZM369.2 0.0 368.3 0.9 368.3 228.8 368.8 229.3 368.3 231.0 368.3 398.8 368.8 399.3 368.3 401.1 368.8 402.0 375.5 402.0 376.4 400.6 376.0 400.2 376.0 362.5 376.4 362.0 376.0 361.6 376.4 360.7 376.4 354.9 376.0 354.4 376.4 350.4 376.4 327.1 376.0 326.6 376.4 13.5 376.0 13.0 376.0 6.7 376.4 4.9 376.0 2.2 376.4 0.9 375.5 0.0Z"/></symbol>
     <symbol id="ferraro-wings" viewBox="0 0 1000 207"><path fill="currentColor" d="M476 145 432 121 263 184 261 186 285 199 305 205 320 207 340 207 355 205 374 200 405 188 449 164 476 147ZM524 145 568 121 737 184 739 186 715 199 695 205 680 207 660 207 645 205 626 200 595 188 551 164 524 147ZM415 109 388 85 385 85 192 135 191 137 234 168 237 169 415 111ZM585 109 612 85 615 85 808 135 809 137 766 168 763 169 585 111ZM373 68 360 52 347 31 345 30 257 48 110 75 108 76 165 117 169 117 373 69ZM627 68 640 52 653 31 655 30 743 48 890 75 892 76 835 117 831 117 627 69ZM0 0 1 2 72 50 343 25 343 23 334 7 328 2 320 0ZM1000 0 999 2 928 50 657 25 657 23 666 7 672 2 680 0Z"/></symbol>
+    <symbol id="i-arrow" viewBox="0 0 24 24"><path d="M3.5 12h16M14 6.5l5.5 5.5-5.5 5.5" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></symbol>
+    <symbol id="i-back" viewBox="0 0 24 24"><path d="M20.5 12h-16M10 6.5 4.5 12l5.5 5.5" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></symbol>
+    <symbol id="i-crown" viewBox="0 0 24 24"><path d="M2.5 10.5h4v3h-4z" fill="currentColor"/><rect x="6.5" y="5.5" width="13" height="13" rx="2.6" fill="none" stroke="currentColor" stroke-width="1.5"/><path d="M10 6v12M13 6v12M16 6v12" stroke="currentColor" stroke-width="1.1"/></symbol>
+    <symbol id="i-plus" viewBox="0 0 24 24"><path d="M12 5v14M5 12h14" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/></symbol>
   </svg>
   <a class="skip" href="#conteudo">Pular para o conteúdo</a>
 
-  <!-- ABERTURA -->
-  <div class="intro" id="intro" aria-hidden="true">
-    <div class="intro__stage">
-      <svg class="intro__dial" viewBox="0 0 200 200">
-        <circle class="intro__ring" cx="100" cy="100" r="92" pathLength="1" />
-        <circle class="intro__ring intro__ring--inner" cx="100" cy="100" r="84" pathLength="1" />
-        <g class="intro__ticks">
-          <rect x="97" y="18" width="2.2" height="13" style="--i:0" /><rect x="100.8" y="18" width="2.2" height="13" style="--i:0" />
-          <rect x="99" y="18" width="2" height="10" transform="rotate(30 100 100)" style="--i:1" />
-          <rect x="99" y="18" width="2" height="10" transform="rotate(60 100 100)" style="--i:2" />
-          <rect x="99" y="18" width="2" height="13" transform="rotate(90 100 100)" style="--i:3" />
-          <rect x="99" y="18" width="2" height="10" transform="rotate(120 100 100)" style="--i:4" />
-          <rect x="99" y="18" width="2" height="10" transform="rotate(150 100 100)" style="--i:5" />
-          <rect x="99" y="18" width="2" height="13" transform="rotate(180 100 100)" style="--i:6" />
-          <rect x="99" y="18" width="2" height="10" transform="rotate(210 100 100)" style="--i:7" />
-          <rect x="99" y="18" width="2" height="10" transform="rotate(240 100 100)" style="--i:8" />
-          <rect x="99" y="18" width="2" height="13" transform="rotate(270 100 100)" style="--i:9" />
-          <rect x="99" y="18" width="2" height="10" transform="rotate(300 100 100)" style="--i:10" />
-          <rect x="99" y="18" width="2" height="10" transform="rotate(330 100 100)" style="--i:11" />
-        </g>
-        <g class="intro__hand intro__hand--h"><path d="M98 104 L98 58 L100 50 L102 58 L102 104 Z" /></g>
-        <g class="intro__hand intro__hand--m"><path d="M98.8 106 L98.8 30 L100 22 L101.2 30 L101.2 106 Z" /></g>
-        <g class="intro__hand intro__hand--s"><rect x="99.5" y="24" width="1" height="90" /><circle cx="100" cy="112" r="2.4" /></g>
-        <circle cx="100" cy="100" r="3.2" class="intro__cap" />
-      </svg>
-      <svg class="intro__wings" viewBox="0 0 1000 207" aria-hidden="true"><use href="#ferraro-wings" /></svg>
-      <p class="intro__brand" aria-label="Ferraro Atelier"><span style="--i:0">F</span><span style="--i:1">e</span><span style="--i:2">r</span><span style="--i:3">r</span><span style="--i:4">a</span><span style="--i:5">r</span><span style="--i:6">o</span><span class="intro__space"> </span><span style="--i:8">A</span><span style="--i:9">t</span><span style="--i:10">e</span><span style="--i:11">l</span><span style="--i:12">i</span><span style="--i:13">e</span><span style="--i:14">r</span></p>
-      <p class="intro__tag">Relojoaria sob encomenda</p>
-    </div>
-    <button class="intro__skip" id="introSkip" type="button" tabindex="-1">Pular</button>
-  </div>
-
   <!-- ===================== INÍCIO ===================== -->
-  <div class="view" id="viewHome">
-    <header class="header">
-      <div class="wrap header__inner">
-        <button class="menu-btn" id="menuBtn" aria-label="Abrir menu" aria-expanded="false" aria-controls="menu"><span></span><span></span></button>
-        <nav class="header__nav" id="menu" aria-label="Principal">
-          <a href="#a-venda" class="nav-sale">À venda</a>
-          <a href="#movimentos">Movimentos</a>
-          <a href="#ponteiros">Ponteiros</a>
-          <a href="#portfolio">Portfólio</a>
-          <a href="#atelie" class="header__nav-extra">O ateliê</a>
-          <a href="#duvidas" class="header__nav-extra">Dúvidas</a>
-        </nav>
-        <a href="#topo" class="brand" aria-label="Ferraro Atelier, início">
-          <svg class="lockup" viewBox="0 0 1000 402" aria-hidden="true"><use href="#ferraro-lockup" /></svg>
-        </a>
-        <div class="header__actions">
-          <a href="#personalizar" class="btn btn--small">Personalizar</a>
-        </div>
+  <div class="view home" id="viewHome">
+    <header class="masthead" id="masthead">
+      <a href="#topo" class="masthead__brand" aria-label="Ferraro Atelier, início"><svg class="lockup" viewBox="0 0 1000 402" aria-hidden="true"><use href="#ferraro-lockup" /></svg></a>
+      <div class="masthead__right">
+        <a href="#personalizar" class="masthead__cta"><svg class="ico ico--crown" viewBox="0 0 24 24" aria-hidden="true"><use href="#i-crown" /></svg>Monte o seu</a>
+        <button type="button" class="masthead__menu" id="menuBtn" aria-expanded="false" aria-controls="menu"><span class="masthead__menu-word">Menu</span><span class="masthead__menu-icon" aria-hidden="true"><i></i><i></i></span></button>
       </div>
     </header>
 
-    <main id="conteudo">
-      <!-- ABERTURA DA PÁGINA: relógio que se desmonta ao rolar -->
-      <!-- BOAS-VINDAS: foto da bancada em tela cheia -->
-      <section class="welcome" id="topo">
-        <div class="welcome__bg" aria-hidden="true"><img src="assets/movimento.jpg" alt="" width="1024" height="1024" /></div>
-        <div class="wrap welcome__inner">
-          <svg class="lockup lockup--welcome rise" style="--d:0" viewBox="0 0 1000 409" role="img" aria-label="Ferraro Atelier"><use href="#ferraro-lockup" /></svg>
-          <h1 class="welcome__title" aria-label="Seu relógio, peça por peça.">
-            <span class="line" aria-hidden="true"><span class="line__in" style="--d:1">Seu relógio,</span></span>
-            <span class="line" aria-hidden="true"><span class="line__in" style="--d:2"><em class="rotator" id="heroRotator">
-              <span class="rotator__word is-on">peça por peça.</span>
-              <span class="rotator__word">na cor exata.</span>
-              <span class="rotator__word">do seu jeito.</span>
-              <span class="rotator__word">no seu tempo.</span>
-            </em></span></span>
-          </h1>
-          <p class="welcome__lead rise" style="--d:3">Você escolhe cada detalhe: a caixa, a cor do mostrador, o estilo dos ponteiros, a pulseira e o movimento. Nós montamos à mão, na bancada do ateliê.</p>
-          <div class="welcome__cta rise" style="--d:4">
-            <a href="#personalizar" class="btn btn--light">Começar a personalizar</a>
-            <a href="#anatomia" class="link-arrow">Ver por dentro</a>
-          </div>
-          <dl class="welcome__facts rise" style="--d:5">
-            <div><dt data-count="16.7" data-decimals="1">0</dt><dd>milhões de cores</dd></div>
-            <div><dt data-count="10">0</dt><dd>estilos de ponteiros</dd></div>
-            <div><dt data-count="3">0</dt><dd>tipos de movimento</dd></div>
-          </dl>
+    <nav class="menu" id="menu" aria-label="Principal" hidden>
+      <div class="menu__inner">
+        <ul class="menu__list" id="menuList">
+          <li><a href="#anatomia" data-hour="1">Anatomia</a></li>
+          <li><a href="#cores" data-hour="2">Cores</a></li>
+          <li><a href="#movimentos" data-hour="3">Movimentos</a></li>
+          <li><a href="#ponteiros" data-hour="4">Ponteiros</a></li>
+          <li class="nav-sale"><a href="#a-venda" data-hour="5">À venda</a></li>
+          <li><a href="#portfolio" data-hour="6">Da bancada</a></li>
+          <li><a href="#atelie" data-hour="7">Como funciona</a></li>
+          <li><a href="#duvidas" data-hour="8">Dúvidas</a></li>
+          <li><a href="#contato" data-hour="9">Contato</a></li>
+        </ul>
+        <div class="menu__side">
+          <svg class="menu__dial" id="menuDial" viewBox="-100 -100 200 200" aria-hidden="true"></svg>
+          <a href="#personalizar" class="menu__cta"><svg class="ico ico--crown" viewBox="0 0 24 24" aria-hidden="true"><use href="#i-crown" /></svg>Monte o seu</a>
+          <p class="menu__contact"><a class="whats-link" href="https://wa.me/5548996950800" target="_blank" rel="noopener">WhatsApp (48) 99695-0800</a><a class="insta-link" href="https://www.instagram.com/ferraro_atelier/" target="_blank" rel="noopener">Instagram @ferraro_atelier</a></p>
         </div>
-        <a href="#anatomia" class="welcome__scroll" aria-label="Rolar para a próxima seção"><span class="hero__mouse"></span></a>
-      </section>
+      </div>
+    </nav>
 
-      <!-- ANATOMIA: relógio que se desmonta ao rolar -->
-      <section class="hero" id="anatomia">
-        <div class="hero__sticky">
-          <div class="wrap hero__grid">
-            <div class="hero__text" id="heroText">
-              <h2 class="hero__heading">Sete peças.<br /><em>Todas escolhidas por você.</em></h2>
-              <p class="hero__lead">Role a página e veja o relógio se desmontar. Cada camada é uma escolha no ateliê virtual.</p>
-              <a href="#personalizar" class="link-arrow">Abrir o ateliê virtual</a>
-            </div>
-            <div class="hero__stage" id="heroStage">
-              <svg class="hero__orbit" id="heroOrbit" viewBox="0 0 400 400" aria-hidden="true"></svg>
-              <div class="stack-scene" id="heroScene">
-                <div class="stack" id="heroStack"></div>
+    <main id="conteudo">
+      <!-- MOSTRADOR VIVO: a tela é o mostrador; ao rolar, ele se afasta, vira o relógio inteiro e se desmonta -->
+      <section class="hero" id="topo">
+        <div class="hero__pin" id="heroPin">
+          <div class="hero__head" id="heroHead">
+            <div class="head__case" aria-hidden="true"></div>
+            <svg class="head__bezel" id="heroBezel" viewBox="-720 -720 1440 1440" aria-hidden="true"></svg>
+            <div class="head__dial" id="heroDial">
+              <div class="dial__base" id="dialBase" aria-hidden="true">
+                <div class="dial__lacquer"></div>
+                <div class="dial__rays"></div>
+                <div class="dial__light" id="dialLight"></div>
               </div>
-              <p class="hero__hint" aria-hidden="true"><span class="hero__mouse"></span> Role para desmontar</p>
+              <svg class="dial__print" id="dialPrint" viewBox="-500 -500 1000 1000" aria-hidden="true"></svg>
+              <div class="dial__date" id="dialDate" aria-hidden="true"><span class="dial__date-strip" id="dateStrip"></span></div>
+              <div class="hero__copy" id="heroCopy">
+                <h1 class="hero__title" id="heroTitle"><span class="hero__line">Seu relógio,</span> <span class="hero__line">peça por peça.</span></h1>
+                <p class="hero__sub" id="heroSub">Montado à mão, com a cor, os ponteiros e o movimento que você escolher.</p>
+                <a class="hero__cta" href="#personalizar"><svg class="ico ico--crown" viewBox="0 0 24 24" aria-hidden="true"><use href="#i-crown" /></svg>Monte o seu</a>
+              </div>
+              <div class="dial__hands" id="heroHands" aria-hidden="true"></div>
+            </div>
+            <a class="crown" id="heroCrown" href="#personalizar" aria-label="Monte o seu relógio no ateliê virtual">
+              <span class="crown__body" aria-hidden="true"><span class="crown__knurl"></span></span>
+              <span class="crown__label" aria-hidden="true">Monte o seu</span>
+            </a>
+          </div>
+          <p class="hero__hint" id="heroHint" aria-hidden="true"><span>Role</span><i></i></p>
+
+          <div class="anatomy" id="anatomia">
+            <div class="anatomy__text" id="anatomyText">
+              <h2>Sete peças.<br /><span>Todas escolhidas por você.</span></h2>
+              <p>Cada camada é uma escolha no ateliê virtual, do metal da caixa ao movimento que bate lá dentro.</p>
+              <a href="#personalizar" class="link-arrow">Abrir o ateliê virtual<svg class="ico" viewBox="0 0 24 24" aria-hidden="true"><use href="#i-arrow" /></svg></a>
+            </div>
+            <div class="anatomy__stage" id="heroStage">
+              <div class="stack-scene" id="heroScene"><div class="stack" id="heroStack"></div></div>
               <ol class="callouts" id="heroCallouts" aria-label="Partes do relógio">
-                <li data-layer="6"><strong>Cristal</strong><span>Protege o mostrador</span></li>
-                <li data-layer="5"><strong>Luneta</strong><span>Mergulho, taquímetro, lisa ou canelada</span></li>
-                <li data-layer="4"><strong>Ponteiros</strong><span>10 estilos, qualquer cor</span></li>
-                <li data-layer="3"><strong>Mostrador</strong><span>Cor livre e 5 acabamentos</span></li>
-                <li data-layer="2"><strong>Caixa</strong><span>Redonda, almofada ou octogonal</span></li>
-                <li data-layer="1"><strong>Movimento</strong><span>Quartzo, automático ou manual</span></li>
-                <li data-layer="0"><strong>Pulseira</strong><span>NATO, couro, borracha ou aço</span></li>
+                <li data-layer="6" data-name="cristal"><strong>Cristal</strong><span>Protege o mostrador</span></li>
+                <li data-layer="5" data-name="luneta"><strong>Luneta</strong><span>Mergulho, taquímetro, lisa ou canelada</span></li>
+                <li data-layer="4" data-name="ponteiros"><strong>Ponteiros</strong><span>10 estilos, qualquer cor</span></li>
+                <li data-layer="3" data-name="mostrador"><strong>Mostrador</strong><span>Cor livre e 5 acabamentos</span></li>
+                <li data-layer="2" data-name="caixa"><strong>Caixa</strong><span>Redonda, almofada ou octogonal</span></li>
+                <li data-layer="1" data-name="movimento"><strong>Movimento</strong><span>Japonês ou suíço</span></li>
+                <li data-layer="0" data-name="pulseira"><strong>Pulseira</strong><span>NATO, couro, borracha ou aço</span></li>
               </ol>
               <p class="part-caption" id="partCaption" aria-hidden="true"><strong></strong><span></span></p>
             </div>
@@ -157,27 +134,36 @@
         </div>
       </section>
 
-      <!-- À VENDA -->
-      <section class="section section--stone" id="a-venda">
-        <div class="wrap">
-          <header class="section-head">
-            <h2>À venda</h2>
-            <p>Relógios que já saíram da bancada e estão disponíveis. A compra é feita pelo WhatsApp.</p>
-          </header>
-          <div class="sale-grid" id="saleGrid"></div>
+      <!-- COR LIVRE -->
+      <section class="colors" id="cores">
+        <div class="wrap colors__grid">
+          <div class="colors__copy">
+            <h2>A cor que você quiser.</h2>
+            <p>Não existe cartela. No ateliê virtual você escolhe qualquer tom, em qualquer peça: mostrador, ponteiros, luneta, pulseira e até o aço.</p>
+            <p class="colors__readout" aria-live="polite"><span class="colors__name" id="colorName">Azul mergulho</span><span class="colors__hex" id="colorHex">#1D4E8F</span></p>
+            <a class="link-arrow" href="#personalizar" id="colorsCta">Montar com esta cor<svg class="ico" viewBox="0 0 24 24" aria-hidden="true"><use href="#i-arrow" /></svg></a>
+          </div>
+          <div class="colors__bench">
+            <div class="colors__watch" id="colorWatch"></div>
+          </div>
+          <div class="colors__controls">
+            <div class="colors__chips" id="colorChips" role="group" aria-label="Lacas de exemplo"></div>
+            <label class="hue-rail" for="colorHue"><span>Ou arraste para qualquer tom</span><input type="range" id="colorHue" min="0" max="359" value="214" /></label>
+          </div>
         </div>
       </section>
 
       <!-- MOVIMENTOS -->
-      <section class="section section--ink" id="movimentos">
+      <section class="movements-sec" id="movimentos" data-ground="opaline">
         <div class="wrap">
-          <header class="section-head">
+          <header class="sec-head">
             <h2>Três jeitos de marcar o tempo</h2>
-            <p>Cada movimento anda de um jeito. Experimente aqui: os relógios abaixo funcionam como os de verdade.</p>
+            <p>Repare no ponteiro de segundos: cada movimento anda num compasso. Os relógios abaixo funcionam como os de verdade.</p>
           </header>
           <div class="movements">
-            <article class="movement reveal">
+            <article class="movement">
               <div class="movement__watch" id="mvQuartzo"></div>
+              <p class="movement__beat"><b>1</b><span>salto por segundo</span></p>
               <h3>Quartzo</h3>
               <p class="movement__how">A bateria faz o ponteiro de segundos <strong>saltar uma vez por segundo</strong>. Preciso e sem manutenção.</p>
               <ul class="movement__spec">
@@ -186,8 +172,9 @@
                 <li><span>Ideal para</span><span>uso diário sem preocupação</span></li>
               </ul>
             </article>
-            <article class="movement reveal">
+            <article class="movement">
               <div class="movement__watch movement__watch--back" id="mvAutomatico" title="Passe o mouse ou arraste o dedo para mexer o rotor"></div>
+              <p class="movement__beat"><b>6</b><span>batidas por segundo · 8 no suíço</span></p>
               <h3>Automático</h3>
               <p class="movement__how">O <strong>rotor gira com o movimento do pulso</strong> e dá corda sozinho. <em>Passe o mouse ou arraste o dedo sobre ele.</em></p>
               <ul class="movement__spec">
@@ -198,8 +185,9 @@
               </ul>
               <div class="meter" aria-hidden="true"><i id="mvAutoMeter"></i></div>
             </article>
-            <article class="movement reveal">
+            <article class="movement">
               <div class="movement__watch movement__watch--back" id="mvManual"></div>
+              <p class="movement__beat"><b>6</b><span>batidas por segundo · 8 no suíço</span></p>
               <h3>Corda manual</h3>
               <p class="movement__how">Você <strong>gira a coroa todo dia</strong> para dar corda. O jeito mais tradicional de ter um relógio.</p>
               <ul class="movement__spec">
@@ -217,55 +205,70 @@
       </section>
 
       <!-- PONTEIROS -->
-      <section class="section" id="ponteiros">
-        <div class="wrap">
-          <header class="section-head">
+      <section class="hands-sec" id="ponteiros">
+        <div class="wrap hands-sec__grid">
+          <header class="sec-head sec-head--left hands-sec__head">
             <h2>Dez estilos de ponteiros</h2>
-            <p>Levantados em pesquisa de mercado: os estilos mais usados na relojoaria e nas montagens personalizadas. Todos podem ter a cor que você quiser.</p>
+            <p>Os mais usados na relojoaria e nas montagens personalizadas. Todos podem ter a cor que você quiser.</p>
           </header>
-          <div class="hue-demo">
-            <label for="handHue">Arraste para mudar a cor dos ponteiros</label>
-            <input type="range" id="handHue" min="0" max="360" value="220" />
+          <div class="specimen">
+            <div class="specimen__dial" id="specimenDial"></div>
+            <p class="specimen__name" id="specimenName" aria-live="polite"></p>
+            <p class="specimen__desc" id="specimenDesc"></p>
           </div>
-          <div class="hands-grid" id="handsGrid"></div>
+          <div class="specimen__controls">
+            <div class="specimen__list" id="handList" role="group" aria-label="Estilo de ponteiro"></div>
+            <label class="hue-rail" for="handHue"><span>Cor dos ponteiros</span><input type="range" id="handHue" min="0" max="359" value="212" /></label>
+            <a class="link-arrow" href="#personalizar" id="handsCta">Usar este ponteiro<svg class="ico" viewBox="0 0 24 24" aria-hidden="true"><use href="#i-arrow" /></svg></a>
+          </div>
         </div>
       </section>
 
-      <!-- PORTFÓLIO -->
-      <section class="section section--stone" id="portfolio">
+      <!-- À VENDA -->
+      <section class="sale" id="a-venda" data-ground="opaline">
         <div class="wrap">
-          <header class="section-head">
-            <h2>Portfólio</h2>
-            <p>Peças montadas no ateliê. Use qualquer uma como ponto de partida para o seu.</p>
+          <header class="sec-head">
+            <h2>À venda</h2>
+            <p>Peças que já saíram da bancada e estão disponíveis. A compra é feita pelo WhatsApp.</p>
           </header>
-          <div class="portfolio" id="portfolioGrid"></div>
+          <div class="sale__list" id="saleGrid"></div>
         </div>
       </section>
 
-      <!-- ATELIÊ -->
-      <section class="section section--ink" id="atelie">
-        <div class="wrap atelier">
-          <figure class="atelier__photo reveal">
+      <!-- DA BANCADA -->
+      <section class="gallery" id="portfolio">
+        <div class="gallery__pin" id="galleryPin">
+          <header class="wrap gallery__head">
+            <h2>Da bancada</h2>
+            <p>Peças montadas no ateliê. Toque em um relógio para ver os detalhes ou usar como ponto de partida.</p>
+          </header>
+          <div class="gallery__track" id="portfolioGrid"></div>
+          <div class="wrap gallery__rail" aria-hidden="true"><span id="galleryBar"></span></div>
+        </div>
+      </section>
+
+      <!-- COMO FUNCIONA -->
+      <section class="process" id="atelie" data-ground="opaline">
+        <div class="wrap process__grid">
+          <figure class="process__photo">
             <img src="assets/atelie.jpg" alt="Relojoeiro de luvas encaixando uma luneta em um relógio na bancada do ateliê" loading="lazy" width="944" height="1135" />
           </figure>
-          <div class="atelier__text">
+          <div class="process__body">
             <h2>Do projeto ao pulso</h2>
-            <ol class="process">
-              <li class="reveal"><span class="process__n" aria-hidden="true">I</span><div><h3>Você projeta</h3><p>Monte o relógio no ateliê virtual, junte um relógio ou imagem de referência se quiser, e envie o projeto pelo WhatsApp.</p></div></li>
-              <li class="reveal"><span class="process__n" aria-hidden="true">II</span><div><h3>Aprovação</h3><p>Confirmamos peças, cores, prazo e valor. Nada é montado antes da sua aprovação.</p></div></li>
-              <li class="reveal"><span class="process__n" aria-hidden="true">III</span><div><h3>Montagem</h3><p>Montagem à mão, regulagem do movimento e teste de vedação. Você recebe fotos da bancada.</p></div></li>
-              <li class="reveal"><span class="process__n" aria-hidden="true">IV</span><div><h3>Entrega</h3><p>Enviado em estojo, com certificado da peça e garantia de 12 meses.</p></div></li>
+            <ol class="process__steps" id="processSteps">
+              <li><span class="qdial" data-q="0" aria-hidden="true"><i></i></span><div><h3>Você projeta</h3><p>Monte o relógio no ateliê virtual, junte um relógio ou imagem de referência se quiser, e envie o projeto pelo WhatsApp.</p></div></li>
+              <li><span class="qdial" data-q="1" aria-hidden="true"><i></i></span><div><h3>Aprovação</h3><p>Confirmamos peças, cores, prazo e valor. Nada é montado antes da sua aprovação.</p></div></li>
+              <li><span class="qdial" data-q="2" aria-hidden="true"><i></i></span><div><h3>Montagem</h3><p>Montagem à mão, regulagem do movimento e teste de vedação. Você recebe fotos da bancada.</p></div></li>
+              <li><span class="qdial" data-q="3" aria-hidden="true"><i></i></span><div><h3>Entrega</h3><p>Enviado em estojo, com certificado da peça e garantia de 12 meses.</p></div></li>
             </ol>
           </div>
         </div>
       </section>
 
       <!-- DÚVIDAS -->
-      <section class="section" id="duvidas">
-        <div class="wrap faq-wrap">
-          <header class="section-head section-head--left">
-            <h2>Dúvidas frequentes</h2>
-          </header>
+      <section class="faq-sec" id="duvidas">
+        <div class="wrap faq-sec__grid">
+          <h2>Dúvidas frequentes</h2>
           <div class="faq">
             <details>
               <summary>A cor do relógio fica igual à da tela?</summary>
@@ -273,7 +276,7 @@
             </details>
             <details>
               <summary>Qual movimento devo escolher?</summary>
-              <p>Quartzo é o mais prático e preciso. Automático dá corda sozinho com o uso e tem o ponteiro de segundos deslizando. Corda manual é o mais tradicional: você gira a coroa todo dia.</p>
+              <p>Quartzo é o mais prático e preciso. Automático dá corda sozinho com o uso e tem o ponteiro de segundos deslizando. Corda manual é o mais tradicional: você gira a coroa todo dia. Automático e manual também existem em versão suíça, com Sellita.</p>
             </details>
             <details>
               <summary>Quanto tempo leva para ficar pronto?</summary>
@@ -290,49 +293,48 @@
           </div>
         </div>
       </section>
-
-      <section class="cta-band">
-        <div class="wrap cta-band__inner reveal">
-          <h2>Pronto para montar o seu?</h2>
-          <a href="#personalizar" class="btn btn--light">Abrir o ateliê virtual</a>
-        </div>
-      </section>
     </main>
 
-    <footer class="footer" id="contato">
-      <div class="wrap footer__grid">
-        <div class="footer__brand">
-          <svg class="lockup lockup--footer" viewBox="0 0 1000 402" aria-hidden="true"><use href="#ferraro-lockup" /></svg>
-          <p>Relojoaria sob encomenda. Relógios montados e personalizados à mão.</p>
+    <footer class="close" id="contato">
+      <div class="wrap close__inner">
+        <a class="close__cta" href="#personalizar">
+          <span class="close__line">Monte o seu.</span>
+          <span class="close__note"><svg class="ico ico--crown" viewBox="0 0 24 24" aria-hidden="true"><use href="#i-crown" /></svg>Abrir o ateliê virtual</span>
+        </a>
+        <div class="close__grid">
+          <div>
+            <p class="close__label">WhatsApp</p>
+            <a id="whatsLink" class="close__big whats-link" href="https://wa.me/5548996950800" target="_blank" rel="noopener">(48) 99695-0800</a>
+            <p class="close__small">Valor e prazo são combinados no atendimento, antes de qualquer pagamento.</p>
+          </div>
+          <div>
+            <p class="close__label">Instagram</p>
+            <a class="close__big insta-link" href="https://www.instagram.com/ferraro_atelier/" target="_blank" rel="noopener">@ferraro_atelier</a>
+          </div>
+          <div>
+            <p class="close__label">Navegar</p>
+            <ul class="close__links">
+              <li><a href="#personalizar">Ateliê virtual</a></li>
+              <li class="nav-sale"><a href="#a-venda">À venda</a></li>
+              <li><a href="#movimentos">Movimentos</a></li>
+              <li><a href="#portfolio">Da bancada</a></li>
+            </ul>
+          </div>
         </div>
-        <div>
-          <p class="label">Atendimento</p>
-          <p>WhatsApp<br /><strong class="phone">(48) 99695-0800</strong></p>
-          <p><a id="whatsLink" href="#" target="_blank" rel="noopener" class="link-arrow">Conversar agora</a></p>
-          <p>Instagram<br /><a class="insta-link footer__insta" href="https://www.instagram.com/ferraro_atelier/" target="_blank" rel="noopener">@ferraro_atelier</a></p>
-        </div>
-        <div>
-          <p class="label">Navegar</p>
-          <ul class="footer__links">
-            <li><a href="#personalizar">Ateliê virtual</a></li>
-            <li class="nav-sale"><a href="#a-venda">À venda</a></li>
-            <li><a href="#movimentos">Movimentos</a></li>
-            <li><a href="#portfolio">Portfólio</a></li>
-            <li><a class="insta-link" href="https://www.instagram.com/ferraro_atelier/" target="_blank" rel="noopener">Instagram</a></li>
-          </ul>
+        <div class="close__base">
+          <p>© <span id="year"></span> Ferraro Atelier · Relojoaria sob encomenda</p>
+          <a href="#oficina" class="close__internal">Oficina</a>
         </div>
       </div>
-      <div class="wrap footer__base">
-        <p>© <span id="year"></span> Ferraro Atelier</p>
-        <p>Valor e prazo combinados no atendimento. <a href="#oficina" class="footer__internal">Oficina</a></p>
-      </div>
+      <svg class="close__mark" viewBox="0 0 1000 402" aria-hidden="true"><use href="#ferraro-lockup" /></svg>
     </footer>
   </div>
+
 
   <!-- ===================== ATELIÊ VIRTUAL ===================== -->
   <div class="view studio" id="viewStudio" hidden>
     <header class="studio__bar">
-      <a href="#topo" class="studio__back">← Início</a>
+      <a href="#topo" class="studio__back"><svg class="ico" viewBox="0 0 24 24" aria-hidden="true"><use href="#i-back" /></svg>Início</a>
       <a href="#topo" class="brand brand--small" aria-label="Ferraro Atelier, início"><svg class="lockup brand__lockup" viewBox="0 0 1000 402" aria-hidden="true"><use href="#ferraro-lockup" /></svg><svg class="brand__mark" viewBox="0 0 1000 207" aria-hidden="true"><use href="#ferraro-wings" /></svg><span class="brand__name">Ferraro Atelier</span><span class="brand__tag">Ateliê virtual</span></a>
       <button type="button" class="studio__summary link-arrow link-arrow--small" id="toSummary"><span class="hide-sm">Ver </span>resumo</button>
     </header>
@@ -386,7 +388,7 @@
   <!-- ===================== OFICINA (uso interno) ===================== -->
   <div class="view workshop" id="viewWorkshop" hidden>
     <header class="studio__bar">
-      <a href="#topo" class="studio__back">← Início</a>
+      <a href="#topo" class="studio__back"><svg class="ico" viewBox="0 0 24 24" aria-hidden="true"><use href="#i-back" /></svg>Início</a>
       <a href="#topo" class="brand brand--small" aria-label="Ferraro Atelier, início"><svg class="lockup brand__lockup" viewBox="0 0 1000 402" aria-hidden="true"><use href="#ferraro-lockup" /></svg><svg class="brand__mark" viewBox="0 0 1000 207" aria-hidden="true"><use href="#ferraro-wings" /></svg><span class="brand__name">Ferraro Atelier</span><span class="brand__tag">Oficina</span></a>
       <a href="#personalizar" class="studio__summary link-arrow link-arrow--small">Ateliê virtual</a>
     </header>
@@ -446,7 +448,7 @@
   <div class="lightbox" id="lightbox" hidden>
     <div class="lightbox__backdrop" data-close></div>
     <div class="lightbox__panel" role="dialog" aria-modal="true" aria-labelledby="lbTitle">
-      <img id="lbImg" alt="" />
+      <div class="lightbox__media" id="lbMedia"></div>
       <div class="lightbox__info">
         <p class="lightbox__kind" id="lbLabel">Portfólio</p>
         <h2 id="lbTitle"></h2>
@@ -462,8 +464,13 @@
 
   <div class="toast" id="toast" role="status" aria-live="polite"></div>
 
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.13.0/gsap.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.13.0/ScrollTrigger.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.13.0/CustomEase.min.js"></script>
+  <script src="https://unpkg.com/lenis@1.3.4/dist/lenis.min.js"></script>
   <script src="js/watch.js"></script>
   <script src="js/picker.js"></script>
   <script src="js/app.js"></script>
+  <script src="js/home.js"></script>
 </body>
 </html>

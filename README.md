@@ -2,15 +2,21 @@
 
 Site da Ferraro Atelier, relojoaria sob encomenda. O cliente não compra relógios prontos: ele monta o próprio relógio no **ateliê virtual** e envia o projeto pelo WhatsApp.
 
-## Página inicial
+## Página inicial: o mostrador vivo
 
-- **Abertura animada**: um mostrador se desenha, os ponteiros vão até 10:08 e a página se abre a partir do centro. Toca uma vez por visita; clique ou qualquer tecla pula.
-- **Boas-vindas**: foto da bancada em tela cheia (`assets/movimento.jpg`) com o título e os botões por cima.
-- **Anatomia**: ao rolar, o relógio se separa em camadas (pulseira, movimento, caixa, mostrador, ponteiros, luneta, cristal). No celular ele ocupa a tela toda, com uma legenda por vez embaixo.
-- **Movimentos**: quartzo, automático (NH35) e corda manual (ST3600) funcionando como os de verdade. O automático gira o rotor quando o mouse passa por cima; o manual precisa de corda.
-- **Dez estilos de ponteiros**, com um controle para ver todos em qualquer cor.
-- **À venda**: relógios prontos com preço e botão "Comprar pelo WhatsApp" (mensagem já preenchida).
-- Portfólio, ateliê, dúvidas e contato.
+A tela inteira é um mostrador de relógio visto de perto. Laca fumê azul (o azul é só o padrão: a cor é livre), impressão branca de mostrador, partes claras em opalino e o vermelho do ponteiro de segundos como único acento. Fontes: Archivo (texto) e Michroma (impressão de mostrador), do Google Fonts.
+
+- **Abertura em motion design** (uma vez por visita; quem volta na mesma sessão vê uma versão curta): a caixa aparece, a luneta gira até travar, a laca escorre do centro, o trilho de minutos é impresso, os índices descem um a um, a logo é impressa, a janela da data gira até o dia de hoje (é o contador da abertura) e os ponteiros saem do meio-dia até a hora de quem está visitando. Tudo no compasso de 8 batidas por segundo, como um Sellita. Um toque, clique, tecla ou tentativa de rolar acelera o resto.
+- **Primeira dobra sem botões**: o título é impresso no mostrador e a ação é a **coroa**, à direita da caixa ("Monte o seu"). No celular, o título fica embaixo do relógio, com o link "Monte o seu".
+- O relógio marca a hora real, com o segundo andando 8 vezes por segundo. No computador, o brilho de raios de sol do mostrador acompanha o mouse; no celular, ele oscila sozinho.
+- **Ao rolar**: o mostrador gigante se afasta (a luneta gira em cliques de meio minuto) até virar o relógio inteiro, que então se desmonta em sete peças com legendas. No computador, passar o mouse numa legenda isola a peça.
+- **Cor livre**: oito lacas de exemplo e um controle para qualquer tom. O fundo da seção acompanha a cor; enquanto ninguém mexe, as lacas se alternam sozinhas. "Montar com esta cor" leva a cor para o ateliê.
+- **Três jeitos de marcar o tempo**: quartzo, automático e corda manual funcionando de verdade, com o compasso de cada um (1, 6 ou 8 batidas por segundo).
+- **Dez estilos de ponteiros** num mostrador de amostra: ao trocar, o ponteiro de minutos dá uma volta e pousa em 10:08. Dá para mudar a cor e levar o ponteiro escolhido para o ateliê.
+- **À venda**, **Da bancada** (no computador, a fileira de fotos anda de lado enquanto a página fica parada), **Do projeto ao pulso** (cada etapa ganha um mini mostrador marcando um quarto de hora), **Dúvidas** e o fechamento **Monte o seu.**
+- **Menu**: abre em círculo a partir do botão; o ponteiro do mostrador aponta para o item sob o mouse.
+- Rolagem suave com Lenis e animações com GSAP + ScrollTrigger, carregados do cdnjs e do unpkg. Com "reduzir movimento" ligado no aparelho, ou se essas bibliotecas não carregarem, a página aparece completa e parada, sem abertura.
+- O código da página inicial fica em `js/home.js`; os dados (peças, ponteiros, receitas) continuam em `js/app.js`.
 
 ## Ateliê virtual (`#personalizar`)
 
@@ -31,7 +37,7 @@ Oito etapas: caixa, mostrador, ponteiros, luneta, pulseira, movimento, referênc
 
 ## Logo
 
-Ficam em `assets/logo/`, em SVG e PNG sem fundo, nas versões creme, escura e dourada: `ferraro-asas-*` (só as asas, usada nos relógios) `ferraro-atelier-*` (logo completa com o nome, usada no topo, nas boas-vindas e no rodapé) e `ferraro-empilhada-*` (asas com FERRARO ATELIER embaixo, usada nos mostradores das fotos e dos desenhos). No site, a logo é um vetor só (`WINGS_D` em `js/watch.js` e o símbolo `#ferraro-wings` no `index.html`), usado no topo, na abertura, no rodapé, no ícone da aba e nos desenhos dos relógios (mostrador, rotor e fundo).
+Ficam em `assets/logo/`, em SVG e PNG sem fundo, nas versões creme, escura e dourada: `ferraro-asas-*` (só as asas, usada nos relógios) `ferraro-atelier-*` (logo completa com o nome, usada no topo, nas boas-vindas e no rodapé) e `ferraro-empilhada-*` (asas com FERRARO ATELIER embaixo, usada nos mostradores das fotos e dos desenhos). No site, a logo é um vetor só (`WINGS_D` em `js/watch.js` e o símbolo `#ferraro-wings` no `index.html`), usado no topo, no mostrador da abertura, no rodapé, no ícone da aba e nos desenhos dos relógios (mostrador, rotor e fundo).
 
 ## Oficina (`#oficina`, uso interno)
 
@@ -46,6 +52,8 @@ Página para a Ferraro Atelier ver o relógio que o cliente montou. Abra o site 
 - `js/app.js`, começo do arquivo: `STORE.whatsapp` e `STORE.instagram` (@ferraro_atelier).
 - `js/app.js`, `PORTFOLIO`: fotos e descrições do portfólio. Fotos ficam em `assets/`. Para pôr uma peça à venda, coloque `price: 1500` nela; para tirar da venda, apague o `price`.
 - `js/watch.js`: desenho do relógio e funcionamento dos movimentos.
+- `js/home.js`: abertura, mostrador vivo, vista explodida e animações da página inicial. As lacas de exemplo ficam em `LACQUERS`.
+- `css/styles.css`, começo do arquivo: as cores da casa (laca, impressão, opalino e o vermelho do ponteiro de segundos).
 
 ## Análise de visitas (Vercel)
 

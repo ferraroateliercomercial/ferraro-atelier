@@ -1,0 +1,9 @@
+# arquivos de trabalho que não fazem parte do site publicado
+.impeccable
+.claude
+.mcp.json
+tools
+PRODUCT.md
+DESIGN.md
+skills-lock.json
+.playwright-mcp

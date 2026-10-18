@@ -414,219 +414,9 @@ function bindCrown(container, getMovement) {
 }
 
 // ---------------------------------------------------------------------------
-// Abertura
-// ---------------------------------------------------------------------------
-function initIntro() {
-  const root = document.documentElement;
-  if (root.dataset.intro !== "on") return;
-  try { sessionStorage.setItem("ct-intro", "1"); } catch { /* sem armazenamento */ }
-  const intro = $("#intro");
-  let done = false;
-  const finish = (state) => { if (done) return; done = true; root.dataset.intro = state; };
-  const natural = setTimeout(() => finish("done"), 4150);
-  const skip = () => {
-    if (done || intro.classList.contains("is-skipping")) return;
-    clearTimeout(natural);
-    root.dataset.intro = "skip";
-    intro.classList.add("is-skipping");
-    setTimeout(() => finish("skipped"), 720);
-  };
-  intro.addEventListener("click", skip);
-  window.addEventListener("keydown", (e) => { if (e.key !== "Tab") skip(); }, { once: true });
-}
-
-// ---------------------------------------------------------------------------
-// Página inicial
+// Página inicial (o resto mora em home.js)
 // ---------------------------------------------------------------------------
 const HERO_CFG = { ...DEFAULT_WATCH, dialColor: "#1d4e8f", dialFinish: "raios", bezelColor: "#1a1d22", handStyle: "mercedes", strapType: "oyster" };
-
-function initNav() {
-  const menu = $("#menu");
-  const btn = $("#menuBtn");
-  const set = (open) => { menu.classList.toggle("is-open", open); btn.setAttribute("aria-expanded", String(open)); };
-  btn.addEventListener("click", () => set(!menu.classList.contains("is-open")));
-  $$("a", menu).forEach((a) => a.addEventListener("click", () => set(false)));
-}
-
-// Como cada peça se afasta na vista explodida da abertura: deslocamento lateral (dx, dy),
-// giro próprio (rot) e altura (level). As medidas valem para um relógio de 330 px de largura.
-const HERO_MOTION = {
-  "pulseira": { level: 0, dx: 0, dy: -40, rot: 0 },
-  "pulseira-baixo": { level: 0, dx: 0, dy: 40, rot: 0, baseY: 185 },
-  "movimento": { level: 1, dx: -80, dy: 16, rot: -75 },
-  "caixa": { level: 2, dx: 10, dy: 0, rot: 0 },
-  "mostrador": { level: 3, dx: 62, dy: -14, rot: 0 },
-  "ponteiros": { level: 4, dx: -40, dy: -6, rot: 0 },
-  "luneta": { level: 5, dx: 86, dy: 4, rot: 135 },
-  "cristal": { level: 6, dx: -58, dy: -16, rot: 0 },
-};
-
-function initHero() {
-  const hero = $("#anatomia");
-  const sticky = $(".hero__sticky", hero);
-  const stack = $("#heroStack");
-  const stage = $("#heroStage");
-  const text = $("#heroText");
-  const scene = $("#heroScene");
-  const caption = $("#partCaption");
-  let captionKey = "";
-  const hint = $(".hero__hint");
-  const orbit = $("#heroOrbit");
-  const callouts = $$("#heroCallouts li");
-  renderStack(stack, HERO_CFG);
-  Clockwork.add(new Movement(stack, HERO_CFG));
-  const layers = $$(".layer", stack).map((el) => ({ el, m: HERO_MOTION[el.dataset.name] }));
-
-  // mostrador decorativo ao fundo
-  let ticks = "";
-  for (let i = 0; i < 120; i++) {
-    const a = (i * 3 * Math.PI) / 180;
-    const r1 = i % 10 === 0 ? 176 : 184;
-    ticks += `<line x1="${(200 + Math.sin(a) * r1).toFixed(1)}" y1="${(200 - Math.cos(a) * r1).toFixed(1)}" x2="${(200 + Math.sin(a) * 190).toFixed(1)}" y2="${(200 - Math.cos(a) * 190).toFixed(1)}" stroke-width="${i % 10 === 0 ? 1.2 : 0.6}"/>`;
-  }
-  orbit.innerHTML = `<circle cx="200" cy="200" r="196" stroke-width=".8"/><circle cx="200" cy="200" r="150" stroke-width=".6" stroke-dasharray="2 6"/>${ticks}`;
-
-  const smooth = (t) => t * t * (3 - 2 * t);
-  const clamp01 = (t) => Math.min(1, Math.max(0, t));
-  let target = 0;
-  let cur = 0;
-  let last = performance.now();
-  const readScroll = () => {
-    const r = hero.getBoundingClientRect();
-    const top = parseFloat(getComputedStyle(sticky).top) || 0;
-    const span = Math.max(1, r.height - sticky.offsetHeight);
-    target = clamp01((top - r.top) / span);
-  };
-  window.addEventListener("scroll", readScroll, { passive: true });
-  window.addEventListener("resize", readScroll);
-  readScroll();
-
-  frameHooks.add((now) => {
-    const dt = Math.min(0.05, (now - last) / 1000);
-    last = now;
-    if (hero.offsetParent === null) return;
-    const r = hero.getBoundingClientRect();
-    if (r.bottom < 0) return;
-    // segue a rolagem com atraso suave, em vez de pular junto com ela
-    cur += (target - cur) * (1 - Math.exp(-dt * 4.5));
-    const mobile = window.innerWidth < 860;
-    // no celular, o texto sai de cena primeiro e o relógio toma a tela toda
-    let e;
-    if (mobile) {
-      const q = smooth(clamp01(cur / 0.22));
-      text.style.opacity = String(1 - q);
-      text.style.transform = `translateY(${(-24 * q).toFixed(1)}px)`;
-      text.style.pointerEvents = q > 0.5 ? "none" : "";
-      const H = stage.offsetHeight;
-      const flatH = stack.offsetHeight;
-      const startY = text.offsetTop + text.offsetHeight + 16;
-      const offset = Math.max(0, startY - (H - flatH) / 2);
-      scene.style.transform = `translateY(${((1 - q) * offset).toFixed(1)}px)`;
-      e = smooth(clamp01((cur - 0.16) / 0.62));
-    } else {
-      text.style.opacity = "";
-      text.style.transform = "";
-      scene.style.transform = "";
-      e = smooth(clamp01(cur * 1.35));
-    }
-    const t = now / 1000;
-    const W = stack.offsetWidth;
-    const k = W / 330;
-    const gap = (mobile ? 46 : 62) * k;
-    const tilt = 60 * e;
-    const spin = -20 * e - 18 * cur;
-    const lift = (mobile ? 95 : 125) * k * e;
-    stack.style.setProperty("--tilt", `${tilt.toFixed(2)}deg`);
-    stack.style.setProperty("--spin", `${spin.toFixed(2)}deg`);
-    stack.style.setProperty("--lift", `${lift.toFixed(1)}px`);
-    orbit.style.transform = `rotate(${(cur * 120 + t * 2).toFixed(2)}deg) scale(${(1 + e * 0.08).toFixed(3)})`;
-    hint.style.opacity = String(1 - clamp01(cur * 8));
-
-    const pos = {};
-    for (const { el, m } of layers) {
-      // as peças de cima saem primeiro
-      const ei = smooth(clamp01((e - (6 - m.level) * 0.055) / 0.67));
-      const breathe = Math.sin(t * 1.3 + m.level * 0.9) * 6 * ei;
-      const z = m.level * gap * ei + breathe;
-      const x = (m.dx * k * (mobile ? 0.45 : 1) + Math.cos(t * 0.7 + m.level) * 4 * ei) * ei;
-      const y = m.dy * k * ei;
-      const rot = m.rot * ei;
-      el.style.transform = `translate3d(${x.toFixed(1)}px, ${y.toFixed(1)}px, ${z.toFixed(1)}px) rotate(${rot.toFixed(1)}deg)`;
-      pos[m.level === 0 ? (m.baseY ? 0 : -1) : m.level] = { x, y: y + (m.baseY || 0) * (W / 400), z };
-    }
-
-    if (mobile) {
-      // uma legenda por vez, embaixo, com a última peça que se soltou
-      let shown = null;
-      callouts.forEach((li, idx) => { if (e > 0.12 + idx * 0.11) shown = li; });
-      const key = shown ? shown.dataset.layer : "";
-      if (key !== captionKey) {
-        captionKey = key;
-        caption.classList.toggle("is-on", !!shown);
-        if (shown) caption.innerHTML = shown.innerHTML;
-      }
-      return;
-    }
-
-    // legendas acompanham a altura de cada peça na tela
-    const sr = stage.getBoundingClientRect();
-    const sceneRect = scene.getBoundingClientRect();
-    const cy = sceneRect.top + sceneRect.height / 2 - sr.top + lift;
-    const sinT = Math.sin((tilt * Math.PI) / 180);
-    const cosT = Math.cos((tilt * Math.PI) / 180);
-    const sp = (spin * Math.PI) / 180;
-    const minGap = mobile ? 30 : 50;
-    let prevY = -Infinity;
-    callouts.forEach((li, idx) => {
-      const p = pos[+li.dataset.layer];
-      if (!p) return;
-      const yr = p.x * Math.sin(sp) + p.y * Math.cos(sp);
-      // nunca deixa uma legenda encostar na de cima
-      const yScreen = Math.max(cy + yr * cosT - p.z * sinT, prevY + minGap);
-      prevY = yScreen;
-      li.style.top = `${(yScreen - 14).toFixed(1)}px`;
-      li.classList.toggle("is-on", e > 0.32 + idx * 0.075);
-    });
-  });
-}
-
-function initHeroText() {
-  const intro = document.documentElement.dataset.intro === "on";
-  const startAt = intro ? 3600 : 700;
-  const reduced = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
-
-  // contadores
-  $$("[data-count]").forEach((el) => {
-    const to = +el.dataset.count;
-    const dec = +(el.dataset.decimals || 0);
-    const fmt = (v) => v.toLocaleString("pt-BR", { minimumFractionDigits: dec, maximumFractionDigits: dec });
-    if (reduced) { el.textContent = fmt(to); return; }
-    setTimeout(() => {
-      const t0 = performance.now();
-      const step = (now) => {
-        const q = Math.min(1, (now - t0) / 1600);
-        el.textContent = fmt(to * (1 - Math.pow(1 - q, 3)));
-        if (q < 1) requestAnimationFrame(step);
-      };
-      requestAnimationFrame(step);
-    }, startAt);
-  });
-
-  // palavra que troca no título
-  const words = $$("#heroRotator .rotator__word");
-  if (reduced || words.length < 2) return;
-  let i = 0;
-  setTimeout(() => setInterval(() => {
-    if (document.hidden) return;
-    const prev = words[i];
-    i = (i + 1) % words.length;
-    prev.classList.remove("is-on");
-    prev.classList.add("is-out");
-    words[i].classList.remove("is-out");
-    words[i].classList.add("is-on");
-    setTimeout(() => prev.classList.remove("is-out"), 900);
-  }, 2800), startAt);
-}
 
 function initMovements() {
   const mvs = {};
@@ -654,91 +444,6 @@ function initMovements() {
   frameHooks.add(() => {
     autoMeter.style.setProperty("--v", mvs.mvAutomatico.reserve.toFixed(3));
     manualMeter.style.setProperty("--v", mvs.mvManual.reserve.toFixed(3));
-  });
-}
-
-function initHands() {
-  const grid = $("#handsGrid");
-  const hue = $("#handHue");
-  const paint = () => {
-    const color = hslHex(+hue.value, 55, 34);
-    grid.innerHTML = HAND_STYLES.map((h) => `
-      <a class="hand-tile" href="#personalizar" data-hand-style="${h.id}">
-        <span class="hand-tile__icon">${Watch.handIcon(h.id, color)}</span>
-        <strong>${h.name}</strong>
-        <span>${h.desc}</span>
-      </a>`).join("");
-  };
-  hue.addEventListener("input", paint);
-  paint();
-  grid.addEventListener("click", (e) => {
-    const t = e.target.closest("[data-hand-style]");
-    if (!t) return;
-    Studio.apply({ handStyle: t.dataset.handStyle }, "ponteiros");
-  });
-}
-
-function initPortfolio() {
-  const grid = $("#portfolioGrid");
-  grid.innerHTML = PORTFOLIO.map((p) => `
-    <article class="work reveal">
-      <button class="work__img" type="button" data-open="${p.id}" aria-label="Ver ${p.name}"><img src="${p.img}" alt="${p.name}" loading="lazy" width="900" height="900" />${p.price ? `<span class="work__tag">À venda · ${brl.format(p.price)}</span>` : ""}</button>
-      <h3>${p.name}</h3>
-      <p>${p.text}</p>
-      <button class="link-arrow" type="button" data-open="${p.id}">Ver detalhes</button>
-    </article>`).join("");
-
-  // À venda
-  const forSale = PORTFOLIO.filter((p) => p.price);
-  $("#a-venda").hidden = forSale.length === 0;
-  $$(".nav-sale").forEach((a) => { a.hidden = forSale.length === 0; });
-  $("#saleGrid").innerHTML = forSale.map((p) => `
-    <article class="sale-card reveal">
-      <button class="sale-card__img" type="button" data-open="${p.id}" aria-label="Ver ${p.name}"><img src="${p.img}" alt="${p.name}" loading="lazy" width="900" height="900" /><span class="sale-card__tag">Disponível</span></button>
-      <div class="sale-card__info">
-        <p class="label">Feito no ateliê</p>
-        <h3>${p.name}</h3>
-        <p class="sale-card__text">${p.text}</p>
-        <ul class="sale-card__spec">${p.spec.map(([k, v]) => `<li><span>${k}</span><span>${v}</span></li>`).join("")}</ul>
-        <p class="sale-card__price">${brl.format(p.price)}</p>
-        <div class="sale-card__actions">
-          <a class="btn" href="${buyUrl(p)}" target="_blank" rel="noopener">Comprar pelo WhatsApp</a>
-          <button class="link-arrow link-arrow--small" type="button" data-open="${p.id}">Ver em detalhe</button>
-        </div>
-      </div>
-    </article>`).join("");
-
-  const lb = $("#lightbox");
-  let current = null;
-  const open = (p) => {
-    current = p;
-    $("#lbImg").src = p.img;
-    $("#lbImg").alt = p.name;
-    $("#lbLabel").textContent = p.price ? "À venda" : "Portfólio";
-    $("#lbTitle").textContent = p.name;
-    $("#lbText").textContent = p.text;
-    $("#lbSpec").innerHTML = p.spec.map(([k, v]) => `<li><span>${k}</span><span>${v}</span></li>`).join("");
-    $("#lbPrice").hidden = !p.price;
-    $("#lbBuy").hidden = !p.price;
-    if (p.price) {
-      $("#lbPrice").textContent = brl.format(p.price);
-      $("#lbBuy").href = buyUrl(p);
-    }
-    $("#lbStart").textContent = p.price ? "Montar um parecido" : "Começar com esta base";
-    $("#lbStart").classList.toggle("btn--line", !!p.price);
-    lb.hidden = false;
-    (p.price ? $("#lbBuy") : $("#lbStart")).focus();
-  };
-  const close = () => { lb.hidden = true; current = null; };
-  [grid, $("#saleGrid")].forEach((g) => g.addEventListener("click", (e) => {
-    const b = e.target.closest("[data-open]");
-    if (b) open(PORTFOLIO.find((p) => p.id === b.dataset.open));
-  }));
-  $$("[data-close]", lb).forEach((b) => b.addEventListener("click", close));
-  document.addEventListener("keydown", (e) => { if (e.key === "Escape" && !lb.hidden) close(); });
-  $("#lbStart").addEventListener("click", () => {
-    if (current) Studio.apply({ ...DEFAULT_WATCH, ...current.cfg }, "caixa", `Projeto iniciado a partir do ${current.name}`);
-    close();
   });
 }
 
@@ -1520,38 +1225,36 @@ function route() {
   }
   const studio = hash.startsWith("personalizar");
   const workshop = hash === "oficina";
-  const wasStudio = !$("#viewStudio").hidden || !$("#viewWorkshop").hidden;
-  $("#viewHome").hidden = studio || workshop;
+  const home = !studio && !workshop;
+  const wasAway = !$("#viewStudio").hidden || !$("#viewWorkshop").hidden;
+  const first = !route.ran;
+  route.ran = true;
+  $("#viewHome").hidden = !home;
   $("#viewStudio").hidden = !studio;
   $("#viewWorkshop").hidden = !workshop;
   if (workshop) {
+    window.Home?.onRoute("away");
     Workshop.init();
     window.scrollTo(0, 0);
     document.title = "Oficina · Ferraro Atelier";
   } else if (studio) {
+    window.Home?.onRoute("away");
     Studio.init();
-    if (!wasStudio) window.scrollTo(0, 0);
+    if (!wasAway) window.scrollTo(0, 0);
     document.title = "Ateliê virtual · Ferraro Atelier";
   } else {
     document.title = "Ferraro Atelier";
-    if (wasStudio) {
-      const target = hash && document.getElementById(hash);
-      requestAnimationFrame(() => (target ? target.scrollIntoView() : window.scrollTo(0, 0)));
-    }
+    // volta do ateliê (ou abre com um endereço de seção): reposiciona a página inicial
+    if (wasAway || (first && hash && hash !== "topo")) window.Home?.onRoute("home", hash);
   }
 }
 
 document.addEventListener("DOMContentLoaded", () => {
   $("#year").textContent = new Date().getFullYear();
-  $("#whatsLink").href = whatsUrl("Olá, Ferraro Atelier! Quero montar um relógio personalizado.");
+  $$(".whats-link").forEach((a) => { a.href = whatsUrl("Olá, Ferraro Atelier! Quero montar um relógio personalizado."); });
   $$(".insta-link").forEach((a) => { a.href = STORE.instagram; });
-  initIntro();
-  initNav();
-  initHero();
-  initHeroText();
   initMovements();
-  initHands();
-  initPortfolio();
+  window.Home?.init();
   window.addEventListener("hashchange", route);
   route();
 });

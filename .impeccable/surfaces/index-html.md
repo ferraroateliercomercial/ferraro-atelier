@@ -13,7 +13,7 @@ Audience and job: people who like watches without being experts and want a piece
 
 Memorable moment: the screen is a dial that tells your own time; scrolling pulls back until the dial becomes a whole watch, which then comes apart.
 
-Unresolved: none from the owner; finish review pending.
+Unresolved: none from the owner. Finish review shipped 2026-10-19; motion smoothing pass the same day (opening and pullback now animate only by transform and opacity of layers prepared in advance).
 
 ## Direction contract
 
@@ -23,8 +23,8 @@ OWN-WORLD: Fumé lacquer, deep blue by default and any hue on demand, with sunbu
 
 STORY: The visitor sees a working dial on their time, learns each part is chosen, watches colour change freely and the watch come apart, trusts the movements, sees finished pieces, then turns the crown to build theirs and send it by WhatsApp.
 
-FIRST VIEWPORT: Full-viewport fumé dial; railroad minute track along the screen edges; wings logo printed under 12; headline "Seu relógio, peça por peça." printed across the lower dial; hour and minute hands pivot at the centre on the visitor's time; red seconds hand at 8 steps per second; date window at 3 o'clock showing today; the crown at the right edge is the action, labelled "Monte o seu". No buttons.
+FIRST VIEWPORT: Full-viewport fumé dial; railroad minute track along the screen edges; wings logo printed under 12; headline "Seu relógio, peça por peça." printed across the lower dial; hour and minute hands pivot at the centre on the visitor's time; red seconds hand sweeping without stopping (owner, 2026-10-19: the opening must feel fluid, so the 8-step tick was dropped on the homepage dial); date window at 3 o'clock showing today; the crown at the right edge is the action, labelled "Monte o seu". No buttons.
 
-FORM: Mostrador vivo, the pick card (rank 1 of my seven) chosen over the assigned index 6; seed key 3ac2addf. Raises kept: ring law, labels orbit the rim and the centre stays clear (accretion disk); one shared clock, motion quantised to 8 beats per second (algorave); select-to-isolate in the anatomy (particle display); scale courage, numerals cropped by the viewport (décollage).
+FORM: Mostrador vivo, the pick card (rank 1 of my seven) chosen over the assigned index 6; seed key 3ac2addf. Raises kept: ring law, labels orbit the rim and the centre stays clear (accretion disk); one shared clock, the opening staggered on a 1/8 s grid (the seconds hand itself now sweeps, at the owner's request); select-to-isolate in the anatomy (particle display); scale courage, numerals cropped by the viewport (décollage).
 
 FINISH: unreviewed and undocumented is unfinished; this build ends with the finish review, the verdict, DESIGN.md, and every shipping raster carrying its provenance

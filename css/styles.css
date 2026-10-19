@@ -88,6 +88,7 @@ button, a, label, input, textarea { touch-action: manipulation; }
 html.lenis, html.lenis body { height: auto; }
 .lenis.lenis-smooth { scroll-behavior: auto !important; }
 .lenis.lenis-stopped { overflow: hidden; }
+html { scrollbar-gutter: stable; }
 
 .skip { position: absolute; left: -999px; top: 8px; background: var(--print); color: var(--ink); padding: 8px 14px; z-index: 200; }
 .skip:focus { left: 16px; }
@@ -200,36 +201,34 @@ html.lenis, html.lenis body { height: auto; }
   position: absolute; left: 50%; top: var(--cy); width: var(--H); height: var(--H);
   margin: calc(var(--H) / -2) 0 0 calc(var(--H) / -2); z-index: 2; will-change: transform;
 }
-/* caixa, luneta, borda do mostrador e índices redondos só aparecem quando o mostrador vira relógio */
+/* caixa, luneta, borda do mostrador e índices redondos só aparecem quando o mostrador vira relógio.
+   Cada um tem camada própria: no recuo eles mudam de escala e de opacidade sem repintar o resto. */
 .head__case, .head__bezel, .dial__rim, .print__track, .print__indices { opacity: 0; }
+.head__case, .head__bezel { will-change: transform, opacity; }
+.dial__rim, .dial__date { will-change: opacity, transform; }
 .head__case {
   position: absolute; inset: 0; border-radius: 50%;
   box-shadow: 0 calc(var(--H) * .04) calc(var(--H) * .09) rgba(0, 0, 0, .6), 0 calc(var(--H) * .015) calc(var(--H) * .03) rgba(0, 0, 0, .45);
 }
-.head__bezel { position: absolute; inset: 0; width: 100%; height: 100%; overflow: visible; }
-.head__bezel .bezel__ring { transition: transform .14s var(--ease-out); transform-origin: 0 0; }
+.head__bezel { position: absolute; inset: 0; }
+.head__bezel svg { position: absolute; inset: 0; width: 100%; height: 100%; overflow: visible; }
+/* o aro gira em cliques de meio minuto: camada própria, a transição roda sem repintar a luneta */
+.head__bezel .bezel__ring { transition: transform .14s var(--ease-out); will-change: transform; }
 
-/* a laca: um campo maior que a tela, recortado num círculo em volta do eixo dos ponteiros */
+/* a laca: um disco do tamanho da tela (do eixo até o canto mais longe), pintado uma vez num canvas com os raios de sol.
+   A abertura e o recuo só mudam a escala desse disco: nada é repintado a cada quadro. */
 .head__field {
-  position: absolute; left: 50%; top: 50%; width: var(--F, 300vmax); height: var(--F, 300vmax); translate: -50% -50%;
-  overflow: hidden; clip-path: circle(var(--clip, 150vmax) at 50% 50%);
-}
-.field__lacquer {
-  position: absolute; inset: 0;
-  background: radial-gradient(circle closest-side, var(--lq-hi) 0%, var(--lq) 30%, color-mix(in oklab, var(--lq), var(--lq-lo) 55%) 62%, var(--lq-lo) 100%);
-}
-.field__rays { position: absolute; left: 50%; top: 50%; width: var(--RS, 200vmax); height: var(--RS, 200vmax); translate: -50% -50%; will-change: transform; }
-.field__light {
   position: absolute; left: 50%; top: 50%; width: var(--RS, 200vmax); height: var(--RS, 200vmax);
-  margin: calc(var(--RS, 200vmax) / -2) 0 0 calc(var(--RS, 200vmax) / -2); border-radius: 50%; will-change: transform;
-  background: conic-gradient(from 0deg,
-    rgba(200, 222, 255, 0) 0deg, rgba(200, 222, 255, .05) 8deg, rgba(200, 222, 255, .13) 18deg, rgba(200, 222, 255, .17) 24deg,
-    rgba(200, 222, 255, .13) 30deg, rgba(200, 222, 255, .05) 40deg, rgba(200, 222, 255, 0) 50deg,
-    rgba(200, 222, 255, 0) 182deg, rgba(200, 222, 255, .04) 190deg, rgba(200, 222, 255, .1) 199deg, rgba(200, 222, 255, .12) 204deg,
-    rgba(200, 222, 255, .1) 209deg, rgba(200, 222, 255, .04) 218deg, rgba(200, 222, 255, 0) 228deg, rgba(200, 222, 255, 0) 360deg);
+  margin: calc(var(--RS, 200vmax) / -2) 0 0 calc(var(--RS, 200vmax) / -2); will-change: transform;
 }
+.field__pour { position: absolute; inset: 0; will-change: transform; }
+.field__lacquer, .field__light { position: absolute; inset: 0; width: 100%; height: 100%; display: block; }
+/* o reflexo é um degradê suave: um canvas pequeno ampliado basta, e só ele gira */
+.field__light { will-change: transform; }
 /* trilho de minutos e índices pelas bordas da tela (desenhados pelo script no tamanho da tela) */
-.hero__edge { position: absolute; left: 0; top: 0; overflow: visible; pointer-events: none; }
+.hero__edge { position: absolute; left: 0; top: 0; pointer-events: none; will-change: opacity; }
+.edge__part { position: absolute; overflow: visible; }
+.hero__edge.is-printing .edge__part { will-change: transform, opacity; }
 
 .head__dial {
   position: absolute; left: 50%; top: 50%; width: var(--D); height: var(--D); margin: calc(var(--D) / -2) 0 0 calc(var(--D) / -2);
@@ -238,21 +237,24 @@ html.lenis, html.lenis body { height: auto; }
 /* no recuo, o fumê escurece na borda do mostrador redondo */
 .dial__rim {
   position: absolute; inset: 0; border-radius: 50%; pointer-events: none;
-  background: radial-gradient(circle closest-side, transparent 56%, color-mix(in srgb, var(--lq-lo) 45%, transparent) 86%, color-mix(in srgb, var(--lq-lo) 88%, transparent) 100%);
+  background: radial-gradient(circle closest-side, transparent 80%, color-mix(in srgb, var(--lq-lo) 55%, transparent) 100%);
   box-shadow: inset 0 0 calc(var(--D) * .05) rgba(0, 0, 0, .65);
 }
 .dial__print { position: absolute; inset: 0; width: 100%; height: 100%; overflow: visible; }
+/* a logo gira em volta do próprio centro: (0, -285) no desenho de 1000, ou seja 50% e 21,5% */
+.dial__logo { position: absolute; inset: 0; transform-origin: 50% 21.5%; will-change: transform; pointer-events: none; }
+.dial__logo-art { display: block; width: 100%; height: 100%; overflow: visible; }
 .dial__date {
   position: absolute; left: calc(50% + var(--D) * .33 - var(--D) * .059); top: calc(50% - var(--D) * .0465);
   width: calc(var(--D) * .118); height: calc(var(--D) * .093); overflow: hidden; border-radius: calc(var(--D) * .008);
   background: #f4f4f1; box-shadow: inset 0 calc(var(--D) * .004) calc(var(--D) * .008) rgba(0, 0, 0, .5), 0 0 0 calc(var(--D) * .003) rgba(0, 0, 0, .45);
 }
-.dial__date-strip { display: grid; transition: transform .25s var(--ease-out); }
+.dial__date-strip { display: grid; will-change: transform; }
 .dial__date-strip span {
   height: calc(var(--D) * .093); display: grid; place-items: center; color: #16191e;
   font: 600 calc(var(--D) * .052) / 1 var(--font-body); font-variant-numeric: tabular-nums;
 }
-.dial__hands { position: absolute; inset: 0; pointer-events: none; }
+.dial__hands { position: absolute; inset: 0; pointer-events: none; will-change: transform; }
 .hand { position: absolute; inset: 0; will-change: transform; }
 .hand svg { width: 100%; height: 100%; display: block; overflow: visible; }
 /* sombra dos ponteiros: uma cópia escura e deslocada, sem desfoque (barata de girar) */

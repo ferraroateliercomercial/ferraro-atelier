@@ -168,7 +168,7 @@ The interface is a watch dial seen from above, and it runs. Dark grounds are fum
 
 Ornament is always a watch part. The crown is the primary control, the date window is the counter, minute-track rules divide, round sub-dials hold the movement demos and the step markers, and callouts orbit a part on a leader line that ends in an applied baton. The site refuses the category default of a product-photo hero with a headline and a discover button: the first screen of a persuade surface carries no buttons, only the dial and its crown, and photographs arrive later as evidence of real pieces and the bench. Density follows the surface: one idea per screen and a long section rhythm where the site persuades; practical opaline panels with a lacquer showcase for the live watch in the ateliê virtual and the Oficina.
 
-**The One Clock Rule.** The drawn watches tell the visitor's own time, and the seconds hand steps eight times a second, the beat of a 28,800 vph movement. The full opening is cued on the same 1/8 s grid. Beyond it, two house curves divide the work (an out-curve for what arrives, an in-out curve for what travels across the screen), scroll scenes are scrubbed rather than fired, and each kind of content has its own reveal; the beat binds the opening and the seconds hand, while reveals and hovers run free on the house curves.
+**The One Clock Rule.** The drawn watches tell the visitor's own time. On the homepage dial the seconds hand sweeps without stopping (the owner asked for fluid motion on 2026-10-19); the movement demos keep their real beats, because there the beat is the lesson. The opening's staggers are cued on a 1/8 s grid. Beyond it, two house curves divide the work (an out-curve for what arrives, an in-out curve for what travels across the screen), scroll scenes are scrubbed rather than fired, and each kind of content has its own reveal; the 1/8 s grid binds the opening's staggers, while reveals and hovers run free on the house curves.
 
 **Key Characteristics:**
 - Fumé lacquer grounds: radial light falloff, sunburst rays, a pointer-following sheen, any hue on demand.
@@ -176,7 +176,7 @@ Ornament is always a watch part. The crown is the primary control, the date wind
 - One accent, the seconds-hand red, kept hand-sized; lume green only at night.
 - Opaline silver for the quiet passages, read in ink.
 - Watch parts as components: crown, date window, minute track, sub-dials, applied batons.
-- One clock: a 1/8 s beat, an eight-step seconds hand, scrubbed scroll scenes, and a complete static page under reduced motion.
+- One clock: a sweeping seconds hand on the visitor's time, openings staggered on a 1/8 s grid, scrubbed scroll scenes, motion that never repaints, and a complete static page under reduced motion.
 
 ## Colors
 
@@ -349,8 +349,9 @@ A 3px track (Print Hairline on lacquer, Ink Hairline on opaline) filled from the
 - **Do** open measured content (readouts, lists, the footer) with the minute-track rule and divide everything else with 1px hairlines.
 - **Do** orbit labels around the part they name, on a leader line that ends in a baton, and keep a dial's centre clear.
 - **Do** tell sequence with the dial (quarter dials for steps, hours for the menu) and show counts in a date-style window.
-- **Do** cue openings on the 1/8 s beat, use `cubic-bezier(.23, 1, .32, 1)` for what arrives and `cubic-bezier(.77, 0, .175, 1)` for what travels, and scrub scroll scenes (0.6) instead of firing them.
+- **Do** stagger openings on the 1/8 s grid, use `cubic-bezier(.23, 1, .32, 1)` for what arrives and `cubic-bezier(.77, 0, .175, 1)` for what travels, and scrub scroll scenes (0.6) instead of firing them.
 - **Do** give each kind of content its own reveal: headings rise out of a mask, photographs open as a window, lists stagger, step dials point, the closing line rises letter by letter.
+- **Do** animate the hero only by moving or fading layers that already exist: the lacquer is painted once into a canvas and opened or closed by scale, the reflection is a small canvas that rotates, and anything that arrives piece by piece (track, batons, numerals, logo, bezel ring) is its own small layer. Nothing in a moving scene is redrawn frame by frame.
 - **Do** keep the reduced-motion page complete and calm: pins release, fades and colour changes stay, travel goes, transitions drop to 0.15s, and the seconds hand ticks once a second.
 - **Do** draw icons as inline SVG strokes (1.5–1.6 width, round caps): arrow, back, crown, plus.
 - **Do** print the stacked mark (wings, FERRARO, ATELIER) under 12 on every drawn dial, and use the horizontal lockup in chrome.
@@ -363,4 +364,5 @@ A 3px track (Print Hairline on lacquer, Ink Hairline on opaline) filled from the
 - **Don't** shadow paper, light anything from the side, or surround anything with a glow.
 - **Don't** put an eyebrow or kicker above a heading, number content sections, or type a glyph (+, ×, →) where an icon belongs.
 - **Don't** set display type above 6rem.
+- **Don't** animate clip-path, blur, filters or the children of a large SVG frame by frame in a scene; each of those repaints the screen on every frame and is what made the first opening stutter.
 - **Don't** set Lacquer Print Tint over a dial's lit centre, where it falls to 2.5:1.

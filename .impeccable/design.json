@@ -440,8 +440,8 @@
       },
       {
         "name": "seconds-step",
-        "value": "8 steps/s (1 step/s under reduced motion)",
-        "purpose": "The seconds hand is quantised like a 28,800 vph movement; hours and minutes advance once a second."
+        "value": "continuous sweep (1 step/s under reduced motion)",
+        "purpose": "The homepage seconds hand glides every frame; hours and minutes advance once a second. The movement demos keep their real beats (1 and 6 per second)."
       },
       {
         "name": "scrub",
@@ -624,19 +624,19 @@
   ],
   "narrative": {
     "northStar": "Mostrador Vivo (The Living Dial)",
-    "overview": "The interface is a watch dial seen from above, and it runs. Dark grounds are fumé lacquer, deep diver blue by default and any hue on demand: lit at the centre, smoked almost to black at the edges, brushed with sunburst rays that catch a sheen following the pointer. Everything that speaks is printed on that lacquer the way a dial is printed, in white Saira opened wide, with a pale tint of the lacquer for secondary print and a single red borrowed from the seconds hand. Opaline silver, the quiet dial, carries the passages that are read rather than felt: specifications, prices, the process.\n\nOrnament is always a watch part. The crown is the primary control, the date window is the counter, minute-track rules divide, round sub-dials hold the movement demos and the step markers, and callouts orbit a part on a leader line that ends in an applied baton. The site refuses the category default of a product-photo hero with a headline and a discover button: the first screen of a persuade surface carries no buttons, only the dial and its crown, and photographs arrive later as evidence of real pieces and the bench. Density follows the surface: one idea per screen and a long section rhythm where the site persuades; practical opaline panels with a lacquer showcase for the live watch in the ateliê virtual and the Oficina.\n\nThe One Clock Rule. The drawn watches tell the visitor's own time, and the seconds hand steps eight times a second, the beat of a 28,800 vph movement. The full opening is cued on the same 1/8 s grid. Beyond it, two house curves divide the work (an out-curve for what arrives, an in-out curve for what travels across the screen), scroll scenes are scrubbed rather than fired, and each kind of content has its own reveal; the beat binds the opening and the seconds hand, while reveals and hovers run free on the house curves.",
+    "overview": "The interface is a watch dial seen from above, and it runs. Dark grounds are fumé lacquer, deep diver blue by default and any hue on demand: lit at the centre, smoked almost to black at the edges, brushed with sunburst rays that catch a sheen following the pointer. Everything that speaks is printed on that lacquer the way a dial is printed, in white Saira opened wide, with a pale tint of the lacquer for secondary print and a single red borrowed from the seconds hand. Opaline silver, the quiet dial, carries the passages that are read rather than felt: specifications, prices, the process.\n\nOrnament is always a watch part. The crown is the primary control, the date window is the counter, minute-track rules divide, round sub-dials hold the movement demos and the step markers, and callouts orbit a part on a leader line that ends in an applied baton. The site refuses the category default of a product-photo hero with a headline and a discover button: the first screen of a persuade surface carries no buttons, only the dial and its crown, and photographs arrive later as evidence of real pieces and the bench. Density follows the surface: one idea per screen and a long section rhythm where the site persuades; practical opaline panels with a lacquer showcase for the live watch in the ateliê virtual and the Oficina.\n\nThe One Clock Rule. The drawn watches tell the visitor's own time. On the homepage dial the seconds hand sweeps without stopping (the owner asked for fluid motion on 2026-10-19); the movement demos keep their real beats, because there the beat is the lesson. The opening's staggers are cued on a 1/8 s grid. Beyond it, two house curves divide the work (an out-curve for what arrives, an in-out curve for what travels across the screen), scroll scenes are scrubbed rather than fired, and each kind of content has its own reveal; the 1/8 s grid binds the opening's staggers, while reveals and hovers run free on the house curves.",
     "keyCharacteristics": [
       "Fumé lacquer grounds: radial light falloff, sunburst rays, a pointer-following sheen, any hue on demand.",
       "One family, three widths: Saira light and wide for display, normal for reading, 125% capitals for dial print.",
       "One accent, the seconds-hand red, kept hand-sized; lume green only at night.",
       "Opaline silver for the quiet passages, read in ink.",
       "Watch parts as components: crown, date window, minute track, sub-dials, applied batons.",
-      "One clock: a 1/8 s beat, an eight-step seconds hand, scrubbed scroll scenes, and a complete static page under reduced motion."
+      "One clock: a sweeping seconds hand on the visitor's time, openings staggered on a 1/8 s grid, scrubbed scroll scenes, motion that never repaints, and a complete static page under reduced motion."
     ],
     "rules": [
       {
         "name": "The One Clock Rule",
-        "body": "The drawn watches tell the visitor's own time, and the seconds hand steps eight times a second, the beat of a 28,800 vph movement. The full opening is cued on the same 1/8 s grid. Beyond it, two house curves divide the work (an out-curve for what arrives, an in-out curve for what travels across the screen), scroll scenes are scrubbed rather than fired, and each kind of content has its own reveal; the beat binds the opening and the seconds hand, while reveals and hovers run free on the house curves.",
+        "body": "The drawn watches tell the visitor's own time. On the homepage dial the seconds hand sweeps without stopping (the owner asked for fluid motion on 2026-10-19); the movement demos keep their real beats, because there the beat is the lesson. The opening's staggers are cued on a 1/8 s grid. Beyond it, two house curves divide the work (an out-curve for what arrives, an in-out curve for what travels across the screen), scroll scenes are scrubbed rather than fired, and each kind of content has its own reveal; the 1/8 s grid binds the opening's staggers, while reveals and hovers run free on the house curves.",
         "section": "overview"
       },
       {
@@ -709,7 +709,7 @@
       "Do open measured content (readouts, lists, the footer) with the minute-track rule and divide everything else with 1px hairlines.",
       "Do orbit labels around the part they name, on a leader line that ends in a baton, and keep a dial's centre clear.",
       "Do tell sequence with the dial (quarter dials for steps, hours for the menu) and show counts in a date-style window.",
-      "Do cue openings on the 1/8 s beat, use `cubic-bezier(.23, 1, .32, 1)` for what arrives and `cubic-bezier(.77, 0, .175, 1)` for what travels, and scrub scroll scenes (0.6) instead of firing them.",
+      "Do stagger openings on the 1/8 s grid, use `cubic-bezier(.23, 1, .32, 1)` for what arrives and `cubic-bezier(.77, 0, .175, 1)` for what travels, and scrub scroll scenes (0.6) instead of firing them.",
       "Do give each kind of content its own reveal: headings rise out of a mask, photographs open as a window, lists stagger, step dials point, the closing line rises letter by letter.",
       "Do keep the reduced-motion page complete and calm: pins release, fades and colour changes stay, travel goes, transitions drop to 0.15s, and the seconds hand ticks once a second.",
       "Do draw icons as inline SVG strokes (1.5–1.6 width, round caps): arrow, back, crown, plus.",

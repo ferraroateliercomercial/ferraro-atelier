@@ -27,8 +27,10 @@ const Home = (() => {
       OUT = "ferraroOut";
       IN_OUT = "ferraroInOut";
     }
+    // o recálculo do load cairia no meio da abertura e travaria um quadro; ele é feito à mão, antes ou depois dela
+    ScrollTrigger.config({ autoRefreshEvents: "visibilitychange,DOMContentLoaded,resize" });
   }
-  // Um compasso para a página inteira: 8 batidas por segundo, como um Sellita (28.800 alternâncias/h).
+  // O compasso da abertura: as entradas em sequência andam em oitavos de segundo, como um Sellita (28.800 alternâncias/h).
   const BEAT = 1 / 8;
 
   let lenis = null;
@@ -97,16 +99,17 @@ const Home = (() => {
     // caixa de aço polido em volta da luneta
     s += `<circle r="${RC}" fill="url(#hb-case)"/><circle r="${RC - 6}" fill="none" stroke="#000" stroke-opacity=".25" stroke-width="3"/>`;
     s += `<circle r="${R0}" fill="#07090d"/>`;
-    s += `<g class="bezel__ring">`;
-    s += `<path d="M${-R1} 0a${R1} ${R1} 0 1 0 ${R1 * 2} 0a${R1} ${R1} 0 1 0 ${-R1 * 2} 0ZM${-R0} 0a${R0} ${R0} 0 1 1 ${R0 * 2} 0a${R0} ${R0} 0 1 1 ${-R0 * 2} 0Z" fill="url(#hb-ceramic)" fill-rule="evenodd"/>`;
-    s += `<circle r="${R1 - 2}" fill="none" stroke="#fff" stroke-opacity=".18" stroke-width="3"/>`;
+    // três desenhos empilhados: a caixa parada, o aro que gira em cliques (camada própria) e o reflexo, que não gira com ele
+    const box = (cls, inner, id = "") => `<svg class="${cls}"${id ? ` id="${id}"` : ""} viewBox="-720 -720 1440 1440">${inner}</svg>`;
+    let ring = `<path d="M${-R1} 0a${R1} ${R1} 0 1 0 ${R1 * 2} 0a${R1} ${R1} 0 1 0 ${-R1 * 2} 0ZM${-R0} 0a${R0} ${R0} 0 1 1 ${R0 * 2} 0a${R0} ${R0} 0 1 1 ${-R0 * 2} 0Z" fill="url(#hb-ceramic)" fill-rule="evenodd"/>`;
+    ring += `<circle r="${R1 - 2}" fill="none" stroke="#fff" stroke-opacity=".18" stroke-width="3"/>`;
     // escala de mergulho: triângulo com lume no 12, números de 10 em 10, barras de 5 em 5, minutos nos primeiros 15
     const [tx, ty] = polar(124 * K, 0);
-    s += `<path d="M${tx - 34} ${ty - 25}L${tx + 34} ${ty - 25}L${tx} ${ty + 34}Z" fill="${PRINT}"/><circle cx="${tx}" cy="${ty - 3}" r="11" fill="#dfeee0"/>`;
+    ring += `<path d="M${tx - 34} ${ty - 25}L${tx + 34} ${ty - 25}L${tx} ${ty + 34}Z" fill="${PRINT}"/><circle cx="${tx}" cy="${ty - 3}" r="11" fill="#dfeee0"/>`;
     for (let m = 5; m < 60; m += 5) {
       const deg = m * 6;
       const [x, y] = polar(119 * K, deg);
-      s += m % 10 === 0
+      ring += m % 10 === 0
         ? `<text x="${x}" y="${y + 26}" text-anchor="middle" font-family="Saira, sans-serif" font-size="74" font-weight="600" fill="${PRINT}" transform="rotate(${deg} ${x} ${y})">${m}</text>`
         : `<rect x="${x - 10}" y="${y - 34}" width="20" height="68" rx="4" fill="${PRINT}" transform="rotate(${deg} ${x} ${y})"/>`;
     }
@@ -114,11 +117,10 @@ const Home = (() => {
       if (m % 5 === 0) continue;
       const [x1, y1] = polar(130 * K, m * 6);
       const [x2, y2] = polar(124 * K, m * 6);
-      s += `<line x1="${x1}" y1="${y1}" x2="${x2}" y2="${y2}" stroke="${PRINT}" stroke-width="7"/>`;
+      ring += `<line x1="${x1}" y1="${y1}" x2="${x2}" y2="${y2}" stroke="${PRINT}" stroke-width="7"/>`;
     }
-    s += `<path d="M${-R1} 0a${R1} ${R1} 0 1 0 ${R1 * 2} 0a${R1} ${R1} 0 1 0 ${-R1 * 2} 0ZM${-R0} 0a${R0} ${R0} 0 1 1 ${R0 * 2} 0a${R0} ${R0} 0 1 1 ${-R0 * 2} 0Z" fill="url(#hb-sheen)" fill-rule="evenodd"/>`;
-    s += `</g>`;
-    $("#heroBezel").innerHTML = s;
+    const sheen = `<path d="M${-R1} 0a${R1} ${R1} 0 1 0 ${R1 * 2} 0a${R1} ${R1} 0 1 0 ${-R1 * 2} 0ZM${-R0} 0a${R0} ${R0} 0 1 1 ${R0 * 2} 0a${R0} ${R0} 0 1 1 ${-R0 * 2} 0Z" fill="url(#hb-sheen)" fill-rule="evenodd"/>`;
+    $("#heroBezel").innerHTML = box("bezel__case", s) + box("bezel__ring", ring, "heroBezelRing") + box("bezel__sheen", sheen);
   }
 
   function buildPrint() {
@@ -150,9 +152,9 @@ const Home = (() => {
       s += `<g class="ix">${h === 0 ? bar(-21) + bar(21) : bar(0)}</g>`;
     }
     s += `</g>`;
-    // logo empilhada abaixo do 12
-    s += `<g class="print__logo"><g class="print__logo-in">${Watch.mark(0, -285, 214, PRINT)}</g></g>`;
     $("#dialPrint").innerHTML = s;
+    // logo empilhada abaixo do 12, num desenho à parte: ela entra na abertura e se move no recuo sem redesenhar o mostrador
+    $("#dialLogoArt").innerHTML = Watch.mark(0, -285, 214, PRINT);
   }
 
   function buildDate() {
@@ -169,7 +171,7 @@ const Home = (() => {
   // ---------------------------------------------------------------------------
   // A tela é o mostrador: geometria, trilho de minutos nas bordas e os raios de sol
   // ---------------------------------------------------------------------------
-  const geo = { W: 0, H: 0, cx: 0, cy: 0, diag: 0, D: 0, Rr: 0, logoY: 0, logoS: 1, handS: 1, key: "" };
+  const geo = { W: 0, H: 0, cx: 0, cy: 0, D: 0, Rr: 0, RS: 0, logoY: 0, logoS: 1, handS: 1, key: "" };
   // medidas do trilho das bordas (celular / computador)
   const EDGE = { m: { e: 10, t: 9, gap: 12, L: 34, bw: 8 }, d: { e: 18, t: 13, gap: 20, L: 70, bw: 15 } };
 
@@ -184,9 +186,9 @@ const Home = (() => {
     if (!geo.W || !geo.D) return false;
     // distância do eixo até o canto mais longe da tela
     geo.Rr = Math.hypot(Math.max(geo.cx, geo.W - geo.cx), Math.max(geo.cy, geo.H - geo.cy));
-    geo.diag = geo.Rr * 1.04;
-    head.style.setProperty("--F", `${Math.ceil(geo.diag * 2)}px`);
-    head.style.setProperty("--RS", `${Math.ceil(geo.Rr * 2)}px`);
+    // o disco de laca passa um pouco do canto mais longe, para a borda nunca aparecer na tela cheia
+    geo.RS = Math.ceil(geo.Rr * 2 * 1.02);
+    head.style.setProperty("--RS", `${geo.RS}px`);
     // o trilho das bordas mora dentro da cabeça (abaixo dos ponteiros), mas cobre a tela inteira
     const edge = $("#heroEdge");
     edge.style.left = `${-head.offsetLeft}px`;
@@ -216,14 +218,16 @@ const Home = (() => {
     const u = 1 - t;
     const y = geo.logoY * u;
     const k = 1 + (geo.logoS - 1) * u;
-    // a logo escala em volta do próprio centro (0, -285) e desloca na vertical
-    $("#dialPrint .print__logo").setAttribute("transform", `translate(0 ${y.toFixed(2)}) translate(0 -285) scale(${k.toFixed(4)}) translate(0 285)`);
+    // a logo escala em volta do próprio centro (transform-origin no CSS) e desloca na vertical
+    $("#dialLogo").style.transform = `translate3d(0, ${((y * geo.D) / 1000).toFixed(2)}px, 0) scale(${k.toFixed(4)})`;
     const hk = (1 + (geo.handS - 1) * u).toFixed(4);
     $("#heroHands").style.transform = hk === "1.0000" ? "" : `scale(${hk})`;
     $("#dialDate").style.transform = hk === "1.0000" ? "" : `scale(${hk})`;
   }
 
-  /** Trilho de minutos e índices aplicados correndo pelas bordas da tela, apontando para o eixo dos ponteiros. */
+  /** Trilho de minutos e índices aplicados correndo pelas bordas da tela, apontando para o eixo dos ponteiros.
+      Cada grupo é um SVG pequeno e separado (trilho, os minutos de cada hora, cada índice, o 12 e o 6): na abertura eles
+      entram um a um só com opacidade e escala, sem redesenhar a tela inteira a cada quadro. */
   function buildEdge() {
     const { W, H, cx, cy } = geo;
     if (!W || !H) return;
@@ -241,27 +245,36 @@ const Home = (() => {
       return [cx + dx * k, cy + dy * k];
     };
     const f = (n) => n.toFixed(1);
-    let s = `<defs>
+    // um SVG posicionado na tela, com o viewBox nas mesmas coordenadas da tela
+    const part = (cls, x, y, w, h, inner) =>
+      `<svg class="edge__part ${cls}" style="left:${f(x)}px;top:${f(y)}px;width:${f(w)}px;height:${f(h)}px" viewBox="${f(x)} ${f(y)} ${f(w)} ${f(h)}" aria-hidden="true">${inner}</svg>`;
+
+    // trilho: duas linhas paralelas pelas bordas
+    let s = part("edge__rails", 0, 0, W, H, `<defs>
       <linearGradient id="he-steel" x1="0" y1="0" x2="1" y2="0">
         <stop offset="0" stop-color="#9aa1aa"/><stop offset=".45" stop-color="#ffffff"/><stop offset=".55" stop-color="#d9dde2"/><stop offset="1" stop-color="#7d848d"/>
       </linearGradient>
-    </defs>`;
-    // trilho: duas linhas paralelas com os minutos entre elas
-    s += `<g class="edge__rails" fill="none" stroke="${PRINT}" stroke-opacity=".45" stroke-width="1">
+    </defs><g fill="none" stroke="${PRINT}" stroke-opacity=".45" stroke-width="1">
       <rect x="${e}" y="${e}" width="${f(W - 2 * e)}" height="${f(H - 2 * e)}"/>
-      <rect x="${e + t}" y="${e + t}" width="${f(W - 2 * (e + t))}" height="${f(H - 2 * (e + t))}"/></g>`;
-    s += `<g class="edge__track">`;
-    for (let m = 0; m < 60; m++) {
-      const five = m % 5 === 0;
-      const [x1, y1] = hit(m * 6, e);
-      const [x2, y2] = hit(m * 6, e + t + (five ? 6 : 0));
-      s += `<line class="tk" x1="${f(x1)}" y1="${f(y1)}" x2="${f(x2)}" y2="${f(y2)}" stroke="${PRINT}" stroke-opacity="${five ? 0.95 : 0.7}" stroke-width="${five ? (mobile ? 2.4 : 3.2) : (mobile ? 1 : 1.4)}"/>`;
+      <rect x="${e + t}" y="${e + t}" width="${f(W - 2 * (e + t))}" height="${f(H - 2 * (e + t))}"/></g>`);
+
+    // os minutos, em doze grupos (um por hora, no sentido horário a partir do 12)
+    for (let h = 0; h < 12; h++) {
+      let lines = "";
+      let x0 = Infinity, y0 = Infinity, x1 = -Infinity, y1 = -Infinity;
+      for (let m = h * 5; m < h * 5 + 5; m++) {
+        const five = m % 5 === 0;
+        const [ax, ay] = hit(m * 6, e);
+        const [bx, by] = hit(m * 6, e + t + (five ? 6 : 0));
+        x0 = Math.min(x0, ax, bx); y0 = Math.min(y0, ay, by); x1 = Math.max(x1, ax, bx); y1 = Math.max(y1, ay, by);
+        lines += `<line x1="${f(ax)}" y1="${f(ay)}" x2="${f(bx)}" y2="${f(by)}" stroke="${PRINT}" stroke-opacity="${five ? 0.95 : 0.7}" stroke-width="${five ? (mobile ? 2.4 : 3.2) : (mobile ? 1 : 1.4)}"/>`;
+      }
+      s += part("edge__ticks", x0 - 3, y0 - 3, x1 - x0 + 6, y1 - y0 + 6, lines);
     }
-    s += `</g>`;
-    // índices aplicados, como os do mostrador redondo; sem o 3 (data e coroa) e, no computador, sem 12 e 6 (números grandes)
-    // sombra dos bastões: cópia escura deslocada para baixo (luz vindo de cima), sem filtro
+
+    // índices aplicados, como os do mostrador redondo; sem o 3 (data e coroa) e, no computador, sem 12 e 6 (números grandes).
+    // Sombra: cópia escura deslocada para baixo (luz vindo de cima), sem filtro.
     const sh = mobile ? [1, 3] : [2, 5];
-    s += `<g class="edge__indices">`;
     for (let h = 0; h < 12; h++) {
       if (h === 3 || (numerals && (h === 0 || h === 6))) continue;
       const deg = h * 30;
@@ -271,33 +284,37 @@ const Home = (() => {
       const bar = (dx) => `<rect x="${f(mx - bw / 2 + dx)}" y="${f(my - L / 2)}" width="${bw}" height="${L}" rx="${bw / 4}" fill="#000" fill-opacity=".34" transform="translate(${sh[0]} ${sh[1]}) rotate(${deg} ${f(mx)} ${f(my)})"/>
         <rect x="${f(mx - bw / 2 + dx)}" y="${f(my - L / 2)}" width="${bw}" height="${L}" rx="${bw / 4}" fill="url(#he-steel)" transform="rotate(${deg} ${f(mx)} ${f(my)})"/>
         <rect class="lume" x="${f(mx - bw / 2 + bw * 0.27 + dx)}" y="${f(my - L / 2 + bw * 0.27)}" width="${f(bw * 0.46)}" height="${f(L - bw * 0.54)}" rx="${bw / 8}" fill="#eef3df" transform="rotate(${deg} ${f(mx)} ${f(my)})"/>`;
-      s += `<g class="bt">${h === 0 ? bar(-bw * 0.85) + bar(bw * 0.85) : bar(0)}</g>`;
+      // caixa do bastão girado (e do par, no 12), com folga para a sombra
+      const hw = bw / 2 + (h === 0 ? bw * 0.85 : 0), hl = L / 2;
+      const ex = Math.abs(hw * Math.cos(a)) + Math.abs(hl * Math.sin(a)) + 2;
+      const ey = Math.abs(hw * Math.sin(a)) + Math.abs(hl * Math.cos(a)) + 2;
+      s += part("edge__bt", mx - ex, my - ey, ex * 2 + sh[0], ey * 2 + sh[1], h === 0 ? bar(-bw * 0.85) + bar(bw * 0.85) : bar(0));
     }
-    s += `</g>`;
+
     // 12 e 6 grandes, cortados pela borda da tela
     if (numerals) {
       const fs = H * 0.3;
-      s += `<g class="edge__numerals" fill="${PRINT}" font-family="Saira, sans-serif" font-weight="200" font-stretch="125%" text-anchor="middle" font-size="${f(fs)}">
-        <text class="num" x="${f(cx)}" y="${f(fs * 0.36)}">12</text>
-        <text class="num" x="${f(cx)}" y="${f(H + fs * 0.34)}">6</text></g>`;
+      const num = (txt, base) => part("edge__num", cx - fs, base - fs * 0.85, fs * 2, fs, `<text x="${f(cx)}" y="${f(base)}" fill="${PRINT}" font-family="Saira, sans-serif" font-weight="200" font-stretch="125%" text-anchor="middle" font-size="${f(fs)}">${txt}</text>`);
+      s += num("12", fs * 0.36) + num("6", H + fs * 0.34);
     }
-    const svg = $("#heroEdge");
-    svg.setAttribute("viewBox", `0 0 ${f(W)} ${f(H)}`);
-    svg.innerHTML = s;
+    $("#heroEdge").innerHTML = s;
   }
 
-  /** Raios de sol desenhados uma vez num canvas: estrias finas, irregulares, que somem perto do eixo. */
-  function paintRays() {
-    const c = $("#heroRays");
-    const css = Math.ceil(geo.Rr * 2);
+  /** A laca pintada uma vez num canvas: o fumê (claro no meio, quase preto na borda) e os raios de sol, estrias finas e
+      irregulares que somem perto do eixo. Fora do disco fica transparente: abrir e fechar o mostrador é só mudar a escala. */
+  function paintField() {
+    const c = $("#heroLacquer");
     const dpr = Math.min(window.devicePixelRatio || 1, 2);
-    const N = Math.min(isMobile() ? 1536 : 2048, Math.max(512, Math.round(css * dpr)));
+    const N = Math.min(isMobile() ? 1536 : 2048, Math.max(512, Math.round(geo.RS * dpr)));
     if (c.width === N) return;
     c.width = N;
     c.height = N;
-    const ctx = c.getContext("2d");
     const R = N / 2;
-    ctx.clearRect(0, 0, N, N);
+    // os raios vão num canvas à parte, para apagar o centro deles sem apagar a laca
+    const rays = document.createElement("canvas");
+    rays.width = N;
+    rays.height = N;
+    const ctx = rays.getContext("2d");
     ctx.save();
     ctx.translate(R, R);
     // ruído suave: estrias agrupadas, como a escovação de um mostrador de verdade
@@ -329,6 +346,42 @@ const Home = (() => {
     ctx.fillStyle = g;
     ctx.fillRect(-R, -R, N, N);
     ctx.restore();
+
+    // a laca: os tons da casa (--lq-hi, --lq, --lq-lo), recortados no disco, e os raios por cima
+    const tok = (name) => getComputedStyle(root).getPropertyValue(name).trim();
+    const lq = tok("--lq"), lqHi = tok("--lq-hi"), lqLo = tok("--lq-lo");
+    const out = c.getContext("2d");
+    out.clearRect(0, 0, N, N);
+    out.save();
+    out.beginPath();
+    out.arc(R, R, R, 0, Math.PI * 2);
+    out.clip();
+    const fume = out.createRadialGradient(R, R, 0, R, R, R);
+    fume.addColorStop(0, lqHi);
+    fume.addColorStop(0.3, lq);
+    fume.addColorStop(0.62, Watch.mix(lq, lqLo, 0.55));
+    fume.addColorStop(1, lqLo);
+    out.fillStyle = fume;
+    out.fillRect(0, 0, N, N);
+    out.drawImage(rays, 0, 0);
+    out.restore();
+  }
+
+  /** O reflexo dos raios de sol: dois feixes de luz opostos, pintados uma vez num canvas pequeno. Só ele gira. */
+  function paintLight() {
+    const c = $("#dialLight");
+    if (c.dataset.painted) return;
+    const ctx = c.getContext("2d");
+    if (!ctx.createConicGradient) { c.hidden = true; return; }
+    c.dataset.painted = "1";
+    const R = c.width / 2;
+    const g = ctx.createConicGradient(-Math.PI / 2, R, R); // 0° no 12, como um conic-gradient do CSS
+    [[0, 0], [8, 0.05], [18, 0.13], [24, 0.17], [30, 0.13], [40, 0.05], [50, 0], [182, 0], [190, 0.04], [199, 0.1],
+      [204, 0.12], [209, 0.1], [218, 0.04], [228, 0], [360, 0]].forEach(([deg, a]) => g.addColorStop(deg / 360, `rgba(200, 222, 255, ${a})`));
+    ctx.beginPath();
+    ctx.arc(R, R, R, 0, Math.PI * 2);
+    ctx.fillStyle = g;
+    ctx.fill();
   }
 
   function layoutHero() {
@@ -339,7 +392,8 @@ const Home = (() => {
       geo.key = key;
       buildEdge();
     }
-    paintRays();
+    paintField();
+    paintLight();
     placeParts();
   }
 
@@ -359,12 +413,12 @@ const Home = (() => {
     ["h", "m", "s"].forEach((k) => { hands[k] = $$(`#heroHands .hand--${k}`); });
   }
 
-  // relógio: a hora de quem visita, com o segundo andando 8 vezes por segundo
+  // relógio: a hora de quem visita, com o ponteiro de segundos deslizando sem parar (no movimento reduzido, um salto por segundo)
   const clock = { live: false, angles: { h: 0, m: 0, s: 0 }, last: { h: null, m: null, s: null } };
-  function timeAngles(at = Date.now(), steps = reduce ? 1 : 8) {
+  function timeAngles(at = Date.now(), steps = reduce ? 1 : 0) {
     const t = new Date(at);
     let sec = t.getSeconds() + t.getMilliseconds() / 1000;
-    sec = Math.floor(sec * steps) / steps;
+    if (steps) sec = Math.floor(sec * steps) / steps;
     const min = t.getMinutes() + sec / 60;
     const hr = (t.getHours() % 12) + min / 60;
     return { h: hr * 30, m: min * 6, s: sec * 6 };
@@ -387,7 +441,7 @@ const Home = (() => {
   }
   function clockFrame() {
     if (!clock.live) return;
-    // horas e minutos andam a cada segundo; só o ponteiro de segundos bate 8 vezes por segundo
+    // horas e minutos andam a cada segundo; o ponteiro de segundos desliza a cada quadro
     const now = Date.now();
     const a = timeAngles(now);
     const whole = timeAngles(now - (now % 1000), 1);
@@ -413,9 +467,9 @@ const Home = (() => {
     const short = mode === "short";
     const today = new Date().getDate();
     const tl = gsap.timeline({ paused: true, defaults: { ease: OUT } });
-    const ticks = $$("#heroEdge .tk");
-    const batons = $$("#heroEdge .bt");
-    const nums = $$("#heroEdge .num");
+    const ticks = $$("#heroEdge .edge__ticks");
+    const batons = $$("#heroEdge .edge__bt");
+    const nums = $$("#heroEdge .edge__num");
     const titleLines = $$("#heroTitle .hero__line");
     const dateState = { n: 1 };
     const sweep = { h: 0, m: 0, s: 0 };
@@ -423,14 +477,17 @@ const Home = (() => {
     const sweepAt = short ? 0.25 : 1.875;
 
     gsap.set(["#heroHead", "#heroEdge", "#heroCopy", "#heroCrown"], { autoAlpha: 1 });
-    gsap.set("#heroField", { "--clip": "0px" });
+    // a laca começa como uma gota no eixo dos ponteiros
+    gsap.set("#heroPour", { scale: 0.02, autoAlpha: 0, force3D: true });
     gsap.set("#heroEdge .edge__rails", { autoAlpha: 0 });
     gsap.set(ticks, { autoAlpha: 0 });
-    gsap.set(batons, { autoAlpha: 0, scale: 1.3, transformOrigin: "50% 50%", transformBox: "fill-box" });
+    gsap.set(batons, { autoAlpha: 0, scale: 1.3, transformOrigin: "50% 50%" });
+    // durante a abertura cada peça do trilho é uma camada própria; no fim elas voltam a ser um desenho só
+    $("#heroEdge").classList.add("is-printing");
     if (nums[0]) gsap.set(nums[0], { autoAlpha: 0, yPercent: -24 });
     if (nums[1]) gsap.set(nums[1], { autoAlpha: 0, yPercent: 24 });
-    gsap.set("#dialPrint .print__logo-in", { autoAlpha: 0, y: 14 });
-    gsap.set(titleLines, { autoAlpha: 0, yPercent: 40, filter: "blur(10px)" });
+    gsap.set("#dialLogoArt", { autoAlpha: 0, y: 10 });
+    gsap.set(titleLines, { autoAlpha: 0, yPercent: 40 });
     gsap.set(["#heroSub", "#heroHint"], { autoAlpha: 0, y: 12 });
     gsap.set("#heroCrown .crown__body", { autoAlpha: 0, x: 28 });
     gsap.set("#heroCrown .crown__label", { autoAlpha: 0, x: 12 });
@@ -440,26 +497,28 @@ const Home = (() => {
     setDate(1);
 
     if (short) {
-      tl.to("#heroField", { "--clip": () => `${geo.diag}px`, duration: 0.7, ease: IN_OUT }, 0.05)
+      tl.to("#heroPour", { autoAlpha: 1, duration: 0.15, ease: "none" }, 0.05)
+        .to("#heroPour", { scale: 1, duration: 0.8, ease: IN_OUT }, 0.05)
         .to("#heroEdge .edge__rails", { autoAlpha: 1, duration: 0.3, ease: "none" }, 0.15)
-        .to(ticks, { autoAlpha: 1, duration: 0.3, stagger: 0.004 }, 0.2)
+        .to(ticks, { autoAlpha: 1, duration: 0.3, stagger: 0.02, ease: "none" }, 0.2)
         .to(batons, { autoAlpha: 1, scale: 1, duration: 0.4, stagger: 0.02 }, 0.3)
-        .to("#dialPrint .print__logo-in", { autoAlpha: 1, y: 0, duration: 0.5 }, 0.4)
+        .to("#dialLogoArt", { autoAlpha: 1, y: 0, duration: 0.5 }, 0.4)
         .to("#dialDate", { autoAlpha: 1, duration: 0.3 }, 0.4)
-        .call(() => setDate(today), null, 0.4);
+        .to(dateState, { n: today, duration: 0.6, ease: "power2.inOut", onUpdate: () => setDate(dateState.n) }, 0.4);
     } else {
       // 1. a laca escorre do eixo dos ponteiros até cobrir a tela inteira
-      tl.to("#heroField", { "--clip": () => `${geo.diag}px`, duration: 1.25, ease: IN_OUT }, 0.25)
+      tl.to("#heroPour", { autoAlpha: 1, duration: 0.2, ease: "none" }, 0.25)
+        .to("#heroPour", { scale: 1, duration: 1.35, ease: IN_OUT }, 0.25)
         // 2. o trilho é impresso pelas bordas, no sentido horário, a partir do 12
         .to("#heroEdge .edge__rails", { autoAlpha: 1, duration: 0.5, ease: "none" }, 0.75)
-        .to(ticks, { autoAlpha: 1, duration: 0.25, stagger: BEAT / 8, ease: "none" }, 0.875)
+        .to(ticks, { autoAlpha: 1, duration: 0.35, stagger: 0.075, ease: "none" }, 0.875)
         // 3. os índices descem no mostrador, meio compasso cada
         .to(batons, { autoAlpha: 1, scale: 1, duration: 0.5, stagger: BEAT / 2 }, 1.125)
         // 4. a logo é impressa
-        .to("#dialPrint .print__logo-in", { autoAlpha: 1, y: 0, duration: 0.75 }, 1.625)
+        .to("#dialLogoArt", { autoAlpha: 1, y: 0, duration: 0.75 }, 1.625)
         // 5. a janela da data gira até hoje (é o contador da abertura)
         .to("#dialDate", { autoAlpha: 1, duration: 0.25 }, 1.375)
-        .to(dateState, { n: today, duration: 1.25, ease: "power2.inOut", onUpdate: () => setDate(Math.round(dateState.n)) }, 1.5);
+        .to(dateState, { n: today, duration: 1.25, ease: "power2.inOut", onUpdate: () => setDate(dateState.n) }, 1.5);
     }
 
     // o 12 e o 6 (só no computador) entram cortados pela borda
@@ -477,7 +536,7 @@ const Home = (() => {
     // texto impresso no mostrador e, por último, a coroa (o cabeçalho só aparece quando a pessoa rolar)
     const textAt = short ? 0.375 : 2.5;
     const k = short ? 0.625 : 1;
-    tl.to(titleLines, { autoAlpha: 1, yPercent: 0, filter: "blur(0px)", duration: 1.0 * k, stagger: BEAT }, textAt)
+    tl.to(titleLines, { autoAlpha: 1, yPercent: 0, duration: 1.0 * k, stagger: BEAT }, textAt)
       .to(["#heroSub", "#heroHint"], { autoAlpha: 1, y: 0, duration: 0.75 * k, stagger: BEAT * 2 }, textAt + 0.375 * k)
       .to(["#heroCrown .crown__body", "#heroCrown .crown__label"], { autoAlpha: 1, x: 0, duration: 0.9 * k, stagger: BEAT }, textAt + 0.5 * k);
     return tl;
@@ -502,10 +561,28 @@ const Home = (() => {
       events.forEach((ev) => window.removeEventListener(ev, skip));
     };
     events.forEach((ev) => window.addEventListener(ev, skip, { passive: true }));
-    // espera as fontes (no máximo um instante) para o texto não pular no meio do desenho
+    // espera as fontes (no máximo um instante) para o texto não pular no meio do desenho; recalcula as posições da
+    // rolagem antes de começar (nada se move ainda) e dá dois quadros para as camadas ficarem prontas
     const fonts = document.fonts?.ready || Promise.resolve();
-    Promise.race([fonts, new Promise((r) => setTimeout(r, 1200))]).then(() => tl.play());
+    Promise.race([fonts, new Promise((r) => setTimeout(r, 1200))]).then(() => {
+      ScrollTrigger.refresh();
+      // durante a abertura, um quadro atrasado faz a animação esperar em vez de pular
+      gsap.ticker.lagSmoothing(120, 33);
+      requestAnimationFrame(() => requestAnimationFrame(() => tl.play()));
+    });
   }
+
+  // o load não recalcula a rolagem no meio da abertura: fica para depois dela, num momento ocioso
+  let refreshAfterIntro = false;
+  const refreshWhenIdle = () => {
+    if (!hasG) return;
+    if (window.requestIdleCallback) requestIdleCallback(() => ScrollTrigger.refresh(), { timeout: 1500 });
+    else setTimeout(() => ScrollTrigger.refresh(), 300);
+  };
+  window.addEventListener("load", () => {
+    if (introDone) refreshWhenIdle();
+    else refreshAfterIntro = true;
+  });
 
   function finishIntro() {
     if (introDone) return;
@@ -517,8 +594,10 @@ const Home = (() => {
       // as partes da coroa voltam para o CSS (o passar do mouse puxa a coroa)
       gsap.set(["#heroCrown .crown__body", "#heroCrown .crown__label"], { clearProps: "all" });
     }
+    $("#heroEdge").classList.remove("is-printing");
     lenis?.start();
-    if (hasG) ScrollTrigger.refresh();
+    if (hasG) gsap.ticker.lagSmoothing(0);
+    if (refreshAfterIntro) refreshWhenIdle();
   }
 
   // ---------------------------------------------------------------------------
@@ -651,6 +730,7 @@ const Home = (() => {
     return { x: left + sw / 2 - hx, y: top + sh / 2 - hy, k: dialD / geo.D };
   }
 
+  let bezelClicks = 0;
   function initScroll() {
     if (!motion) {
       $("#viewHome").classList.add("home--static");
@@ -665,8 +745,7 @@ const Home = (() => {
     tl.to("#heroCopy", { autoAlpha: 0, y: -30, duration: 0.08 }, 0.01)
       .to("#heroCrown", { autoAlpha: 0, x: 30, duration: 0.06 }, 0.01)
       .to("#heroEdge", { autoAlpha: 0, duration: 0.08 }, 0.03)
-      .fromTo("#heroField", { "--clip": () => `${geo.diag}px` }, { "--clip": () => `${geo.D / 2}px`, duration: 0.15, ease: "power2.inOut" }, 0.02)
-      .fromTo("#heroRays", { scale: 1 }, { scale: () => (geo.D * 0.51) / geo.Rr, duration: 0.15, ease: "power2.inOut" }, 0.02)
+      .fromTo("#heroField", { scale: 1 }, { scale: () => geo.D / geo.RS, duration: 0.15, ease: "power2.inOut" }, 0.02)
       .fromTo(lg, { t: 0 }, { t: 1, duration: 0.15, ease: "power2.inOut", onUpdate: () => placeParts(lg.t) }, 0.02)
       .fromTo([".dial__rim", "#dialPrint .print__track", "#dialPrint .print__indices"], { autoAlpha: 0 }, { autoAlpha: 1, duration: 0.06 }, 0.1)
       .fromTo([".head__case", "#heroBezel"], { autoAlpha: 0, scale: 1.1 }, { autoAlpha: 1, scale: 1, duration: 0.08, ease: "power2.out" }, 0.11)
@@ -699,7 +778,10 @@ const Home = (() => {
         anatomy.target = clamp01((p - 0.34) / 0.56);
         // a luneta gira em cliques de meio minuto enquanto o mostrador vira relógio
         const clicks = Math.round(clamp01((p - 0.1) / 0.2) * 20);
-        $("#heroBezel .bezel__ring").style.transform = `rotate(${-clicks * 3}deg)`;
+        if (clicks !== bezelClicks) {
+          bezelClicks = clicks;
+          $("#heroBezelRing").style.transform = `rotate(${-clicks * 3}deg)`;
+        }
         $("#masthead").classList.toggle("is-past-hero", p > 0.3);
       },
     });

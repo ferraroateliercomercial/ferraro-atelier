@@ -368,6 +368,10 @@
         <div class="studio__canvas" id="studioCanvas">
           <div class="stack-scene"><div class="stack" id="studioStack"></div></div>
           <div class="studio__back-view" id="studioBack" hidden></div>
+          <button type="button" class="stage-btn zoom-open" id="studioZoom" aria-label="Ampliar o relógio: zoom e arrastar">
+            <svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="10.5" cy="10.5" r="6" fill="none" stroke="currentColor" stroke-width="1.4"/><path d="m15 15 5 5M10.5 8v5M8 10.5h5" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round"/></svg>
+            <span>Ampliar</span>
+          </button>
         </div>
         <div class="status" id="studioStatus">
           <div class="status__head">
@@ -454,6 +458,17 @@
   </div>
 
   <!-- Portfólio ampliado -->
+  <div class="zoomview" id="zoomView" role="dialog" aria-modal="true" aria-label="Relógio ampliado" hidden>
+    <div class="zoomview__stage" id="zoomStage"><div class="zoomview__pan" id="zoomPan"></div></div>
+    <div class="zoomview__bar">
+      <button type="button" id="zoomOut" aria-label="Diminuir">&minus;</button>
+      <button type="button" id="zoomReset" aria-label="Ver o relógio inteiro">Inteiro</button>
+      <button type="button" id="zoomIn" aria-label="Aumentar">+</button>
+    </div>
+    <p class="zoomview__hint" id="zoomHint">Role, pince ou toque duas vezes para dar zoom. Arraste para mover.</p>
+    <button type="button" class="zoomview__close" id="zoomClose">Fechar</button>
+  </div>
+
   <div class="lightbox" id="lightbox" hidden>
     <div class="lightbox__backdrop" data-close></div>
     <div class="lightbox__panel" role="dialog" aria-modal="true" aria-labelledby="lbTitle">

@@ -210,6 +210,117 @@ function renderStack(el, cfg, night = false) {
 }
 
 /** Vira o relógio no eixo vertical entre frente e fundo (meia volta para sair, meia para entrar). */
+/** Tela cheia com zoom: roda, pinça, toque duplo e arraste. Mostra uma cópia do relógio como está agora. */
+function initZoomView(getSource) {
+  const root = $("#zoomView"), stage = $("#zoomStage"), pan = $("#zoomPan"), hint = $("#zoomHint");
+  const MIN = 1, MAX = 8;
+  let k = 1, x = 0, y = 0, lastFocus = null;
+  const pts = new Map();
+  let pinch = null;
+  const apply = () => { pan.style.transform = `translate(${x}px, ${y}px) scale(${k})`; };
+  const clamp = () => {
+    // o relógio nunca sai por inteiro da tela
+    const w = pan.offsetWidth * k, h = pan.offsetHeight * k, vw = stage.clientWidth, vh = stage.clientHeight;
+    x = Math.min(Math.max(x, -w + 80), vw - 80);
+    y = Math.min(Math.max(y, -h + 80), vh - 80);
+  };
+  const zoomAt = (nk, cx, cy) => {
+    nk = Math.min(MAX, Math.max(MIN, nk));
+    const r = nk / k;
+    x = cx - (cx - x) * r; y = cy - (cy - y) * r; k = nk;
+    if (k === MIN) fit(); else { clamp(); apply(); }
+    hint.classList.add("is-off");
+  };
+  const fit = () => {
+    k = 1;
+    x = (stage.clientWidth - pan.offsetWidth) / 2;
+    y = (stage.clientHeight - pan.offsetHeight) / 2;
+    apply();
+  };
+  const center = () => { const r = stage.getBoundingClientRect(); return [r.width / 2, r.height / 2]; };
+  const open = () => {
+    const src = getSource();
+    if (!src) return;
+    lastFocus = document.activeElement;
+    pan.innerHTML = "";
+    const copy = src.cloneNode(true);
+    copy.hidden = false;
+    // os ids ficam: gradientes e máscaras da cópia apontam para os mesmos do relógio da bancada, que continua na tela por baixo
+    pan.append(copy);
+    root.hidden = false;
+    document.documentElement.style.overflow = "hidden";
+    hint.classList.remove("is-off");
+    pan.style.transform = "none";
+    fit();
+    setTimeout(() => hint.classList.add("is-off"), 4500);
+    $("#zoomClose").focus();
+  };
+  const close = () => {
+    root.hidden = true;
+    pan.innerHTML = "";
+    document.documentElement.style.overflow = "";
+    lastFocus?.focus?.();
+  };
+  stage.addEventListener("wheel", (e) => {
+    e.preventDefault();
+    const r = stage.getBoundingClientRect();
+    zoomAt(k * Math.exp(-e.deltaY * (e.ctrlKey ? 0.01 : 0.0018)), e.clientX - r.left, e.clientY - r.top);
+  }, { passive: false });
+  stage.addEventListener("pointerdown", (e) => {
+    stage.setPointerCapture(e.pointerId);
+    pts.set(e.pointerId, [e.clientX, e.clientY]);
+    stage.classList.add("is-drag");
+    if (pts.size === 2) { const [a, b] = [...pts.values()]; pinch = { d: Math.hypot(a[0] - b[0], a[1] - b[1]), k }; }
+  });
+  stage.addEventListener("pointermove", (e) => {
+    const prev = pts.get(e.pointerId);
+    if (!prev) return;
+    const cur = [e.clientX, e.clientY];
+    pts.set(e.pointerId, cur);
+    if (pts.size === 2 && pinch) {
+      const [a, b] = [...pts.values()];
+      const r = stage.getBoundingClientRect();
+      zoomAt(pinch.k * Math.hypot(a[0] - b[0], a[1] - b[1]) / pinch.d, (a[0] + b[0]) / 2 - r.left, (a[1] + b[1]) / 2 - r.top);
+    } else if (pts.size === 1 && k > MIN) {
+      x += cur[0] - prev[0]; y += cur[1] - prev[1];
+      clamp(); apply();
+    }
+  });
+  const up = (e) => {
+    pts.delete(e.pointerId);
+    pinch = null;
+    if (!pts.size) stage.classList.remove("is-drag");
+  };
+  stage.addEventListener("pointerup", up);
+  stage.addEventListener("pointercancel", up);
+  stage.addEventListener("dblclick", (e) => {
+    const r = stage.getBoundingClientRect();
+    if (k > 1.05) { fit(); } else zoomAt(3, e.clientX - r.left, e.clientY - r.top);
+  });
+  $("#zoomIn").addEventListener("click", () => zoomAt(k * 1.6, ...center()));
+  $("#zoomOut").addEventListener("click", () => zoomAt(k / 1.6, ...center()));
+  $("#zoomReset").addEventListener("click", fit);
+  $("#zoomClose").addEventListener("click", close);
+  root.addEventListener("keydown", (e) => {
+    if (e.key === "Escape") { e.preventDefault(); close(); }
+    else if (e.key === "+" || e.key === "=") zoomAt(k * 1.6, ...center());
+    else if (e.key === "-") zoomAt(k / 1.6, ...center());
+    else if (e.key === "0") fit();
+    else if (e.key.startsWith("Arrow") && k > MIN) {
+      const d = 60;
+      if (e.key === "ArrowLeft") x += d; else if (e.key === "ArrowRight") x -= d; else if (e.key === "ArrowUp") y += d; else y -= d;
+      e.preventDefault(); clamp(); apply();
+    } else if (e.key === "Tab") {
+      const f = [...root.querySelectorAll("button")];
+      const i = f.indexOf(document.activeElement);
+      e.preventDefault();
+      f[(i + (e.shiftKey ? -1 : 1) + f.length) % f.length].focus();
+    }
+  });
+  window.addEventListener("resize", () => { if (!root.hidden && k === 1) fit(); });
+  return open;
+}
+
 function flipWatch(outEl, inEl, toBack, swap) {
   const reduced = matchMedia("(prefers-reduced-motion: reduce)").matches;
   const dir = toBack ? 1 : -1;
@@ -633,6 +744,13 @@ const Studio = {
     $("#stepNext").addEventListener("click", () => this.step(1));
     $$(".views button").forEach((b) => b.addEventListener("click", () => this.setView(b.dataset.view)));
     $("#studioNight").addEventListener("click", () => this.setNight(!this.night));
+    const openZoom = initZoomView(() => (this.view === "fundo" ? this.backEl : this.stack.parentElement));
+    $("#studioZoom").addEventListener("click", openZoom);
+    // clicar no relógio também amplia (a coroa e os botões do relógio seguem com a função deles)
+    this.canvas.addEventListener("click", (e) => {
+      if (e.target.closest("[data-crown], [data-pusher], [data-rotor], button")) return;
+      if (e.target.closest(".stack, .studio__back-view")) openZoom();
+    });
     $("#studioSurprise").addEventListener("click", () => this.surprise());
 
     bindCrown(this.canvas, () => this.mv);

@@ -1085,3 +1085,26 @@ html[data-intro="on"] #masthead, html[data-intro="short"] #masthead { opacity: 0
   .hero__hint i::after { animation: none !important; }
   .btn:active, .choice:active, .toggle:active, .color-field__btn:active, .crown:active .crown__body { transform: none; }
 }
+
+
+/* ampliar o relógio: tela cheia com zoom e arraste */
+.zoom-open { position: absolute; right: 0; bottom: 0; top: auto; translate: none; z-index: 2; }
+.zoomview { position: fixed; inset: 0; z-index: 130; background: radial-gradient(ellipse 85% 75% at 50% 45%, var(--cq-hi) 0%, var(--cq) 55%, var(--night) 100%); color: var(--print); animation: fade-in .25s; }
+.zoomview[hidden] { display: none; }
+.zoomview__stage { position: absolute; inset: 0; overflow: hidden; touch-action: none; cursor: grab; user-select: none; -webkit-user-select: none; }
+.zoomview__stage.is-drag { cursor: grabbing; }
+.zoomview__pan { position: absolute; left: 0; top: 0; transform-origin: 0 0; width: max-content; }
+.zoomview__pan .stack-scene, .zoomview__pan .studio__back-view { position: relative; inset: auto; width: auto; display: grid; place-items: center; backface-visibility: visible; }
+.zoomview__pan .stack { width: min(92vw, calc((100svh - 150px) * .77)); max-width: none; height: auto; }
+.zoomview__pan .studio__back-view { width: min(92vw, calc(100svh - 150px)); aspect-ratio: 1; }
+.zoomview__pan .studio__back-view svg { width: 100%; height: 100%; }
+.zoomview__bar { position: absolute; left: 50%; bottom: max(20px, env(safe-area-inset-bottom)); translate: -50% 0; display: flex; gap: 1px; border: 1px solid var(--rule-n); background: color-mix(in srgb, var(--night) 70%, transparent); }
+.zoomview__bar button, .zoomview__close { color: var(--print); font: inherit; font-size: .75rem; letter-spacing: .16em; text-transform: uppercase; min-width: 48px; height: 44px; padding: 0 16px; }
+.zoomview__bar button:first-child, .zoomview__bar button:last-child { font-size: 1.3rem; letter-spacing: 0; }
+.zoomview__close { position: absolute; top: max(14px, env(safe-area-inset-top)); right: 16px; border: 1px solid var(--rule-n); background: color-mix(in srgb, var(--night) 70%, transparent); }
+.zoomview__hint { position: absolute; left: 0; right: 0; top: max(22px, env(safe-area-inset-top)); text-align: center; font-size: .75rem; letter-spacing: .12em; color: var(--print-2); padding: 0 96px; pointer-events: none; transition: opacity .6s var(--ease-out); }
+.zoomview__hint.is-off { opacity: 0; }
+@media (hover: hover) and (pointer: fine) { .zoomview__bar button:hover, .zoomview__close:hover { background: var(--rule-n); } }
+@media (max-width: 859px) { .zoom-open { bottom: auto; top: 0; } .zoomview__hint { top: auto; bottom: 80px; padding: 0 24px; } }
+.studio__canvas .stack-scene .stack, .studio__canvas .studio__back-view svg { cursor: zoom-in; }
+.studio__canvas [data-crown], .studio__canvas [data-rotor] { cursor: grab; }

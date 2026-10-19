@@ -908,8 +908,14 @@ const Home = (() => {
     const gh = $(".sp-h", host), gm = $(".sp-m", host);
     if (animate && motion) {
       // troca de ponteiro: o minuto dá uma volta inteira e o conjunto pousa de novo em 10:08
-      gsap.fromTo(gm, { rotation: specimen.angles.m - 360 }, { rotation: specimen.angles.m, duration: 1.0, ease: OUT, svgOrigin: "200 260" });
-      gsap.fromTo(gh, { rotation: specimen.angles.h - 30 }, { rotation: specimen.angles.h, duration: 1.0, ease: OUT, svgOrigin: "200 260" });
+      // o ângulo é animado num objeto e gravado direto no atributo: o pivô fica sempre no centro do mostrador
+      const spin = (g, from, to) => {
+        const a = { v: from };
+        g.setAttribute("transform", `rotate(${from} 200 260)`);
+        gsap.to(a, { v: to, duration: 1.0, ease: OUT, onUpdate: () => g.setAttribute("transform", `rotate(${a.v.toFixed(2)} 200 260)`) });
+      };
+      spin(gm, specimen.angles.m - 360, specimen.angles.m);
+      spin(gh, specimen.angles.h - 30, specimen.angles.h);
     } else {
       gh.setAttribute("transform", `rotate(${specimen.angles.h} 200 260)`);
       gm.setAttribute("transform", `rotate(${specimen.angles.m} 200 260)`);

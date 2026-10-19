@@ -2,3 +2,7 @@
 .impeccable/review/
 .impeccable/questions/
 .impeccable/config.local.json
+
+# Impeccable: motor baixado pelo update (binário de 21 MB) e configurações locais do Claude Code
+.claude/skills/impeccable/scripts/bin/
+.claude/settings.local.json

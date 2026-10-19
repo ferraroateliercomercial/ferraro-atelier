@@ -297,7 +297,7 @@ html.lenis, html.lenis body { height: auto; }
   background: repeating-linear-gradient(180deg, rgba(0, 0, 0, .55) 0 2px, rgba(255, 255, 255, .5) 2px 4px);
   transition: background-position .6s var(--ease-out);
 }
-.crown__label { font-family: var(--font-print); font-stretch: 125%; font-weight: 500; font-size: .75rem; letter-spacing: .2em; text-transform: uppercase; white-space: nowrap; padding-bottom: 6px; border-bottom: 1px solid var(--second); }
+.crown__label { font-family: var(--font-print); font-stretch: 125%; font-weight: 500; font-size: .75rem; letter-spacing: .2em; text-transform: uppercase; white-space: nowrap; padding-block-end: 6px; border-block-end: 1px solid var(--second); }
 @media (hover: hover) and (pointer: fine) {
   .crown:hover .crown__body, .close__cta:hover .crown__body { transform: translateX(6px); }
   .crown:hover .crown__knurl, .close__cta:hover .crown__knurl { background-position: 0 -24px; }
@@ -524,12 +524,13 @@ html[data-intro="on"] #masthead, html[data-intro="short"] #masthead { opacity: 0
 .sale__actions { display: flex; flex-wrap: wrap; align-items: center; gap: 16px 28px; margin-top: 6px; }
 
 /* ---------- na bancada: a foto se abre como vista por uma lupa ---------- */
-.loupe { position: relative; background: var(--night); }
+.loupe { position: relative; background: var(--ground); }
 .loupe__pin { position: relative; height: 100svh; min-height: 520px; overflow: hidden; }
 .loupe__frame { position: absolute; inset: 0; margin: 0; clip-path: circle(calc(var(--r, 4000) * 1px) at 51% 45%); }
 .loupe__frame img { width: 100%; height: 100%; object-fit: cover; object-position: 51% 45%; transform-origin: 51% 45%; will-change: transform; }
 .loupe__frame::after { content: ""; position: absolute; inset: 0; background: linear-gradient(180deg, rgba(3, 11, 25, 0) 48%, rgba(3, 11, 25, .55) 70%, rgba(3, 11, 25, .9) 100%); }
-.loupe__ring { position: absolute; left: 51%; top: 45%; width: 200px; height: 200px; margin: -100px 0 0 -100px; overflow: visible; color: #14171c; pointer-events: none; opacity: 0; will-change: transform; }
+/* aro da lupa: aço polido com borda escura; cresce junto com o recorte, como se a lupa viesse na direção de quem olha */
+.loupe__ring { position: absolute; left: 51%; top: 45%; width: 200px; height: 200px; margin: -100px 0 0 -100px; overflow: visible; pointer-events: none; opacity: 0; will-change: transform; }
 .loupe__caption {
   position: absolute; left: 50%; bottom: clamp(40px, 9svh, 96px); translate: -50% 0; width: min(100% - 2 * var(--gutter), 860px); text-align: center;
   font-size: var(--step-3); font-weight: 300; font-stretch: 112%; line-height: 1.12; letter-spacing: -.02em; text-wrap: balance; color: var(--print);
@@ -961,9 +962,11 @@ html[data-intro="on"] #masthead, html[data-intro="short"] #masthead { opacity: 0
   .hero__line { white-space: normal; }
   .hero__sub { position: static; margin: 12px auto 0; max-width: 28ch; font-size: .75rem; letter-spacing: .12em; }
   .hero__hint { display: grid; margin-top: 18px; }
-  .crown { --cb: 46px; right: 10px; flex-direction: column-reverse; align-items: flex-end; gap: 10px; padding: 14px 0 14px 10px; }
-  .crown__body { width: 20px; }
-  .crown__label { margin-right: 18px; }
+  /* em pé, a coroa desce para a altura das 4h (como nos mergulhadores de coroa às 4) e o rótulo corre na vertical,
+     junto à borda: fora do giro dos ponteiros e longe do título. O topo fica logo abaixo do índice das 4. */
+  .crown { --cb: 40px; right: 8px; top: calc(var(--cy) + (50vw - 31px) * .577 + 12px); flex-direction: row; align-items: flex-end; gap: 10px; padding: 10px 0 10px 10px; }
+  .crown__body { width: 18px; }
+  .crown__label { writing-mode: vertical-rl; letter-spacing: .14em; }
 
   .anatomy__text { left: var(--gutter); right: var(--gutter); top: 84px; translate: none; width: auto; justify-items: center; text-align: center; gap: 12px; }
   .anatomy__text h2 { font-size: clamp(1.7rem, 7vw, 2.4rem); }

@@ -244,8 +244,12 @@
           <figure class="loupe__frame" id="loupeFrame">
             <img src="assets/movimento.jpg" alt="Movimento aberto na bancada do ateliê, durante a montagem" loading="lazy" width="1024" height="1024" />
           </figure>
-          <svg class="loupe__ring" id="loupeRing" viewBox="-100 -100 200 200" aria-hidden="true"><circle r="100" fill="none" stroke="currentColor" stroke-width="14" vector-effect="non-scaling-stroke" /><circle r="100" fill="none" stroke="#000" stroke-opacity=".5" stroke-width="2" vector-effect="non-scaling-stroke" /></svg>
-          <p class="loupe__caption" id="loupeCaption">Cada relógio é montado à mão, peça por peça, antes de ir para o pulso.</p>
+          <svg class="loupe__ring" id="loupeRing" viewBox="-100 -100 200 200" aria-hidden="true">
+            <defs><linearGradient id="loupe-steel" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#f4f6f8" /><stop offset=".22" stop-color="#8b929b" /><stop offset=".5" stop-color="#e4e8ec" /><stop offset=".74" stop-color="#6a717a" /><stop offset="1" stop-color="#cfd4da" /></linearGradient></defs>
+            <circle r="100" fill="none" stroke="#06080b" stroke-width="24" />
+            <circle r="100" fill="none" stroke="url(#loupe-steel)" stroke-width="18" />
+          </svg>
+          <p class="loupe__caption" id="loupeCaption">Um movimento aberto na bancada, antes de ir para a caixa.</p>
         </div>
       </section>
 
@@ -260,7 +264,7 @@
             <ol class="process__steps" id="processSteps">
               <li><span class="qdial" data-q="0" aria-hidden="true"><i></i></span><div><h3>Você projeta</h3><p>Monte o relógio no ateliê virtual, junte um relógio ou imagem de referência se quiser, e envie o projeto pelo WhatsApp.</p></div></li>
               <li><span class="qdial" data-q="1" aria-hidden="true"><i></i></span><div><h3>Aprovação</h3><p>Confirmamos peças, cores, prazo e valor. Nada é montado antes da sua aprovação.</p></div></li>
-              <li><span class="qdial" data-q="2" aria-hidden="true"><i></i></span><div><h3>Montagem</h3><p>O relógio é montado à mão, peça por peça, com o movimento que você escolheu.</p></div></li>
+              <li><span class="qdial" data-q="2" aria-hidden="true"><i></i></span><div><h3>Montagem</h3><p>Com o projeto aprovado, o ateliê monta as peças que você escolheu, uma a uma.</p></div></li>
               <li><span class="qdial" data-q="3" aria-hidden="true"><i></i></span><div><h3>Entrega</h3><p>O relógio pronto vai para o seu pulso. A forma de entrega é combinada no atendimento.</p></div></li>
             </ol>
           </div>

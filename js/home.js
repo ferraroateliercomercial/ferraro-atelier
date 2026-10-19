@@ -632,7 +632,7 @@ const Home = (() => {
       const lead = `${Math.max(16, reach - p.half * W - 10).toFixed(1)}px`;
       if (li._x !== x) { li._x = x; li.style[side === "r" ? "left" : "right"] = x; }
       if (li._lead !== lead) { li._lead = lead; li.style.setProperty("--lead", lead); }
-      li.classList.toggle("is-on", e > 0.3 + idx * 0.075);
+      li.classList.toggle("is-on", e > 0.26 + idx * 0.045);
     });
   }
 

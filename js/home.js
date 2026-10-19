@@ -883,8 +883,8 @@ const Home = (() => {
     const open = (p) => {
       current = p;
       lastFocus = document.activeElement;
-      $("#lbMedia").innerHTML = `<img src="${p.img}" alt="${p.name}" width="900" height="900" />`;
-      $("#lbLabel").textContent = p.price ? "Disponível" : "Portfólio";
+      // a situação da peça vai na foto, como na lista (nunca como sobretítulo)
+      $("#lbMedia").innerHTML = `<img src="${p.img}" alt="${p.name}" width="900" height="900" /><span class="sale__tag${p.price ? "" : " sale__tag--base"}">${p.price ? "Disponível" : "Portfólio"}</span>`;
       $("#lbTitle").textContent = p.name;
       $("#lbText").textContent = p.text;
       $("#lbSpec").innerHTML = p.spec.map(([k, v]) => `<li><span>${k}</span><span>${v}</span></li>`).join("");

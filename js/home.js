@@ -126,7 +126,6 @@ const Home = (() => {
       <linearGradient id="hp-steel" x1="0" y1="0" x2="1" y2="0">
         <stop offset="0" stop-color="#9aa1aa"/><stop offset=".45" stop-color="#ffffff"/><stop offset=".55" stop-color="#d9dde2"/><stop offset="1" stop-color="#7d848d"/>
       </linearGradient>
-      <filter id="hp-shadow" x="-50%" y="-50%" width="200%" height="200%"><feDropShadow dx="4" dy="9" stdDeviation="6" flood-color="#000" flood-opacity=".55"/></filter>
     </defs>`;
     // trilho de minutos
     s += `<g class="print__track">`;
@@ -137,20 +136,22 @@ const Home = (() => {
       s += `<line class="tk" x1="${x1}" y1="${y1}" x2="${x2}" y2="${y2}" stroke="${PRINT}" stroke-opacity=".72" stroke-width="4.5"/>`;
     }
     s += `</g>`;
-    // índices aplicados: bastões polidos com lume, como no relógio desenhado (sem o 3, onde fica a data)
-    s += `<g class="print__indices" filter="url(#hp-shadow)">`;
+    // índices aplicados: bastões polidos com lume, como no relógio desenhado (sem o 3, onde fica a data).
+    // A sombra é uma cópia escura deslocada: um filtro SVG aqui repintaria o mostrador a cada passo do segundo.
+    s += `<g class="print__indices">`;
     for (let h = 0; h < 12; h++) {
       if (h === 3) continue;
       const deg = h * 30;
       const len = h % 3 === 0 ? 100 : 74;
       const [x, y] = polar(465 - len / 2, deg);
-      const bar = (dx) => `<rect x="${x - 13 + dx}" y="${y - len / 2}" width="26" height="${len}" rx="5" fill="url(#hp-steel)" transform="rotate(${deg} ${x} ${y})"/>
+      const bar = (dx) => `<rect x="${x - 13 + dx}" y="${y - len / 2}" width="26" height="${len}" rx="5" fill="#000" fill-opacity=".38" transform="translate(4 9) rotate(${deg} ${x} ${y})"/>
+        <rect x="${x - 13 + dx}" y="${y - len / 2}" width="26" height="${len}" rx="5" fill="url(#hp-steel)" transform="rotate(${deg} ${x} ${y})"/>
         <rect class="lume" x="${x - 7 + dx}" y="${y - len / 2 + 7}" width="14" height="${len - 14}" rx="3" fill="#eef3df" transform="rotate(${deg} ${x} ${y})"/>`;
       s += `<g class="ix">${h === 0 ? bar(-21) + bar(21) : bar(0)}</g>`;
     }
     s += `</g>`;
     // logo empilhada abaixo do 12
-    s += `<g class="print__logo">${Watch.mark(0, -285, 214, PRINT)}</g>`;
+    s += `<g class="print__logo"><g class="print__logo-in">${Watch.mark(0, -285, 214, PRINT)}</g></g>`;
     $("#dialPrint").innerHTML = s;
   }
 
@@ -163,6 +164,183 @@ const Home = (() => {
   }
   function setDate(n) {
     $("#dateStrip").style.transform = `translateY(${(-(n - 1) * 100) / 31}%)`;
+  }
+
+  // ---------------------------------------------------------------------------
+  // A tela é o mostrador: geometria, trilho de minutos nas bordas e os raios de sol
+  // ---------------------------------------------------------------------------
+  const geo = { W: 0, H: 0, cx: 0, cy: 0, diag: 0, D: 0, Rr: 0, logoY: 0, logoS: 1, handS: 1, key: "" };
+  // medidas do trilho das bordas (celular / computador)
+  const EDGE = { m: { e: 10, t: 9, gap: 12, L: 34, bw: 8 }, d: { e: 18, t: 13, gap: 20, L: 70, bw: 15 } };
+
+  function measureHero() {
+    const stage = $("#heroStage0");
+    const head = $("#heroHead");
+    geo.W = stage.clientWidth;
+    geo.H = stage.clientHeight;
+    geo.cx = head.offsetLeft + head.offsetWidth / 2;
+    geo.cy = head.offsetTop + head.offsetHeight / 2;
+    geo.D = $("#heroDial").offsetWidth;
+    if (!geo.W || !geo.D) return false;
+    // distância do eixo até o canto mais longe da tela
+    geo.Rr = Math.hypot(Math.max(geo.cx, geo.W - geo.cx), Math.max(geo.cy, geo.H - geo.cy));
+    geo.diag = geo.Rr * 1.04;
+    head.style.setProperty("--F", `${Math.ceil(geo.diag * 2)}px`);
+    head.style.setProperty("--RS", `${Math.ceil(geo.Rr * 2)}px`);
+    // o trilho das bordas mora dentro da cabeça (abaixo dos ponteiros), mas cobre a tela inteira
+    const edge = $("#heroEdge");
+    edge.style.left = `${-head.offsetLeft}px`;
+    edge.style.top = `${-head.offsetTop}px`;
+    edge.style.width = `${geo.W}px`;
+    edge.style.height = `${geo.H}px`;
+    // em pé, os ponteiros e a data ficam maiores na tela cheia (--hs no CSS) e voltam ao tamanho do relógio no recuo
+    geo.handS = parseFloat(getComputedStyle($("#heroPin")).getPropertyValue("--hs")) || 1;
+    // em pé, a logo sobe para perto do 12 e cresce; no recuo ela volta ao lugar do mostrador redondo
+    if (isMobile()) {
+      const k = EDGE.m;
+      const top = k.e + k.t + k.gap + k.L;
+      const want = top + (geo.cy - top) * 0.42;
+      geo.logoY = ((want - (geo.cy - 0.285 * geo.D)) * 1000) / geo.D;
+      geo.logoS = Math.min(2.2, (geo.W * 0.4) / (0.214 * geo.D));
+    } else {
+      geo.logoY = 0;
+      geo.logoS = 1;
+    }
+    return true;
+  }
+
+  // 0 = peças na posição da tela cheia, 1 = no mostrador redondo
+  let placeT = 0;
+  function placeParts(t = placeT) {
+    placeT = t;
+    const u = 1 - t;
+    const y = geo.logoY * u;
+    const k = 1 + (geo.logoS - 1) * u;
+    // a logo escala em volta do próprio centro (0, -285) e desloca na vertical
+    $("#dialPrint .print__logo").setAttribute("transform", `translate(0 ${y.toFixed(2)}) translate(0 -285) scale(${k.toFixed(4)}) translate(0 285)`);
+    const hk = (1 + (geo.handS - 1) * u).toFixed(4);
+    $("#heroHands").style.transform = hk === "1.0000" ? "" : `scale(${hk})`;
+    $("#dialDate").style.transform = hk === "1.0000" ? "" : `scale(${hk})`;
+  }
+
+  /** Trilho de minutos e índices aplicados correndo pelas bordas da tela, apontando para o eixo dos ponteiros. */
+  function buildEdge() {
+    const { W, H, cx, cy } = geo;
+    if (!W || !H) return;
+    const mobile = isMobile();
+    // e: margem da borda · t: largura do trilho · gap: do trilho até os índices · L e bw: bastões
+    const { e, t, gap, L, bw } = mobile ? EDGE.m : EDGE.d;
+    const numerals = !mobile && W / H > 1.05;
+    // ponto em que o raio do ângulo `deg` (0 = 12h) encontra o retângulo recuado `d` da borda
+    const hit = (deg, d) => {
+      const a = (deg * Math.PI) / 180;
+      const dx = Math.sin(a), dy = -Math.cos(a);
+      const tx = dx > 1e-6 ? (W - d - cx) / dx : dx < -1e-6 ? (d - cx) / dx : Infinity;
+      const ty = dy > 1e-6 ? (H - d - cy) / dy : dy < -1e-6 ? (d - cy) / dy : Infinity;
+      const k = Math.min(tx, ty);
+      return [cx + dx * k, cy + dy * k];
+    };
+    const f = (n) => n.toFixed(1);
+    let s = `<defs>
+      <linearGradient id="he-steel" x1="0" y1="0" x2="1" y2="0">
+        <stop offset="0" stop-color="#9aa1aa"/><stop offset=".45" stop-color="#ffffff"/><stop offset=".55" stop-color="#d9dde2"/><stop offset="1" stop-color="#7d848d"/>
+      </linearGradient>
+    </defs>`;
+    // trilho: duas linhas paralelas com os minutos entre elas
+    s += `<g class="edge__rails" fill="none" stroke="${PRINT}" stroke-opacity=".45" stroke-width="1">
+      <rect x="${e}" y="${e}" width="${f(W - 2 * e)}" height="${f(H - 2 * e)}"/>
+      <rect x="${e + t}" y="${e + t}" width="${f(W - 2 * (e + t))}" height="${f(H - 2 * (e + t))}"/></g>`;
+    s += `<g class="edge__track">`;
+    for (let m = 0; m < 60; m++) {
+      const five = m % 5 === 0;
+      const [x1, y1] = hit(m * 6, e);
+      const [x2, y2] = hit(m * 6, e + t + (five ? 6 : 0));
+      s += `<line class="tk" x1="${f(x1)}" y1="${f(y1)}" x2="${f(x2)}" y2="${f(y2)}" stroke="${PRINT}" stroke-opacity="${five ? 0.95 : 0.7}" stroke-width="${five ? (mobile ? 2.4 : 3.2) : (mobile ? 1 : 1.4)}"/>`;
+    }
+    s += `</g>`;
+    // índices aplicados, como os do mostrador redondo; sem o 3 (data e coroa) e, no computador, sem 12 e 6 (números grandes)
+    // sombra dos bastões: cópia escura deslocada para baixo (luz vindo de cima), sem filtro
+    const sh = mobile ? [1, 3] : [2, 5];
+    s += `<g class="edge__indices">`;
+    for (let h = 0; h < 12; h++) {
+      if (h === 3 || (numerals && (h === 0 || h === 6))) continue;
+      const deg = h * 30;
+      const [ox, oy] = hit(deg, e + t + gap);
+      const a = (deg * Math.PI) / 180;
+      const mx = ox - Math.sin(a) * (L / 2), my = oy + Math.cos(a) * (L / 2);
+      const bar = (dx) => `<rect x="${f(mx - bw / 2 + dx)}" y="${f(my - L / 2)}" width="${bw}" height="${L}" rx="${bw / 4}" fill="#000" fill-opacity=".34" transform="translate(${sh[0]} ${sh[1]}) rotate(${deg} ${f(mx)} ${f(my)})"/>
+        <rect x="${f(mx - bw / 2 + dx)}" y="${f(my - L / 2)}" width="${bw}" height="${L}" rx="${bw / 4}" fill="url(#he-steel)" transform="rotate(${deg} ${f(mx)} ${f(my)})"/>
+        <rect class="lume" x="${f(mx - bw / 2 + bw * 0.27 + dx)}" y="${f(my - L / 2 + bw * 0.27)}" width="${f(bw * 0.46)}" height="${f(L - bw * 0.54)}" rx="${bw / 8}" fill="#eef3df" transform="rotate(${deg} ${f(mx)} ${f(my)})"/>`;
+      s += `<g class="bt">${h === 0 ? bar(-bw * 0.85) + bar(bw * 0.85) : bar(0)}</g>`;
+    }
+    s += `</g>`;
+    // 12 e 6 grandes, cortados pela borda da tela
+    if (numerals) {
+      const fs = H * 0.3;
+      s += `<g class="edge__numerals" fill="${PRINT}" font-family="Saira, sans-serif" font-weight="200" font-stretch="125%" text-anchor="middle" font-size="${f(fs)}">
+        <text class="num" x="${f(cx)}" y="${f(fs * 0.36)}">12</text>
+        <text class="num" x="${f(cx)}" y="${f(H + fs * 0.34)}">6</text></g>`;
+    }
+    const svg = $("#heroEdge");
+    svg.setAttribute("viewBox", `0 0 ${f(W)} ${f(H)}`);
+    svg.innerHTML = s;
+  }
+
+  /** Raios de sol desenhados uma vez num canvas: estrias finas, irregulares, que somem perto do eixo. */
+  function paintRays() {
+    const c = $("#heroRays");
+    const css = Math.ceil(geo.Rr * 2);
+    const dpr = Math.min(window.devicePixelRatio || 1, 2);
+    const N = Math.min(isMobile() ? 1536 : 2048, Math.max(512, Math.round(css * dpr)));
+    if (c.width === N) return;
+    c.width = N;
+    c.height = N;
+    const ctx = c.getContext("2d");
+    const R = N / 2;
+    ctx.clearRect(0, 0, N, N);
+    ctx.save();
+    ctx.translate(R, R);
+    // ruído suave: estrias agrupadas, como a escovação de um mostrador de verdade
+    let seed = 1974;
+    const rnd = () => { seed = (seed * 16807) % 2147483647; return seed / 2147483647; };
+    const n = 3600;
+    const raw = Array.from({ length: n }, () => rnd() * 2 - 1);
+    const val = raw.map((_, i) => (raw[(i - 1 + n) % n] + 2 * raw[i] + raw[(i + 1) % n]) / 4);
+    const max = Math.max(...val.map(Math.abs));
+    const step = (Math.PI * 2) / n;
+    for (let i = 0; i < n; i++) {
+      const v = val[i] / max;
+      const a0 = i * step, a1 = a0 + step * 1.02;
+      ctx.fillStyle = v > 0 ? `rgba(226, 236, 255, ${(v * 0.085).toFixed(3)})` : `rgba(0, 6, 20, ${(-v * 0.13).toFixed(3)})`;
+      ctx.beginPath();
+      ctx.moveTo(0, 0);
+      ctx.lineTo(Math.cos(a0) * R, Math.sin(a0) * R);
+      ctx.lineTo(Math.cos(a1) * R, Math.sin(a1) * R);
+      ctx.closePath();
+      ctx.fill();
+    }
+    // some perto do eixo, onde as estrias se juntam
+    ctx.globalCompositeOperation = "destination-in";
+    const g = ctx.createRadialGradient(0, 0, 0, 0, 0, R);
+    g.addColorStop(0, "rgba(0,0,0,0)");
+    g.addColorStop(0.07, "rgba(0,0,0,0)");
+    g.addColorStop(0.4, "rgba(0,0,0,1)");
+    g.addColorStop(1, "rgba(0,0,0,1)");
+    ctx.fillStyle = g;
+    ctx.fillRect(-R, -R, N, N);
+    ctx.restore();
+  }
+
+  function layoutHero() {
+    if (!measureHero()) return;
+    // o trilho só é redesenhado se a tela mudou (o ScrollTrigger recalcula no load, no meio da abertura)
+    const key = [geo.W, geo.H, geo.cx, geo.cy, geo.D, isMobile()].join(":");
+    if (key !== geo.key) {
+      geo.key = key;
+      buildEdge();
+    }
+    paintRays();
+    placeParts();
   }
 
   // ponteiros: cada um é uma camada do tamanho do mostrador que gira em volta do centro
@@ -199,6 +377,14 @@ const Home = (() => {
       hands[k].forEach((el) => { el.style.transform = `rotate(${v}deg)`; });
     }
   }
+  /** Das 19h às 6h no relógio de quem visita, o lume acende. */
+  let nightHour = -1;
+  function setNight() {
+    const h = new Date().getHours();
+    if (h === nightHour) return;
+    nightHour = h;
+    $("#heroPin").classList.toggle("is-night", h >= 19 || h < 6);
+  }
   function clockFrame() {
     if (!clock.live) return;
     // horas e minutos andam a cada segundo; só o ponteiro de segundos bate 8 vezes por segundo
@@ -206,6 +392,8 @@ const Home = (() => {
     const a = timeAngles(now);
     const whole = timeAngles(now - (now % 1000), 1);
     paintHands({ h: whole.h, m: whole.m, s: a.s });
+    const minute = Math.floor(now / 60000);
+    if (minute !== clock.minute) { clock.minute = minute; setNight(); }
   }
 
   // luz dos raios de sol: segue o ponteiro do mouse; no celular, oscila devagar sozinha
@@ -224,58 +412,57 @@ const Home = (() => {
     const short = mode === "short";
     const today = new Date().getDate();
     const tl = gsap.timeline({ paused: true, defaults: { ease: OUT } });
-    const ticks = $$("#dialPrint .tk");
-    const idx = $$("#dialPrint .ix");
+    const ticks = $$("#heroEdge .tk");
+    const batons = $$("#heroEdge .bt");
+    const nums = $$("#heroEdge .num");
     const titleLines = $$("#heroTitle .hero__line");
     const dateState = { n: 1 };
     const sweep = { h: 0, m: 0, s: 0 };
     const sweepDur = short ? 0.75 : 1.25;
     const sweepAt = short ? 0.25 : 1.875;
 
-    gsap.set("#heroHead, #heroCopy", { autoAlpha: 1 });
-    gsap.set(".head__case", { autoAlpha: 0, scale: 0.96 });
-    gsap.set("#heroBezel .bezel__ring", { rotation: -90, transformOrigin: "50% 50%" });
-    gsap.set("#heroBezel", { autoAlpha: 0 });
-    gsap.set("#dialBase", { clipPath: "circle(0% at 50% 50%)" });
+    gsap.set(["#heroHead", "#heroEdge", "#heroCopy", "#heroCrown"], { autoAlpha: 1 });
+    gsap.set("#heroField", { "--clip": "0px" });
+    gsap.set("#heroEdge .edge__rails", { autoAlpha: 0 });
     gsap.set(ticks, { autoAlpha: 0 });
-    gsap.set(idx, { autoAlpha: 0, scale: 1.25, transformOrigin: "50% 50%", transformBox: "fill-box" });
-    gsap.set("#dialPrint .print__logo", { autoAlpha: 0, y: 14 });
+    gsap.set(batons, { autoAlpha: 0, scale: 1.3, transformOrigin: "50% 50%", transformBox: "fill-box" });
+    if (nums[0]) gsap.set(nums[0], { autoAlpha: 0, yPercent: -24 });
+    if (nums[1]) gsap.set(nums[1], { autoAlpha: 0, yPercent: 24 });
+    gsap.set("#dialPrint .print__logo-in", { autoAlpha: 0, y: 14 });
     gsap.set(titleLines, { autoAlpha: 0, yPercent: 40, filter: "blur(10px)" });
-    gsap.set(["#heroSub", ".hero__cta"], { autoAlpha: 0, y: 12 });
-    gsap.set(["#heroCrown", "#masthead", "#heroHint"], { autoAlpha: 0 });
-    gsap.set("#heroCrown", { x: -24 });
+    gsap.set(["#heroSub", "#heroHint"], { autoAlpha: 0, y: 12 });
+    gsap.set("#heroCrown .crown__body", { autoAlpha: 0, x: 28 });
+    gsap.set("#heroCrown .crown__label", { autoAlpha: 0, x: 12 });
     gsap.set("#dialDate", { autoAlpha: 0 });
     gsap.set("#heroHands", { autoAlpha: 0 });
     paintHands(sweep);
     setDate(1);
 
     if (short) {
-      tl.to(".head__case", { autoAlpha: 1, scale: 1, duration: 0.6 }, 0)
-        .to("#heroBezel", { autoAlpha: 1, duration: 0.5 }, 0)
-        .to("#heroBezel .bezel__ring", { rotation: 0, duration: 0.9, ease: IN_OUT }, 0)
-        .to("#dialBase", { clipPath: "circle(71% at 50% 50%)", duration: 0.7, ease: IN_OUT, clearProps: "clipPath" }, 0.05)
-        .to(ticks, { autoAlpha: 1, duration: 0.3, stagger: 0.004 }, 0.25)
-        .to(idx, { autoAlpha: 1, scale: 1, duration: 0.4, stagger: 0.02 }, 0.3)
-        .to("#dialPrint .print__logo", { autoAlpha: 1, y: 0, duration: 0.5 }, 0.4)
+      tl.to("#heroField", { "--clip": () => `${geo.diag}px`, duration: 0.7, ease: IN_OUT }, 0.05)
+        .to("#heroEdge .edge__rails", { autoAlpha: 1, duration: 0.3, ease: "none" }, 0.15)
+        .to(ticks, { autoAlpha: 1, duration: 0.3, stagger: 0.004 }, 0.2)
+        .to(batons, { autoAlpha: 1, scale: 1, duration: 0.4, stagger: 0.02 }, 0.3)
+        .to("#dialPrint .print__logo-in", { autoAlpha: 1, y: 0, duration: 0.5 }, 0.4)
         .to("#dialDate", { autoAlpha: 1, duration: 0.3 }, 0.4)
         .call(() => setDate(today), null, 0.4);
     } else {
-      // 1. a caixa aparece e a luneta gira até travar no zero
-      tl.to(".head__case", { autoAlpha: 1, scale: 1, duration: 1.0 }, 0)
-        .to("#heroBezel", { autoAlpha: 1, duration: 0.6, ease: "none" }, 0.125)
-        .to("#heroBezel .bezel__ring", { rotation: 0, duration: 1.5, ease: IN_OUT }, 0.125)
-        // 2. a laca escorre do centro
-        .to("#dialBase", { clipPath: "circle(71% at 50% 50%)", duration: 1.125, ease: IN_OUT, clearProps: "clipPath" }, 0.375)
-        // 3. o trilho de minutos é impresso, no sentido horário
+      // 1. a laca escorre do eixo dos ponteiros até cobrir a tela inteira
+      tl.to("#heroField", { "--clip": () => `${geo.diag}px`, duration: 1.25, ease: IN_OUT }, 0.25)
+        // 2. o trilho é impresso pelas bordas, no sentido horário, a partir do 12
+        .to("#heroEdge .edge__rails", { autoAlpha: 1, duration: 0.5, ease: "none" }, 0.75)
         .to(ticks, { autoAlpha: 1, duration: 0.25, stagger: BEAT / 8, ease: "none" }, 0.875)
-        // 4. os índices descem no mostrador, meio compasso cada
-        .to(idx, { autoAlpha: 1, scale: 1, duration: 0.5, stagger: BEAT / 2 }, 1.125)
-        // 5. a logo é impressa
-        .to("#dialPrint .print__logo", { autoAlpha: 1, y: 0, duration: 0.75 }, 1.625)
-        // 6. a janela da data gira até hoje (é o contador da abertura)
+        // 3. os índices descem no mostrador, meio compasso cada
+        .to(batons, { autoAlpha: 1, scale: 1, duration: 0.5, stagger: BEAT / 2 }, 1.125)
+        // 4. a logo é impressa
+        .to("#dialPrint .print__logo-in", { autoAlpha: 1, y: 0, duration: 0.75 }, 1.625)
+        // 5. a janela da data gira até hoje (é o contador da abertura)
         .to("#dialDate", { autoAlpha: 1, duration: 0.25 }, 1.375)
         .to(dateState, { n: today, duration: 1.25, ease: "power2.inOut", onUpdate: () => setDate(Math.round(dateState.n)) }, 1.5);
     }
+
+    // o 12 e o 6 (só no computador) entram cortados pela borda
+    if (nums.length) tl.to(nums, { autoAlpha: 1, yPercent: 0, duration: short ? 0.6 : 1.0, stagger: short ? 0 : BEAT }, short ? 0.3 : 1.25);
 
     // os ponteiros saem do meio-dia e acertam a hora de agora
     const endAt = (k) => () => timeAngles(Date.now() + sweepDur * 1000)[k];
@@ -286,13 +473,12 @@ const Home = (() => {
       onComplete: () => { clock.live = true; },
     }, sweepAt);
 
-    // texto impresso no mostrador, a coroa e o resto da página
+    // texto impresso no mostrador e, por último, a coroa (o cabeçalho só aparece quando a pessoa rolar)
     const textAt = short ? 0.375 : 2.5;
     const k = short ? 0.625 : 1;
     tl.to(titleLines, { autoAlpha: 1, yPercent: 0, filter: "blur(0px)", duration: 1.0 * k, stagger: BEAT }, textAt)
-      .to(["#heroSub", ".hero__cta"], { autoAlpha: 1, y: 0, duration: 0.75 * k, stagger: BEAT / 2 }, textAt + 0.375 * k)
-      .to("#heroCrown", { autoAlpha: 1, x: 0, duration: 0.9 * k }, textAt + 0.5 * k)
-      .to(["#masthead", "#heroHint"], { autoAlpha: 1, duration: 0.75 * k, ease: "none" }, textAt + 0.625 * k);
+      .to(["#heroSub", "#heroHint"], { autoAlpha: 1, y: 0, duration: 0.75 * k, stagger: BEAT * 2 }, textAt + 0.375 * k)
+      .to(["#heroCrown .crown__body", "#heroCrown .crown__label"], { autoAlpha: 1, x: 0, duration: 0.9 * k, stagger: BEAT }, textAt + 0.5 * k);
     return tl;
   }
 
@@ -325,7 +511,11 @@ const Home = (() => {
     introDone = true;
     clock.live = true;
     root.dataset.intro = "done";
-    if (hasG) gsap.set(["#heroHead", "#heroCopy", "#masthead", "#heroHint", "#heroCrown", "#heroSub", ".hero__cta", "#dialDate", "#heroHands"], { clearProps: "opacity,visibility" });
+    if (hasG) {
+      gsap.set(["#heroHead", "#heroEdge", "#heroCopy", "#heroHint", "#heroCrown", "#heroSub", "#dialDate", "#heroHands"], { clearProps: "opacity,visibility" });
+      // as partes da coroa voltam para o CSS (o passar do mouse puxa a coroa)
+      gsap.set(["#heroCrown .crown__body", "#heroCrown .crown__label"], { clearProps: "all" });
+    }
     lenis?.start();
     if (hasG) ScrollTrigger.refresh();
   }
@@ -333,17 +523,17 @@ const Home = (() => {
   // ---------------------------------------------------------------------------
   // Ao rolar: o mostrador se afasta, vira o relógio inteiro e se desmonta
   // ---------------------------------------------------------------------------
-  // Como cada peça se afasta na vista explodida: deslocamento lateral (dx, dy), giro (rot) e altura (level).
-  // As medidas valem para um relógio de 330 px de largura.
+  // Vista explodida num eixo só, como um desenho técnico: cada peça sobe na sua altura (level),
+  // as metades da pulseira se afastam (dy) e algumas giram um pouco (rot). Medidas para 330 px de largura.
   const HERO_MOTION = {
-    "pulseira": { level: 0, dx: 0, dy: -40, rot: 0 },
-    "pulseira-baixo": { level: 0, dx: 0, dy: 40, rot: 0, baseY: 185 },
-    "movimento": { level: 1, dx: -80, dy: 16, rot: -75 },
-    "caixa": { level: 2, dx: 10, dy: 0, rot: 0 },
-    "mostrador": { level: 3, dx: 62, dy: -14, rot: 0 },
-    "ponteiros": { level: 4, dx: -40, dy: -6, rot: 0 },
-    "luneta": { level: 5, dx: 86, dy: 4, rot: 135 },
-    "cristal": { level: 6, dx: -58, dy: -16, rot: 0 },
+    "pulseira": { level: 0, dy: -40, rot: 0, half: 0.16 },
+    "pulseira-baixo": { level: 0, dy: 40, rot: 0, baseY: 185, half: 0.16 },
+    "movimento": { level: 1, dy: 0, rot: -40, half: 0.27 },
+    "caixa": { level: 2, dy: 0, rot: 0, half: 0.37 },
+    "mostrador": { level: 3, dy: 0, rot: 0, half: 0.26 },
+    "ponteiros": { level: 4, dy: 0, rot: 0, half: 0.2 },
+    "luneta": { level: 5, dy: 0, rot: 45, half: 0.33 },
+    "cristal": { level: 6, dy: 0, rot: 0, half: 0.3 },
   };
 
   const anatomy = { target: 0, cur: 0, layers: [], stack: null, isolated: null, captionKey: "", active: true };
@@ -354,6 +544,8 @@ const Home = (() => {
     renderStack(stack, HERO);
     Clockwork.add(new Movement(stack, HERO));
     anatomy.layers = $$(".layer", stack).map((el) => ({ el, m: HERO_MOTION[el.dataset.name] }));
+    // as legendas ficam em volta do relógio, alternando os lados
+    $$("#heroCallouts li").forEach((li, i) => { li.dataset.side = i % 2 ? "l" : "r"; });
 
     // passar o mouse numa legenda isola a peça e apaga as outras
     if (fine) {
@@ -375,7 +567,8 @@ const Home = (() => {
 
   function anatomyFrame(now, dt) {
     const stack = anatomy.stack;
-    if (!stack || !anatomy.active || stack.offsetParent === null) return;
+    // parado (movimento reduzido ou sem bibliotecas), o relógio fica inteiro e as legendas viram lista
+    if (!motion || !stack || !anatomy.active || stack.offsetParent === null) return;
     anatomy.cur += (anatomy.target - anatomy.cur) * (1 - Math.exp(-dt * 6));
     const cur = anatomy.cur;
     const e = smooth(clamp01(cur));
@@ -383,10 +576,12 @@ const Home = (() => {
     const t = now / 1000;
     const W = stack.offsetWidth;
     const k = W / 330;
-    const gap = (mobile ? 46 : 62) * k;
-    const tilt = 60 * e;
-    const spin = -20 * e - 18 * cur;
-    const lift = (mobile ? 80 : 110) * k * e;
+    const gap = (mobile ? 50 : 64) * k;
+    const tilt = 58 * e;
+    const spin = -14 * e - 10 * cur;
+    const sinT = Math.sin((tilt * Math.PI) / 180);
+    const cosT = Math.cos((tilt * Math.PI) / 180);
+    const lift = 2.6 * gap * sinT * 0.92;
     stack.style.setProperty("--tilt", `${tilt.toFixed(2)}deg`);
     stack.style.setProperty("--spin", `${spin.toFixed(2)}deg`);
     stack.style.setProperty("--lift", `${lift.toFixed(1)}px`);
@@ -395,12 +590,11 @@ const Home = (() => {
     for (const { el, m } of anatomy.layers) {
       // as peças de cima saem primeiro
       const ei = smooth(clamp01((e - (6 - m.level) * 0.055) / 0.67));
-      const breathe = Math.sin(t * 1.3 + m.level * 0.9) * 6 * ei;
+      const breathe = Math.sin(t * 1.3 + m.level * 0.9) * 4 * ei;
       const z = m.level * gap * ei + breathe;
-      const x = (m.dx * k * (mobile ? 0.45 : 1) + Math.cos(t * 0.7 + m.level) * 4 * ei) * ei;
       const y = m.dy * k * ei;
-      el.style.transform = `translate3d(${x.toFixed(1)}px, ${y.toFixed(1)}px, ${z.toFixed(1)}px) rotate(${(m.rot * ei).toFixed(1)}deg)`;
-      pos[m.level === 0 ? (m.baseY ? 0 : -1) : m.level] = { x, y: y + (m.baseY || 0) * (W / 400), z };
+      el.style.transform = `translate3d(0px, ${y.toFixed(1)}px, ${z.toFixed(1)}px) rotate(${(m.rot * ei).toFixed(1)}deg)`;
+      pos[m.level === 0 ? (m.baseY ? 0 : -1) : m.level] = { y: y + (m.baseY || 0) * (W / 400), z, half: m.half };
     }
 
     const callouts = $$("#heroCallouts li");
@@ -417,41 +611,43 @@ const Home = (() => {
       }
       return;
     }
-    // legendas acompanham a altura de cada peça na tela
+    // cada legenda fica na altura da sua peça, de um lado ou do outro, com o fio até a borda dela
     const stage = $("#heroStage");
     const sr = stage.getBoundingClientRect();
     const scene = $("#heroScene").getBoundingClientRect();
+    const cx = scene.left + scene.width / 2 - sr.left;
     const cy = scene.top + scene.height / 2 - sr.top + lift;
-    const sinT = Math.sin((tilt * Math.PI) / 180);
-    const cosT = Math.cos((tilt * Math.PI) / 180);
-    const sp = (spin * Math.PI) / 180;
-    let prevY = -Infinity;
+    const reach = W * 0.46 + 28;
+    const prev = { l: -Infinity, r: -Infinity };
     callouts.forEach((li, idx) => {
       const p = pos[+li.dataset.layer];
       if (!p) return;
-      const yr = p.x * Math.sin(sp) + p.y * Math.cos(sp);
-      const yScreen = Math.max(cy + yr * cosT - p.z * sinT, prevY + 50);
-      prevY = yScreen;
-      li.style.top = `${(yScreen - 14).toFixed(1)}px`;
-      li.classList.toggle("is-on", e > 0.32 + idx * 0.075);
+      const side = li.dataset.side;
+      const yScreen = Math.max(cy + p.y * cosT - p.z * sinT, prev[side] + 58);
+      prev[side] = yScreen;
+      li.style.transform = `translate3d(0, ${(yScreen - 14).toFixed(1)}px, 0)`;
+      // lado e comprimento do fio só mudam quando a tela muda de tamanho
+      const x = side === "r" ? `${(cx + reach).toFixed(1)}px` : `${(sr.width - cx + reach).toFixed(1)}px`;
+      const lead = `${Math.max(16, reach - p.half * W - 10).toFixed(1)}px`;
+      if (li._x !== x) { li._x = x; li.style[side === "r" ? "left" : "right"] = x; }
+      if (li._lead !== lead) { li._lead = lead; li.style.setProperty("--lead", lead); }
+      li.classList.toggle("is-on", e > 0.3 + idx * 0.075);
     });
   }
 
-  /** Onde o mostrador do relógio da vista explodida está na tela, para o mostrador gigante pousar nele. */
+  /** Onde o mostrador do relógio da vista explodida está na tela, para o mostrador pousar nele. */
   function pullTarget() {
     const head = $("#heroHead");
     const stack = anatomy.stack;
-    const pin = $("#heroPin").getBoundingClientRect();
     const sw = stack.offsetWidth;
     const sh = stack.offsetHeight;
     // posição do relógio sem nenhuma transformação (vista de frente)
     let el = stack, left = 0, top = 0;
     while (el && el !== $("#heroPin")) { left += el.offsetLeft; top += el.offsetTop; el = el.offsetParent; }
     const dialD = sw * (204 / 400);
-    const D = $("#heroDial").offsetWidth;
     const hx = head.offsetLeft + head.offsetWidth / 2;
     const hy = head.offsetTop + head.offsetHeight / 2;
-    return { x: left + sw / 2 - hx, y: top + sh / 2 - hy, k: dialD / D, pinH: pin.height };
+    return { x: left + sw / 2 - hx, y: top + sh / 2 - hy, k: dialD / geo.D };
   }
 
   function initScroll() {
@@ -462,33 +658,46 @@ const Home = (() => {
     }
     const tl = gsap.timeline({ defaults: { ease: "none" } });
     let target = pullTarget();
-    tl.to("#heroHint", { autoAlpha: 0, duration: 0.03 }, 0)
-      .to("#heroCopy", { autoAlpha: 0, y: -30, duration: 0.09 }, 0.01)
-      .to("#heroCrown", { autoAlpha: 0, x: 30, duration: 0.07 }, 0.01)
-      .to("#heroHead", { x: () => target.x, y: () => target.y, scale: () => target.k, duration: 0.26, ease: "power2.inOut" }, 0.03)
-      .to(".head__case", { autoAlpha: 0, duration: 0.08 }, 0.2)
-      .fromTo("#heroStage", { autoAlpha: 0 }, { autoAlpha: 1, duration: 0.06 }, 0.24)
-      .to("#heroHead", { autoAlpha: 0, duration: 0.05 }, 0.3)
-      .fromTo("#anatomyText", { autoAlpha: 0, y: 40 }, { autoAlpha: 1, y: 0, duration: 0.12 }, 0.33)
+    const lg = { t: 0 };
+    // 1. a laca que cobria a tela se fecha num círculo; o trilho e os índices das bordas somem, os do
+    //    mostrador redondo aparecem, a logo volta ao lugar e a luneta e a caixa crescem em volta: vira um relógio
+    tl.to("#heroCopy", { autoAlpha: 0, y: -30, duration: 0.08 }, 0.01)
+      .to("#heroCrown", { autoAlpha: 0, x: 30, duration: 0.06 }, 0.01)
+      .to("#heroEdge", { autoAlpha: 0, duration: 0.08 }, 0.03)
+      .fromTo("#heroField", { "--clip": () => `${geo.diag}px` }, { "--clip": () => `${geo.D / 2}px`, duration: 0.15, ease: "power2.inOut" }, 0.02)
+      .fromTo("#heroRays", { scale: 1 }, { scale: () => (geo.D * 0.51) / geo.Rr, duration: 0.15, ease: "power2.inOut" }, 0.02)
+      .fromTo(lg, { t: 0 }, { t: 1, duration: 0.15, ease: "power2.inOut", onUpdate: () => placeParts(lg.t) }, 0.02)
+      .fromTo([".dial__rim", "#dialPrint .print__track", "#dialPrint .print__indices"], { autoAlpha: 0 }, { autoAlpha: 1, duration: 0.06 }, 0.1)
+      .fromTo([".head__case", "#heroBezel"], { autoAlpha: 0, scale: 1.1 }, { autoAlpha: 1, scale: 1, duration: 0.08, ease: "power2.out" }, 0.11)
+      // 2. o relógio inteiro vai até o lugar da vista explodida
+      .to("#heroHead", { x: () => target.x, y: () => target.y, scale: () => target.k, duration: 0.14, ease: "power2.inOut" }, 0.17)
+      .to(".head__case", { autoAlpha: 0, duration: 0.05 }, 0.26)
+      .fromTo("#heroStage", { autoAlpha: 0 }, { autoAlpha: 1, duration: 0.05 }, 0.27)
+      .to("#heroHead", { autoAlpha: 0, duration: 0.04 }, 0.31)
+      .fromTo("#anatomyText", { autoAlpha: 0, y: 40 }, { autoAlpha: 1, y: 0, duration: 0.1 }, 0.33)
       .to({}, { duration: 0.55 }, 0.45);
 
     heroST = ScrollTrigger.create({
       animation: tl,
       trigger: "#topo",
       start: "top top",
-      end: () => `+=${Math.round(window.innerHeight * (isMobile() ? 2.4 : 3))}`,
+      end: () => `+=${Math.round(window.innerHeight * (isMobile() ? 2.6 : 3.2))}`,
       pin: "#heroPin",
       scrub: 0.6,
       anticipatePin: 1,
       invalidateOnRefresh: true,
-      onRefreshInit: () => { gsap.set("#heroHead", { x: 0, y: 0, scale: 1 }); },
-      onRefresh: () => { target = pullTarget(); },
+      // medidas novas antes de o ScrollTrigger recalcular (mudou o tamanho da tela, voltou do ateliê)
+      onRefreshInit: () => {
+        gsap.set("#heroHead", { x: 0, y: 0, scale: 1 });
+        layoutHero();
+        target = pullTarget();
+      },
       onToggle: (self) => { anatomy.active = self.isActive || self.progress < 1; },
       onUpdate: (self) => {
         const p = self.progress;
         anatomy.target = clamp01((p - 0.34) / 0.56);
-        // a luneta gira em cliques de meio minuto enquanto o mostrador se afasta
-        const clicks = Math.round(clamp01(p / 0.3) * 20);
+        // a luneta gira em cliques de meio minuto enquanto o mostrador vira relógio
+        const clicks = Math.round(clamp01((p - 0.1) / 0.2) * 20);
         $("#heroBezel .bezel__ring").style.transform = `rotate(${-clicks * 3}deg)`;
         $("#masthead").classList.toggle("is-past-hero", p > 0.3);
       },
@@ -642,42 +851,31 @@ const Home = (() => {
   }
 
   // ---------------------------------------------------------------------------
-  // Peças à venda, galeria da bancada e detalhe ampliado
+  // Da bancada: as peças montadas no ateliê (à venda ou ponto de partida) e o detalhe ampliado
   // ---------------------------------------------------------------------------
-  const BENCH = [{ id: "bancada", name: "Na bancada", img: "assets/movimento.jpg", text: "Movimento aberto durante a regulagem, antes de ir para a caixa." }];
-
   function initPieces() {
-    const forSale = PORTFOLIO.filter((p) => p.price);
-    $("#a-venda").hidden = forSale.length === 0;
-    $$(".nav-sale").forEach((a) => { a.hidden = forSale.length === 0; });
-    $("#saleGrid").innerHTML = forSale.map((p, i) => {
-      const [cur, value] = brl.format(p.price).split(/\s+/);
+    $("#saleGrid").innerHTML = PORTFOLIO.map((p, i) => {
+      const forSale = !!p.price;
+      const [cur, value] = forSale ? brl.format(p.price).split(/\s+/) : [];
       return `
-      <article class="sale__item${i % 2 ? " sale__item--flip" : ""}">
-        <button class="sale__img" type="button" data-open="${p.id}" aria-label="Ver ${p.name} em detalhe"><img src="${p.img}" alt="${p.name}" loading="lazy" width="900" height="900" /><span class="sale__tag">Disponível</span></button>
+      <article class="sale__item${i % 2 ? " sale__item--flip" : ""}${forSale ? "" : " sale__item--base"}">
+        <button class="sale__img" type="button" data-open="${p.id}" aria-label="Ver ${p.name} em detalhe"><img src="${p.img}" alt="${p.name}" loading="lazy" width="900" height="900" /><span class="sale__tag${forSale ? "" : " sale__tag--base"}">${forSale ? "Disponível" : "Portfólio"}</span></button>
         <div class="sale__info">
           <h3>${p.name}</h3>
           <p class="sale__text">${p.text}</p>
           <ul class="spec">${p.spec.map(([k, v]) => `<li><span>${k}</span><span>${v}</span></li>`).join("")}</ul>
-          <p class="sale__price"><span>${cur}</span>${value}</p>
+          ${forSale ? `<p class="sale__price"><span>${cur}</span>${value}</p>` : ""}
           <div class="sale__actions">
-            <a class="btn" href="${buyUrl(p)}" target="_blank" rel="noopener">Comprar pelo WhatsApp</a>
-            <button class="link-arrow" type="button" data-open="${p.id}">Ver em detalhe<svg class="ico" viewBox="0 0 24 24" aria-hidden="true"><use href="#i-arrow" /></svg></button>
+            ${forSale
+              ? `<a class="btn" href="${buyUrl(p)}" target="_blank" rel="noopener">Comprar pelo WhatsApp</a>
+            <button class="link-arrow" type="button" data-open="${p.id}">Ver em detalhe<svg class="ico" viewBox="0 0 24 24" aria-hidden="true"><use href="#i-arrow" /></svg></button>`
+              : `<a class="link-arrow" href="#personalizar" data-start="${p.id}">Começar com esta base<svg class="ico" viewBox="0 0 24 24" aria-hidden="true"><use href="#i-arrow" /></svg></a>`}
           </div>
         </div>
       </article>`;
     }).join("");
 
-    const frames = [...PORTFOLIO, ...BENCH];
-    $("#portfolioGrid").innerHTML = frames.map((p) => `
-      <figure class="frame${p.cfg ? "" : " frame--bench"}">
-        ${p.cfg ? `<button class="frame__img" type="button" data-open="${p.id}" aria-label="Ver ${p.name} em detalhe">` : `<div class="frame__img">`}
-          <img src="${p.img}" alt="${p.name}" loading="lazy" width="900" height="900" />
-          ${p.price ? `<span class="frame__tag">À venda · ${brl.format(p.price)}</span>` : ""}
-        ${p.cfg ? "</button>" : "</div>"}
-        <figcaption><strong>${p.name}</strong><span>${p.text}</span></figcaption>
-      </figure>`).join("");
-
+    const startFrom = (p) => Studio.apply({ ...DEFAULT_WATCH, ...p.cfg }, "caixa", `Projeto iniciado a partir do ${p.name}`);
     const lb = $("#lightbox");
     let current = null;
     let lastFocus = null;
@@ -685,7 +883,7 @@ const Home = (() => {
       current = p;
       lastFocus = document.activeElement;
       $("#lbMedia").innerHTML = `<img src="${p.img}" alt="${p.name}" width="900" height="900" />`;
-      $("#lbLabel").textContent = p.price ? "À venda" : "Portfólio";
+      $("#lbLabel").textContent = p.price ? "Disponível" : "Portfólio";
       $("#lbTitle").textContent = p.name;
       $("#lbText").textContent = p.text;
       $("#lbSpec").innerHTML = p.spec.map(([k, v]) => `<li><span>${k}</span><span>${v}</span></li>`).join("");
@@ -707,17 +905,57 @@ const Home = (() => {
       lenis?.start();
       lastFocus?.focus?.();
     };
-    [$("#saleGrid"), $("#portfolioGrid")].forEach((g) => g.addEventListener("click", (e) => {
+    $("#saleGrid").addEventListener("click", (e) => {
+      const start = e.target.closest("[data-start]");
+      if (start) {
+        const p = PORTFOLIO.find((x) => x.id === start.dataset.start);
+        if (p) startFrom(p);
+        return;
+      }
       const b = e.target.closest("[data-open]");
       const p = b && PORTFOLIO.find((x) => x.id === b.dataset.open);
       if (p) open(p);
-    }));
+    });
     $$("[data-close]", lb).forEach((b) => b.addEventListener("click", close));
     document.addEventListener("keydown", (e) => { if (e.key === "Escape" && !lb.hidden) close(); });
     $("#lbStart").addEventListener("click", () => {
-      if (current) Studio.apply({ ...DEFAULT_WATCH, ...current.cfg }, "caixa", `Projeto iniciado a partir do ${current.name}`);
+      if (current) startFrom(current);
       close();
     });
+  }
+
+  // ---------------------------------------------------------------------------
+  // Na bancada: a foto do movimento aparece por uma lupa que se abre até tomar a tela
+  // ---------------------------------------------------------------------------
+  function initLoupe() {
+    if (!motion) return;
+    const pin = $("#loupePin");
+    const ring = $("#loupeRing");
+    const img = $("#loupeFrame img");
+    const lens = { r: 0 };
+    // raio que cobre a tela inteira a partir do centro da lupa (51% 45%)
+    const full = () => Math.hypot(Math.max(0.51, 0.49) * pin.clientWidth, Math.max(0.45, 0.55) * pin.clientHeight) + 40;
+    const start = () => Math.min(pin.clientWidth, pin.clientHeight) * 0.2;
+    const paint = () => {
+      pin.style.setProperty("--r", lens.r.toFixed(1));
+      ring.style.transform = `scale(${(lens.r / 100).toFixed(4)})`;
+    };
+    const tl = gsap.timeline({ defaults: { ease: "none" } });
+    tl.fromTo(lens, { r: start }, { r: full, duration: 1, ease: "power2.in", onUpdate: paint }, 0)
+      .fromTo(ring, { autoAlpha: 1 }, { autoAlpha: 0, duration: 0.15 }, 0.85)
+      .fromTo(img, { scale: 1.35 }, { scale: 1, duration: 1, ease: "power1.out" }, 0)
+      .fromTo("#loupeCaption", { autoAlpha: 0, y: 24 }, { autoAlpha: 1, y: 0, duration: 0.3, ease: OUT }, 0.75)
+      .to({}, { duration: 0.25 }, 1);
+    ScrollTrigger.create({
+      animation: tl,
+      trigger: "#bancada",
+      start: "top top",
+      end: () => `+=${Math.round(window.innerHeight * 1.2)}`,
+      pin: pin,
+      scrub: 0.6,
+      invalidateOnRefresh: true,
+    });
+    paint();
   }
 
   // ---------------------------------------------------------------------------
@@ -811,6 +1049,8 @@ const Home = (() => {
       }
       if (head.dataset.ground !== ground) head.dataset.ground = ground;
       head.classList.toggle("is-scrolled", window.scrollY > 24);
+      // na primeira tela só existem o mostrador e a coroa; o cabeçalho chega quando a pessoa rola
+      head.classList.toggle("is-hero", heroST ? heroST.progress < 0.02 : window.scrollY < 40);
     };
     window.addEventListener("scroll", pick, { passive: true });
     window.addEventListener("resize", pick);
@@ -833,7 +1073,7 @@ const Home = (() => {
   function initReveals() {
     if (!motion) return;
     // títulos de seção: a linha sobe de dentro de uma máscara
-    $$(".sec-head h2, .gallery__head h2, .process__body h2, .faq-sec h2, .colors__copy h2").forEach((h) => {
+    $$(".sec-head h2, .process__body h2, .faq-sec h2, .colors__copy h2").forEach((h) => {
       h.innerHTML = `<span class="mask"><span class="mask__in">${h.innerHTML}</span></span>`;
       gsap.from($(".mask__in", h), { yPercent: 110, duration: 1.1, ease: OUT, scrollTrigger: { trigger: h, start: "top 88%", once: true } });
     });
@@ -858,27 +1098,10 @@ const Home = (() => {
     gsap.from(".process__photo img", { scale: 1.18, ease: "none", scrollTrigger: { trigger: ".process__photo", start: "top bottom", end: "bottom top", scrub: true } });
     // fechamento: as letras sobem uma a uma; a logo gigante desliza devagar
     const line = $(".close__line");
-    line.innerHTML = [...line.textContent].map((ch) => `<span class="ch">${ch === " " ? "&nbsp;" : ch}</span>`).join("");
+    // letra por letra, mas a palavra nunca se parte no meio
+    line.innerHTML = line.textContent.split(" ").map((w) => `<span class="word">${[...w].map((ch) => `<span class="ch">${ch}</span>`).join("")}</span>`).join(" ");
     gsap.from(".close__line .ch", { yPercent: 105, duration: 1.0, ease: OUT, stagger: 0.035, scrollTrigger: { trigger: ".close__cta", start: "top 85%", once: true } });
     gsap.fromTo(".close__mark", { yPercent: 18 }, { yPercent: 0, ease: "none", scrollTrigger: { trigger: ".close", start: "top bottom", end: "bottom bottom", scrub: true } });
-  }
-
-  // galeria: no computador, a fileira anda de lado enquanto a página fica parada
-  function initGallery() {
-    if (!motion) return;
-    const mm = gsap.matchMedia();
-    mm.add("(min-width: 900px)", () => {
-      const track = $("#portfolioGrid");
-      const dist = () => Math.max(0, track.scrollWidth - window.innerWidth + parseFloat(getComputedStyle(track).paddingLeft));
-      const tween = gsap.to(track, {
-        x: () => -dist(), ease: "none",
-        scrollTrigger: {
-          trigger: "#portfolio", start: "top top", end: () => `+=${dist()}`, pin: "#galleryPin", scrub: 0.6, invalidateOnRefresh: true,
-          onUpdate: (self) => { $("#galleryBar").style.transform = `scaleX(${self.progress.toFixed(3)})`; },
-        },
-      });
-      return () => tween.scrollTrigger?.kill();
-    });
   }
 
   // ---------------------------------------------------------------------------
@@ -915,17 +1138,24 @@ const Home = (() => {
     buildHands();
     light.el = $("#dialLight");
     paintHands(timeAngles());
+    setNight();
     initAnatomy();
+    layoutHero();
     initColors();
     initHands();
     initPieces();
     initMenu();
-    initMasthead();
     startLenis();
     initScroll();
-    initGallery();
+    initLoupe();
+    initMasthead();
     initReveals();
     startLoop();
+    // sem ScrollTrigger (parado), o próprio mostrador se refaz quando a tela muda de tamanho
+    if (!motion) {
+      let t = 0;
+      window.addEventListener("resize", () => { clearTimeout(t); t = setTimeout(layoutHero, 150); });
+    }
     $$(".whats-link").forEach((a) => { a.href = whatsUrl("Olá, Ferraro Atelier! Quero montar um relógio personalizado."); });
     runIntro();
   }
@@ -934,6 +1164,7 @@ const Home = (() => {
   function onRoute(view, hash) {
     if (view === "home") {
       startLenis();
+      if (!motion) requestAnimationFrame(layoutHero);
       if (hasG) {
         ScrollTrigger.getAll().forEach((t) => t.enable(false));
         ScrollTrigger.refresh();

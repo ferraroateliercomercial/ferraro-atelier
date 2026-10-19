@@ -164,7 +164,8 @@ const LABELS = {
 };
 
 // ---------------------------------------------------------------------------
-// Portfólio. Peças com `price` aparecem também na seção "À venda".
+// Peças da bancada (seção "Da bancada" da página inicial). Com `price`, a peça aparece como
+// disponível, com preço e botão de compra; sem `price`, aparece como portfólio e ponto de partida.
 // Para vender outra peça, coloque `price: 1500` nela; para tirar da venda, apague o `price`.
 // ---------------------------------------------------------------------------
 const brl = new Intl.NumberFormat("pt-BR", { style: "currency", currency: "BRL", maximumFractionDigits: 0 });

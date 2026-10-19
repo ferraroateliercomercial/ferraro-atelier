@@ -8,7 +8,7 @@
   <meta property="og:title" content="Ferraro Atelier · Relojoaria sob encomenda" />
   <meta property="og:description" content="Monte seu relógio peça por peça. A gente monta à mão." />
   <meta property="og:image" content="assets/carbon-edition.jpg" />
-  <meta name="theme-color" content="#05070b" />
+  <meta name="theme-color" content="#030b19" />
   <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Crect width='64' height='64' rx='14' fill='%2305070b'/%3E%3Cpath fill='%23f2f0e9' transform='translate%285 26%29 scale%28.054%29' d='M476 145 432 121 263 184 261 186 285 199 305 205 320 207 340 207 355 205 374 200 405 188 449 164 476 147ZM524 145 568 121 737 184 739 186 715 199 695 205 680 207 660 207 645 205 626 200 595 188 551 164 524 147ZM415 109 388 85 385 85 192 135 191 137 234 168 237 169 415 111ZM585 109 612 85 615 85 808 135 809 137 766 168 763 169 585 111ZM373 68 360 52 347 31 345 30 257 48 110 75 108 76 165 117 169 117 373 69ZM627 68 640 52 653 31 655 30 743 48 890 75 892 76 835 117 831 117 627 69ZM0 0 1 2 72 50 343 25 343 23 334 7 328 2 320 0ZM1000 0 999 2 928 50 657 25 657 23 666 7 672 2 680 0Z'/%3E%3C/svg%3E" />
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
@@ -53,7 +53,7 @@
 
   <!-- ===================== INÍCIO ===================== -->
   <div class="view home" id="viewHome">
-    <header class="masthead" id="masthead">
+    <header class="masthead is-hero" id="masthead">
       <a href="#topo" class="masthead__brand" aria-label="Ferraro Atelier, início"><svg class="lockup" viewBox="0 0 1000 402" aria-hidden="true"><use href="#ferraro-lockup" /></svg></a>
       <div class="masthead__right">
         <a href="#personalizar" class="masthead__cta"><svg class="ico ico--crown" viewBox="0 0 24 24" aria-hidden="true"><use href="#i-crown" /></svg>Monte o seu</a>
@@ -68,8 +68,8 @@
           <li><a href="#cores" data-hour="2">Cores</a></li>
           <li><a href="#movimentos" data-hour="3">Movimentos</a></li>
           <li><a href="#ponteiros" data-hour="4">Ponteiros</a></li>
-          <li class="nav-sale"><a href="#a-venda" data-hour="5">À venda</a></li>
-          <li><a href="#portfolio" data-hour="6">Da bancada</a></li>
+          <li><a href="#a-venda" data-hour="5">Peças</a></li>
+          <li><a href="#bancada" data-hour="6">Na bancada</a></li>
           <li><a href="#atelie" data-hour="7">Como funciona</a></li>
           <li><a href="#duvidas" data-hour="8">Dúvidas</a></li>
           <li><a href="#contato" data-hour="9">Contato</a></li>
@@ -86,30 +86,33 @@
       <!-- MOSTRADOR VIVO: a tela é o mostrador; ao rolar, ele se afasta, vira o relógio inteiro e se desmonta -->
       <section class="hero" id="topo">
         <div class="hero__pin" id="heroPin">
-          <div class="hero__head" id="heroHead">
-            <div class="head__case" aria-hidden="true"></div>
-            <svg class="head__bezel" id="heroBezel" viewBox="-720 -720 1440 1440" aria-hidden="true"></svg>
-            <div class="head__dial" id="heroDial">
-              <div class="dial__base" id="dialBase" aria-hidden="true">
-                <div class="dial__lacquer"></div>
-                <div class="dial__rays"></div>
-                <div class="dial__light" id="dialLight"></div>
+          <div class="hero__stage" id="heroStage0">
+            <div class="hero__head" id="heroHead">
+              <div class="head__case" aria-hidden="true"></div>
+              <svg class="head__bezel" id="heroBezel" viewBox="-720 -720 1440 1440" aria-hidden="true"></svg>
+              <div class="head__field" id="heroField" aria-hidden="true">
+                <div class="field__lacquer"></div>
+                <canvas class="field__rays" id="heroRays"></canvas>
+                <div class="field__light" id="dialLight"></div>
               </div>
-              <svg class="dial__print" id="dialPrint" viewBox="-500 -500 1000 1000" aria-hidden="true"></svg>
-              <div class="dial__date" id="dialDate" aria-hidden="true"><span class="dial__date-strip" id="dateStrip"></span></div>
-              <div class="hero__copy" id="heroCopy">
-                <h1 class="hero__title" id="heroTitle"><span class="hero__line">Seu relógio,</span> <span class="hero__line">peça por peça.</span></h1>
-                <p class="hero__sub" id="heroSub">Montado à mão, com a cor, os ponteiros e o movimento que você escolher.</p>
-                <a class="hero__cta" href="#personalizar"><svg class="ico ico--crown" viewBox="0 0 24 24" aria-hidden="true"><use href="#i-crown" /></svg>Monte o seu</a>
+              <svg class="hero__edge" id="heroEdge" aria-hidden="true"></svg>
+              <div class="head__dial" id="heroDial">
+                <div class="dial__rim" aria-hidden="true"></div>
+                <svg class="dial__print" id="dialPrint" viewBox="-500 -500 1000 1000" aria-hidden="true"></svg>
+                <div class="dial__date" id="dialDate" aria-hidden="true"><span class="dial__date-strip" id="dateStrip"></span></div>
+                <div class="hero__copy" id="heroCopy">
+                  <h1 class="hero__title" id="heroTitle"><span class="hero__line">Seu relógio,</span> <span class="hero__line">peça por peça.</span></h1>
+                  <p class="hero__sub" id="heroSub">Montado à mão, com a cor, os ponteiros e o movimento que você escolher.</p>
+                  <p class="hero__hint" id="heroHint" aria-hidden="true"><i></i><span>Role</span></p>
+                </div>
+                <div class="dial__hands" id="heroHands" aria-hidden="true"></div>
               </div>
-              <div class="dial__hands" id="heroHands" aria-hidden="true"></div>
             </div>
             <a class="crown" id="heroCrown" href="#personalizar" aria-label="Monte o seu relógio no ateliê virtual">
-              <span class="crown__body" aria-hidden="true"><span class="crown__knurl"></span></span>
               <span class="crown__label" aria-hidden="true">Monte o seu</span>
+              <span class="crown__body" aria-hidden="true"><span class="crown__knurl"></span></span>
             </a>
           </div>
-          <p class="hero__hint" id="heroHint" aria-hidden="true"><span>Role</span><i></i></p>
 
           <div class="anatomy" id="anatomia">
             <div class="anatomy__text" id="anatomyText">
@@ -162,22 +165,22 @@
           </header>
           <div class="movements">
             <article class="movement">
-              <div class="movement__watch" id="mvQuartzo"></div>
-              <p class="movement__beat"><b>1</b><span>salto por segundo</span></p>
+              <div class="movement__dial"><div class="movement__watch" id="mvQuartzo"></div><span class="movement__window" aria-hidden="true"><b>1</b>/s</span></div>
               <h3>Quartzo</h3>
               <p class="movement__how">A bateria faz o ponteiro de segundos <strong>saltar uma vez por segundo</strong>. Preciso e sem manutenção.</p>
               <ul class="movement__spec">
+                <li><span>Compasso</span><span>1 salto por segundo</span></li>
                 <li><span>Precisão</span><span>cerca de ±15 s por mês</span></li>
                 <li><span>Energia</span><span>bateria, troca a cada ~2 anos</span></li>
                 <li><span>Ideal para</span><span>uso diário sem preocupação</span></li>
               </ul>
             </article>
             <article class="movement">
-              <div class="movement__watch movement__watch--back" id="mvAutomatico" title="Passe o mouse ou arraste o dedo para mexer o rotor"></div>
-              <p class="movement__beat"><b>6</b><span>batidas por segundo · 8 no suíço</span></p>
+              <div class="movement__dial"><div class="movement__watch movement__watch--back" id="mvAutomatico" title="Passe o mouse ou arraste o dedo para mexer o rotor"></div><span class="movement__window" aria-hidden="true"><b>6</b>/s</span></div>
               <h3>Automático</h3>
               <p class="movement__how">O <strong>rotor gira com o movimento do pulso</strong> e dá corda sozinho. <em>Passe o mouse ou arraste o dedo sobre ele.</em></p>
               <ul class="movement__spec">
+                <li><span>Compasso</span><span>6 batidas por segundo · 8 no suíço</span></li>
                 <li><span>Calibre</span><span>Seiko NH35, 24 rubis</span></li>
                 <li><span>Frequência</span><span>21.600 alternâncias/h</span></li>
                 <li><span>Reserva</span><span>cerca de 41 horas</span></li>
@@ -186,11 +189,11 @@
               <div class="meter" aria-hidden="true"><i id="mvAutoMeter"></i></div>
             </article>
             <article class="movement">
-              <div class="movement__watch movement__watch--back" id="mvManual"></div>
-              <p class="movement__beat"><b>6</b><span>batidas por segundo · 8 no suíço</span></p>
+              <div class="movement__dial"><div class="movement__watch movement__watch--back" id="mvManual"></div><span class="movement__window" aria-hidden="true"><b>6</b>/s</span></div>
               <h3>Corda manual</h3>
               <p class="movement__how">Você <strong>gira a coroa todo dia</strong> para dar corda. O jeito mais tradicional de ter um relógio.</p>
               <ul class="movement__spec">
+                <li><span>Compasso</span><span>6 batidas por segundo · 8 no suíço</span></li>
                 <li><span>Calibre</span><span>Seagull ST3600, 17 rubis</span></li>
                 <li><span>Frequência</span><span>21.600 alternâncias/h</span></li>
                 <li><span>Reserva</span><span>mais de 40 horas</span></li>
@@ -228,22 +231,21 @@
       <section class="sale" id="a-venda" data-ground="opaline">
         <div class="wrap">
           <header class="sec-head">
-            <h2>À venda</h2>
-            <p>Peças que já saíram da bancada e estão disponíveis. A compra é feita pelo WhatsApp.</p>
+            <h2>Da bancada</h2>
+            <p>Peças montadas no ateliê. As disponíveis são vendidas pelo WhatsApp; as outras servem de ponto de partida para o seu.</p>
           </header>
           <div class="sale__list" id="saleGrid"></div>
         </div>
       </section>
 
-      <!-- DA BANCADA -->
-      <section class="gallery" id="portfolio">
-        <div class="gallery__pin" id="galleryPin">
-          <header class="wrap gallery__head">
-            <h2>Da bancada</h2>
-            <p>Peças montadas no ateliê. Toque em um relógio para ver os detalhes ou usar como ponto de partida.</p>
-          </header>
-          <div class="gallery__track" id="portfolioGrid"></div>
-          <div class="wrap gallery__rail" aria-hidden="true"><span id="galleryBar"></span></div>
+      <!-- NA BANCADA: a foto abre como se fosse vista por uma lupa -->
+      <section class="loupe" id="bancada">
+        <div class="loupe__pin" id="loupePin">
+          <figure class="loupe__frame" id="loupeFrame">
+            <img src="assets/movimento.jpg" alt="Movimento aberto na bancada do ateliê, durante a montagem" loading="lazy" width="1024" height="1024" />
+          </figure>
+          <svg class="loupe__ring" id="loupeRing" viewBox="-100 -100 200 200" aria-hidden="true"><circle r="100" fill="none" stroke="currentColor" stroke-width="14" vector-effect="non-scaling-stroke" /><circle r="100" fill="none" stroke="#000" stroke-opacity=".5" stroke-width="2" vector-effect="non-scaling-stroke" /></svg>
+          <p class="loupe__caption" id="loupeCaption">Cada relógio é montado à mão, peça por peça, antes de ir para o pulso.</p>
         </div>
       </section>
 
@@ -258,8 +260,8 @@
             <ol class="process__steps" id="processSteps">
               <li><span class="qdial" data-q="0" aria-hidden="true"><i></i></span><div><h3>Você projeta</h3><p>Monte o relógio no ateliê virtual, junte um relógio ou imagem de referência se quiser, e envie o projeto pelo WhatsApp.</p></div></li>
               <li><span class="qdial" data-q="1" aria-hidden="true"><i></i></span><div><h3>Aprovação</h3><p>Confirmamos peças, cores, prazo e valor. Nada é montado antes da sua aprovação.</p></div></li>
-              <li><span class="qdial" data-q="2" aria-hidden="true"><i></i></span><div><h3>Montagem</h3><p>Montagem à mão, regulagem do movimento e teste de vedação. Você recebe fotos da bancada.</p></div></li>
-              <li><span class="qdial" data-q="3" aria-hidden="true"><i></i></span><div><h3>Entrega</h3><p>Enviado em estojo, com certificado da peça e garantia de 12 meses.</p></div></li>
+              <li><span class="qdial" data-q="2" aria-hidden="true"><i></i></span><div><h3>Montagem</h3><p>O relógio é montado à mão, peça por peça, com o movimento que você escolheu.</p></div></li>
+              <li><span class="qdial" data-q="3" aria-hidden="true"><i></i></span><div><h3>Entrega</h3><p>O relógio pronto vai para o seu pulso. A forma de entrega é combinada no atendimento.</p></div></li>
             </ol>
           </div>
         </div>
@@ -272,7 +274,7 @@
           <div class="faq">
             <details>
               <summary>A cor do relógio fica igual à da tela?</summary>
-              <p>Fica muito próxima. Cada tela mostra as cores de um jeito, então antes de montar enviamos foto ou amostra da peça na cor escolhida para você aprovar.</p>
+              <p>Fica muito próxima, mas cada tela mostra as cores de um jeito. Antes de montar, a cor é confirmada com você no atendimento.</p>
             </details>
             <details>
               <summary>Qual movimento devo escolher?</summary>
@@ -280,7 +282,7 @@
             </details>
             <details>
               <summary>Quanto tempo leva para ficar pronto?</summary>
-              <p>Em geral de 15 a 30 dias úteis, conforme as peças. Peças com cor sob encomenda podem levar um pouco mais. O prazo exato é confirmado na aprovação.</p>
+              <p>Depende das peças escolhidas. O prazo é confirmado no atendimento, junto com o valor, antes de qualquer pagamento.</p>
             </details>
             <details>
               <summary>Posso pedir algo que não está no ateliê virtual?</summary>
@@ -299,7 +301,8 @@
       <div class="wrap close__inner">
         <a class="close__cta" href="#personalizar">
           <span class="close__line">Monte o seu.</span>
-          <span class="close__note"><svg class="ico ico--crown" viewBox="0 0 24 24" aria-hidden="true"><use href="#i-crown" /></svg>Abrir o ateliê virtual</span>
+          <span class="close__crown" aria-hidden="true"><span class="crown__body"><span class="crown__knurl"></span></span></span>
+          <span class="close__note">Abrir o ateliê virtual</span>
         </a>
         <div class="close__grid">
           <div>
@@ -315,9 +318,9 @@
             <p class="close__label">Navegar</p>
             <ul class="close__links">
               <li><a href="#personalizar">Ateliê virtual</a></li>
-              <li class="nav-sale"><a href="#a-venda">À venda</a></li>
+              <li><a href="#a-venda">Peças</a></li>
               <li><a href="#movimentos">Movimentos</a></li>
-              <li><a href="#portfolio">Da bancada</a></li>
+              <li><a href="#duvidas">Dúvidas</a></li>
             </ul>
           </div>
         </div>

@@ -4,7 +4,7 @@ Site da Ferraro Atelier, relojoaria sob encomenda. O cliente não compra relógi
 
 ## Página inicial: o mostrador vivo
 
-A primeira tela é o mostrador inteiro de um relógio, visto de cima. Laca fumê azul (o azul é só o padrão: a cor é livre), impressão branca de mostrador, partes claras em opalino e o vermelho do ponteiro de segundos como único acento. Os fundos escuros do site inteiro são a mesma laca fumê: azul no meio, quase preta nas bordas.
+A primeira tela é o mostrador inteiro de um relógio, visto de cima, numa paleta de floresta: laca verde-musgo (o verde é só o padrão: a cor é livre), impressão marfim, índices e ponteiros dourados, caixa e coroa de bronze, nogueira e couro no segundo fundo escuro, linho nas partes claras e o dourado do ponteiro de segundos como único acento. Os fundos escuros do site são a mesma laca: clara no meio, quase preta nas bordas.
 
 - **Abertura em motion design** (uma vez por visita; quem volta na mesma sessão vê uma versão curta): a laca escorre do centro até cobrir a tela, o trilho de minutos é impresso pelas bordas da tela, os índices descem um a um, o 12 e o 6 gigantes entram cortados pela borda (no computador), a logo é impressa, a janela da data gira até o dia de hoje (é o contador da abertura) e os ponteiros saem do meio-dia e acertam a hora de quem está vendo. Um toque, clique, tecla ou tentativa de rolar acelera o resto.
 - **Primeira tela sem botões**: só o mostrador, o título impresso na metade de baixo ("Seu relógio, peça por peça.") e a **coroa** na borda direita, que é a ação ("Monte o seu"). O cabeçalho com o menu só aparece quando a pessoa começa a rolar (ou ao navegar pelo teclado).
@@ -23,7 +23,7 @@ A primeira tela é o mostrador inteiro de um relógio, visto de cima. Laca fumê
 
 ## Ateliê virtual (`#personalizar`)
 
-Oito etapas: caixa, mostrador, ponteiros, luneta, pulseira, movimento, referência e resumo. O site não mostra preços: valor e prazo são combinados no atendimento.
+Oito etapas: caixa, mostrador, ponteiros, luneta, pulseira, movimento, referência e resumo. O site não mostra preços: valor e prazo são combinados no atendimento. Quem abre o ateliê pela primeira vez começa do relógio da página inicial (mostrador verde-musgo, caixa de bronze, luneta marrom e pulseira de couro); "Recomeçar" volta para ele. Os códigos de projeto continuam lidos a partir do `DEFAULT_WATCH`, então projetos antigos não mudam.
 
 - Todas as cores são livres (seletor de espectro completo e código HEX), inclusive a do aço da pulseira.
 - Pulseira em duas cores: laterais de uma cor e centro de outra (no aço, elos de fora e elos do centro).

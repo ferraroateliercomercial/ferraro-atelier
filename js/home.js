@@ -73,8 +73,9 @@ const Home = (() => {
   // Mostrador vivo: desenho
   // ---------------------------------------------------------------------------
   const K = 500 / 102;               // o mostrador do desenho tem raio 102; aqui, 500
-  const HERO = { ...HERO_CFG, secondColor: "#e04a32" };
-  const PRINT = "#f2f0e9";
+  const HERO = { ...HERO_CFG };
+  const PRINT = "#efe6cf";   // impressão marfim
+  const GILT = "#d9b56b";    // dourado aplicado: escala da luneta
 
   function polar(r, deg) {
     const a = ((deg - 90) * Math.PI) / 180;
@@ -85,11 +86,11 @@ const Home = (() => {
     const R1 = 133 * K, R0 = 104 * K, RC = 146 * K; // luneta 652/510 e caixa 716, numa caixa de 1440
     let s = `<defs>
       <linearGradient id="hb-case" x1="0" y1="0" x2="1" y2="1">
-        <stop offset="0" stop-color="#f4f6f8"/><stop offset=".22" stop-color="#8b929b"/><stop offset=".5" stop-color="#e4e8ec"/>
-        <stop offset=".74" stop-color="#6a717a"/><stop offset="1" stop-color="#cfd4da"/>
+        <stop offset="0" stop-color="#f2d9a4"/><stop offset=".22" stop-color="#9a6f3a"/><stop offset=".5" stop-color="#e3bf7f"/>
+        <stop offset=".74" stop-color="#7a5428"/><stop offset="1" stop-color="#c99c5d"/>
       </linearGradient>
       <radialGradient id="hb-ceramic" cx=".38" cy=".3" r=".9">
-        <stop offset="0" stop-color="#2b3038"/><stop offset=".55" stop-color="#15181d"/><stop offset="1" stop-color="#0b0d10"/>
+        <stop offset="0" stop-color="#4a3624"/><stop offset=".55" stop-color="#2a1e15"/><stop offset="1" stop-color="#140e09"/>
       </radialGradient>
       <linearGradient id="hb-sheen" x1="0" y1="0" x2="1" y2="1">
         <stop offset="0" stop-color="#fff" stop-opacity=".16"/><stop offset=".35" stop-color="#fff" stop-opacity="0"/>
@@ -98,26 +99,26 @@ const Home = (() => {
     </defs>`;
     // caixa de aço polido em volta da luneta
     s += `<circle r="${RC}" fill="url(#hb-case)"/><circle r="${RC - 6}" fill="none" stroke="#000" stroke-opacity=".25" stroke-width="3"/>`;
-    s += `<circle r="${R0}" fill="#07090d"/>`;
+    s += `<circle r="${R0}" fill="#0a0d08"/>`;
     // três desenhos empilhados: a caixa parada, o aro que gira em cliques (camada própria) e o reflexo, que não gira com ele
     const box = (cls, inner, id = "") => `<svg class="${cls}"${id ? ` id="${id}"` : ""} viewBox="-720 -720 1440 1440">${inner}</svg>`;
     let ring = `<path d="M${-R1} 0a${R1} ${R1} 0 1 0 ${R1 * 2} 0a${R1} ${R1} 0 1 0 ${-R1 * 2} 0ZM${-R0} 0a${R0} ${R0} 0 1 1 ${R0 * 2} 0a${R0} ${R0} 0 1 1 ${-R0 * 2} 0Z" fill="url(#hb-ceramic)" fill-rule="evenodd"/>`;
     ring += `<circle r="${R1 - 2}" fill="none" stroke="#fff" stroke-opacity=".18" stroke-width="3"/>`;
     // escala de mergulho: triângulo com lume no 12, números de 10 em 10, barras de 5 em 5, minutos nos primeiros 15
     const [tx, ty] = polar(124 * K, 0);
-    ring += `<path d="M${tx - 34} ${ty - 25}L${tx + 34} ${ty - 25}L${tx} ${ty + 34}Z" fill="${PRINT}"/><circle cx="${tx}" cy="${ty - 3}" r="11" fill="#dfeee0"/>`;
+    ring += `<path d="M${tx - 34} ${ty - 25}L${tx + 34} ${ty - 25}L${tx} ${ty + 34}Z" fill="${GILT}"/><circle cx="${tx}" cy="${ty - 3}" r="11" fill="#dfeee0"/>`;
     for (let m = 5; m < 60; m += 5) {
       const deg = m * 6;
       const [x, y] = polar(119 * K, deg);
       ring += m % 10 === 0
-        ? `<text x="${x}" y="${y + 26}" text-anchor="middle" font-family="Saira, sans-serif" font-size="74" font-weight="600" fill="${PRINT}" transform="rotate(${deg} ${x} ${y})">${m}</text>`
-        : `<rect x="${x - 10}" y="${y - 34}" width="20" height="68" rx="4" fill="${PRINT}" transform="rotate(${deg} ${x} ${y})"/>`;
+        ? `<text x="${x}" y="${y + 26}" text-anchor="middle" font-family="Saira, sans-serif" font-size="74" font-weight="600" fill="${GILT}" transform="rotate(${deg} ${x} ${y})">${m}</text>`
+        : `<rect x="${x - 10}" y="${y - 34}" width="20" height="68" rx="4" fill="${GILT}" transform="rotate(${deg} ${x} ${y})"/>`;
     }
     for (let m = 1; m < 15; m++) {
       if (m % 5 === 0) continue;
       const [x1, y1] = polar(130 * K, m * 6);
       const [x2, y2] = polar(124 * K, m * 6);
-      ring += `<line x1="${x1}" y1="${y1}" x2="${x2}" y2="${y2}" stroke="${PRINT}" stroke-width="7"/>`;
+      ring += `<line x1="${x1}" y1="${y1}" x2="${x2}" y2="${y2}" stroke="${GILT}" stroke-width="7"/>`;
     }
     const sheen = `<path d="M${-R1} 0a${R1} ${R1} 0 1 0 ${R1 * 2} 0a${R1} ${R1} 0 1 0 ${-R1 * 2} 0ZM${-R0} 0a${R0} ${R0} 0 1 1 ${R0 * 2} 0a${R0} ${R0} 0 1 1 ${-R0 * 2} 0Z" fill="url(#hb-sheen)" fill-rule="evenodd"/>`;
     $("#heroBezel").innerHTML = box("bezel__case", s) + box("bezel__ring", ring, "heroBezelRing") + box("bezel__sheen", sheen);
@@ -126,7 +127,7 @@ const Home = (() => {
   function buildPrint() {
     let s = `<defs>
       <linearGradient id="hp-steel" x1="0" y1="0" x2="1" y2="0">
-        <stop offset="0" stop-color="#9aa1aa"/><stop offset=".45" stop-color="#ffffff"/><stop offset=".55" stop-color="#d9dde2"/><stop offset="1" stop-color="#7d848d"/>
+        <stop offset="0" stop-color="#8c6a2e"/><stop offset=".45" stop-color="#f5e1a8"/><stop offset=".55" stop-color="#d9b76f"/><stop offset="1" stop-color="#7e5d24"/>
       </linearGradient>
     </defs>`;
     // trilho de minutos
@@ -252,7 +253,7 @@ const Home = (() => {
     // trilho: duas linhas paralelas pelas bordas
     let s = part("edge__rails", 0, 0, W, H, `<defs>
       <linearGradient id="he-steel" x1="0" y1="0" x2="1" y2="0">
-        <stop offset="0" stop-color="#9aa1aa"/><stop offset=".45" stop-color="#ffffff"/><stop offset=".55" stop-color="#d9dde2"/><stop offset="1" stop-color="#7d848d"/>
+        <stop offset="0" stop-color="#8c6a2e"/><stop offset=".45" stop-color="#f5e1a8"/><stop offset=".55" stop-color="#d9b76f"/><stop offset="1" stop-color="#7e5d24"/>
       </linearGradient>
     </defs><g fill="none" stroke="${PRINT}" stroke-opacity=".45" stroke-width="1">
       <rect x="${e}" y="${e}" width="${f(W - 2 * e)}" height="${f(H - 2 * e)}"/>
@@ -328,7 +329,7 @@ const Home = (() => {
     for (let i = 0; i < n; i++) {
       const v = val[i] / max;
       const a0 = i * step, a1 = a0 + step * 1.02;
-      ctx.fillStyle = v > 0 ? `rgba(226, 236, 255, ${(v * 0.085).toFixed(3)})` : `rgba(0, 6, 20, ${(-v * 0.13).toFixed(3)})`;
+      ctx.fillStyle = v > 0 ? `rgba(250, 238, 205, ${(v * 0.085).toFixed(3)})` : `rgba(6, 10, 4, ${(-v * 0.13).toFixed(3)})`;
       ctx.beginPath();
       ctx.moveTo(0, 0);
       ctx.lineTo(Math.cos(a0) * R, Math.sin(a0) * R);
@@ -377,7 +378,7 @@ const Home = (() => {
     const R = c.width / 2;
     const g = ctx.createConicGradient(-Math.PI / 2, R, R); // 0° no 12, como um conic-gradient do CSS
     [[0, 0], [8, 0.05], [18, 0.13], [24, 0.17], [30, 0.13], [40, 0.05], [50, 0], [182, 0], [190, 0.04], [199, 0.1],
-      [204, 0.12], [209, 0.1], [218, 0.04], [228, 0], [360, 0]].forEach(([deg, a]) => g.addColorStop(deg / 360, `rgba(200, 222, 255, ${a})`));
+      [204, 0.12], [209, 0.1], [218, 0.04], [228, 0], [360, 0]].forEach(([deg, a]) => g.addColorStop(deg / 360, `rgba(250, 232, 190, ${a})`));
     ctx.beginPath();
     ctx.arc(R, R, R, 0, Math.PI * 2);
     ctx.fillStyle = g;
@@ -550,7 +551,8 @@ const Home = (() => {
       return;
     }
     try { sessionStorage.setItem("ct-intro", "1"); } catch { /* sem armazenamento */ }
-    lenis?.stop();
+    // a rolagem não é travada: travar esconde a barra de rolagem e muda a largura da página. Rolar só acelera a abertura
+    // (a abertura e o recuo mexem em camadas diferentes, então os dois podem acontecer juntos).
     const tl = introTimeline(mode);
     tl.eventCallback("onComplete", finishIntro);
     // pular: um toque, um clique, uma tecla ou a tentativa de rolar aceleram o resto da abertura
@@ -791,23 +793,24 @@ const Home = (() => {
   // Cor livre
   // ---------------------------------------------------------------------------
   const LACQUERS = [
-    ["Azul mergulho", "#1d4e8f"],
+    ["Verde musgo", "#46603a"],
     ["Verde fumê", "#2f6e5a"],
-    ["Salmão", "#e0a68a"],
+    ["Chocolate", "#4a3326"],
     ["Laca negra", "#18191c"],
     ["Vinho", "#5c1d27"],
-    ["Turquesa", "#58bdb2"],
-    ["Ardósia", "#5a636f"],
+    ["Azul mergulho", "#1d4e8f"],
+    ["Salmão", "#e0a68a"],
     ["Laranja queimado", "#c25e1f"],
   ];
   const colors = { current: LACQUERS[0][1], name: LACQUERS[0][0], auto: true, timer: null, mv: null, pending: false };
 
   function colorCfg(hex) {
-    const ink = readableOn(hex);
+    // mostrador escuro: índices e ponteiros dourados com lume; claro: tinta de nogueira. Caixa de bronze.
+    const dark = readableOn(hex) === "#e6e9ee";
     return {
-      ...DEFAULT_WATCH, caseShape: "redonda", caseColor: "#c9cdd2", dialColor: hex, dialFume: true, dialFinish: "raios",
-      dialLayout: "data", indexStyle: "bastao", indexColor: ink === "#e6e9ee" ? "#eef0f2" : "#1c2c4a", lume: ink === "#e6e9ee",
-      handStyle: "dauphine", handColor: ink === "#e6e9ee" ? "#e9ecef" : "#1c2c4a", secondColor: "#e04a32", secondStyle: "agulha",
+      ...DEFAULT_WATCH, caseShape: "redonda", caseColor: "#b48a58", dialColor: hex, dialFume: true, dialFinish: "raios",
+      dialLayout: "data", indexStyle: "bastao", indexColor: dark ? "#dcc081" : "#2a2119", lume: dark,
+      handStyle: "dauphine", handColor: dark ? "#dcc081" : "#2a2119", secondColor: "#d9b25f", secondStyle: "agulha",
       bezelType: "lisa", strapType: "couro", strapColor: "#2b1d16", stitchColor: "#cbb8a2", movement: "automatico",
     };
   }
@@ -815,8 +818,8 @@ const Home = (() => {
     colors.current = hex;
     colors.name = name;
     const sec = $("#cores");
-    sec.style.setProperty("--cq", Watch.mix(hex, "#05070b", 0.8));
-    sec.style.setProperty("--cq-hi", Watch.mix(hex, "#05070b", 0.45));
+    sec.style.setProperty("--cq", Watch.mix(hex, "#090e08", 0.8));
+    sec.style.setProperty("--cq-hi", Watch.mix(hex, "#090e08", 0.45));
     $("#colorName").textContent = name;
     $("#colorHex").textContent = hex.toUpperCase();
     $$("#colorChips button").forEach((bt) => bt.setAttribute("aria-pressed", String(bt.dataset.hex === hex)));
@@ -876,7 +879,7 @@ const Home = (() => {
   // ---------------------------------------------------------------------------
   // Ponteiros: um mostrador de amostra
   // ---------------------------------------------------------------------------
-  const specimen = { style: "espada", color: "#1c2c4a", angles: { h: 304, m: 48 } };
+  const specimen = { style: "espada", color: "#5a3a1e", angles: { h: 304, m: 48 } };
   function specimenSvg(style, color) {
     const c = { ...DEFAULT_WATCH, handColor: color, lume: false, handStyle: style };
     let ticks = "";
@@ -884,15 +887,15 @@ const Home = (() => {
       const [x1, y1] = [200 + Math.sin((m * 6 * Math.PI) / 180) * 98, 260 - Math.cos((m * 6 * Math.PI) / 180) * 98];
       const r2 = m % 5 === 0 ? 86 : 93;
       const [x2, y2] = [200 + Math.sin((m * 6 * Math.PI) / 180) * r2, 260 - Math.cos((m * 6 * Math.PI) / 180) * r2];
-      ticks += `<line x1="${x1.toFixed(1)}" y1="${y1.toFixed(1)}" x2="${x2.toFixed(1)}" y2="${y2.toFixed(1)}" stroke="#1b1f25" stroke-opacity="${m % 5 === 0 ? 0.8 : 0.35}" stroke-width="${m % 5 === 0 ? 2 : 0.8}"/>`;
+      ticks += `<line x1="${x1.toFixed(1)}" y1="${y1.toFixed(1)}" x2="${x2.toFixed(1)}" y2="${y2.toFixed(1)}" stroke="#2a2119" stroke-opacity="${m % 5 === 0 ? 0.8 : 0.35}" stroke-width="${m % 5 === 0 ? 2 : 0.8}"/>`;
     }
     return `<svg viewBox="96 156 208 208" role="img" aria-label="Ponteiros estilo ${style}">
-      <defs><radialGradient id="sp-dial" cx=".5" cy=".42" r=".7"><stop offset="0" stop-color="#f7f6f2"/><stop offset=".7" stop-color="#e3e1db"/><stop offset="1" stop-color="#cfccc4"/></radialGradient></defs>
+      <defs><radialGradient id="sp-dial" cx=".5" cy=".42" r=".7"><stop offset="0" stop-color="#f6f1e4"/><stop offset=".7" stop-color="#e6dcc7"/><stop offset="1" stop-color="#d3c6aa"/></radialGradient></defs>
       <circle cx="200" cy="260" r="102" fill="url(#sp-dial)"/>${ticks}
-      ${Watch.mark(200, 214, 46, "#1b1f25")}
+      ${Watch.mark(200, 214, 46, "#2a2119")}
       <g class="sp-h">${Watch.hand(style, "h", c)}</g>
       <g class="sp-m">${Watch.hand(style, "m", c)}</g>
-      <circle cx="200" cy="260" r="5" fill="${color}"/><circle cx="200" cy="260" r="1.8" fill="#f7f6f2"/>
+      <circle cx="200" cy="260" r="5" fill="${color}"/><circle cx="200" cy="260" r="1.8" fill="#f6f1e4"/>
     </svg>`;
   }
   function paintSpecimen(animate) {
@@ -914,7 +917,7 @@ const Home = (() => {
   }
   function initHands() {
     $("#handList").innerHTML = HAND_STYLES.map((h) =>
-      `<button type="button" data-style="${h.id}" aria-pressed="false"><span class="hand-opt__icon">${Watch.handIcon(h.id, "#f2f0e9")}</span><span>${h.name}</span></button>`).join("");
+      `<button type="button" data-style="${h.id}" aria-pressed="false"><span class="hand-opt__icon">${Watch.handIcon(h.id, PRINT)}</span><span>${h.name}</span></button>`).join("");
     $("#handList").addEventListener("click", (e) => {
       const b = e.target.closest("button[data-style]");
       if (!b || b.dataset.style === specimen.style) return;

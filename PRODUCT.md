@@ -38,6 +38,7 @@ Cada relógio é montado à mão a partir das escolhas do cliente, peça por pe�
 - Logo: asas + FERRARO | ATELIER (versão em negrito), e a versão empilhada (asas, FERRARO, ATELIER) nos mostradores dos relógios desenhados e das fotos.
 - Português do Brasil, tom de ateliê: direto, artesanal, sem exagero.
 - Pedido explícito do dono (2026-10-18): site "de 100 mil", com abertura em motion design de um relógio (no espírito do loader da prancha do site da Alívio), primeira dobra sem botões e as melhores animações possíveis.
+- Pedidos do dono (2026-10-19): animações mais suaves e fluidas, e uma paleta que remeta a floresta: verde terroso, um toque de dourado e marrom.
 
 ## Evidence on Hand
 

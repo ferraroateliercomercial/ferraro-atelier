@@ -417,7 +417,13 @@ function bindCrown(container, getMovement) {
 // ---------------------------------------------------------------------------
 // Página inicial (o resto mora em home.js)
 // ---------------------------------------------------------------------------
-const HERO_CFG = { ...DEFAULT_WATCH, dialColor: "#1d4e8f", dialFinish: "raios", bezelColor: "#1a1d22", handStyle: "mercedes", strapType: "oyster" };
+// O relógio da página inicial: mostrador verde-musgo em raios de sol, caixa de bronze, luneta marrom,
+// ponteiros e índices dourados, pulseira de couro.
+const HERO_CFG = {
+  ...DEFAULT_WATCH, dialColor: "#46603a", dialFinish: "raios", caseColor: "#b48a58", bezelColor: "#2c2017",
+  indexColor: "#d9b56b", handStyle: "mercedes", handColor: "#d9b56b", secondColor: "#e0b860",
+  strapType: "couro", strapColor: "#5a3a22", stitchColor: "#d9c29a", rotorColor: "#b8924f",
+};
 
 function initMovements() {
   const mvs = {};
@@ -427,8 +433,8 @@ function initMovements() {
     mvs[id] = Clockwork.add(new Movement(el, cfg));
     return el;
   };
-  make("mvQuartzo", { ...DEFAULT_WATCH, movement: "quartzo", dialColor: "#ebe8e1", dialFume: false, dialFinish: "raios", indexStyle: "romanos", indexColor: "#1c2c4a", handStyle: "breguet", handColor: "#1c2c4a", secondColor: "#1c2c4a", bezelType: "lisa", strapType: "couro", strapColor: "#5a3420", lume: false });
-  const auto = make("mvAutomatico", { ...DEFAULT_WATCH, movement: "automatico", strapType: "borracha", strapColor: "#22262c" }, true);
+  make("mvQuartzo", { ...DEFAULT_WATCH, movement: "quartzo", dialColor: "#ebe5d4", dialFume: false, dialFinish: "raios", indexStyle: "romanos", indexColor: "#2a2119", handStyle: "breguet", handColor: "#2a2119", secondColor: "#8c6a22", bezelType: "lisa", strapType: "couro", strapColor: "#5a3420", lume: false });
+  const auto = make("mvAutomatico", { ...DEFAULT_WATCH, movement: "automatico", strapType: "borracha", strapColor: "#1f2a1e", rotorColor: "#b8924f" }, true);
   make("mvManual", { ...DEFAULT_WATCH, movement: "manual", caseColor: "#c7a46a", strapType: "couro", strapColor: "#3d2a1d" }, true);
   mvs.mvManual.reserve = 0.35;
 
@@ -599,8 +605,10 @@ function parseProjectMessage(text) {
 // ---------------------------------------------------------------------------
 // Ateliê virtual
 // ---------------------------------------------------------------------------
+// Quem abre o ateliê pela primeira vez começa do relógio da página inicial (o padrão de decodificação continua
+// sendo DEFAULT_WATCH, para os códigos antigos de projeto não mudarem).
 const Studio = {
-  cfg: { ...DEFAULT_WATCH, ...storage.get("ct-design", {}) },
+  cfg: { ...HERO_CFG, ...storage.get("ct-design", {}) },
   tab: "caixa",
   view: "frente",
   night: false,
@@ -950,7 +958,7 @@ const Studio = {
       return;
     }
     if (e.target.closest("#resetDesign")) {
-      this.cfg = { ...DEFAULT_WATCH };
+      this.cfg = { ...HERO_CFG };
       this.refImages.forEach((r) => URL.revokeObjectURL(r.url));
       this.refImages = [];
       this.save();

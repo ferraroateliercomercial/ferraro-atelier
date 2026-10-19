@@ -19,7 +19,7 @@ Unresolved: none from the owner. Finish review shipped 2026-10-19; motion smooth
 
 THESIS: The page is one living dial seen from above. The viewport is the dial and runs the visitor's own time; pulling back reveals the watch they can build. It refuses the category default of a product photo hero with a headline and a discover button.
 
-OWN-WORLD: Fumé lacquer, deep blue by default and any hue on demand, with sunburst light that follows the pointer; opaline silver for quiet passages; print-white dial printing set in expanded Saira; the red seconds hand is the only accent; lume green only at night. Components are dial parts: minute-track rules, applied baton indices as markers, the date window as counter, sub-dials as cards, the crown as the primary control.
+OWN-WORLD: Forest palette (owner, 2026-10-19: earthy green, a touch of gold, brown). Moss-green fumé lacquer by default and any hue on demand, with sunburst light that follows the pointer; walnut and leather brown as the second dark ground; linen for quiet passages with walnut ink; ivory dial printing set in expanded Saira; bronze case and crown, gilt indices and hands; the gold seconds hand is the only accent; lume green only at night. Components are dial parts: minute-track rules, applied baton indices as markers, the date window as counter, sub-dials as cards, the crown as the primary control.
 
 STORY: The visitor sees a working dial on their time, learns each part is chosen, watches colour change freely and the watch come apart, trusts the movements, sees finished pieces, then turns the crown to build theirs and send it by WhatsApp.
 

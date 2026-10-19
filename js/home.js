@@ -97,7 +97,7 @@ const Home = (() => {
         <stop offset=".7" stop-color="#fff" stop-opacity="0"/><stop offset="1" stop-color="#fff" stop-opacity=".07"/>
       </linearGradient>
     </defs>`;
-    // caixa de aço polido em volta da luneta
+    // caixa de bronze polido em volta da luneta
     s += `<circle r="${RC}" fill="url(#hb-case)"/><circle r="${RC - 6}" fill="none" stroke="#000" stroke-opacity=".25" stroke-width="3"/>`;
     s += `<circle r="${R0}" fill="#0a0d08"/>`;
     // três desenhos empilhados: a caixa parada, o aro que gira em cliques (camada própria) e o reflexo, que não gira com ele

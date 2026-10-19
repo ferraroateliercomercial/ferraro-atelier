@@ -397,12 +397,13 @@ const Home = (() => {
   }
 
   // luz dos raios de sol: segue o ponteiro do mouse; no celular, oscila devagar sozinha
-  const light = { target: -30, cur: -30, el: null };
+  const light = { target: -30, cur: -30, el: null, last: "" };
   function lightFrame(now, dt) {
     if (!light.el) return;
     if (!fine) light.target = -30 + Math.sin(now / 2600) * 22;
     light.cur += (light.target - light.cur) * (1 - Math.exp(-dt * 4));
-    light.el.style.transform = `rotate(${light.cur.toFixed(2)}deg)`;
+    const v = light.cur.toFixed(1);
+    if (v !== light.last) { light.last = v; light.el.style.transform = `rotate(${v}deg)`; }
   }
 
   // ---------------------------------------------------------------------------
@@ -1037,6 +1038,7 @@ const Home = (() => {
   // ---------------------------------------------------------------------------
   // Cabeçalho: muda de cor conforme o fundo da seção que passa por baixo
   // ---------------------------------------------------------------------------
+  let pickGround = () => {};
   function initMasthead() {
     const head = $("#masthead");
     const sections = $$("#viewHome main > section, #viewHome footer");
@@ -1054,6 +1056,7 @@ const Home = (() => {
     };
     window.addEventListener("scroll", pick, { passive: true });
     window.addEventListener("resize", pick);
+    pickGround = pick;
     pick();
     // links internos rolam suavemente; os do ateliê e da oficina trocam de tela
     $("#viewHome").addEventListener("click", (e) => {
@@ -1170,7 +1173,8 @@ const Home = (() => {
         ScrollTrigger.refresh();
       }
       const id = hash && hash !== "topo" ? hash : "topo";
-      requestAnimationFrame(() => goTo(id, true));
+      // de volta ao topo pode não haver evento de rolagem: o cabeçalho confere o lugar por conta própria
+      requestAnimationFrame(() => { goTo(id, true); requestAnimationFrame(pickGround); });
     } else {
       stopLenis();
       if (hasG) ScrollTrigger.getAll().forEach((t) => t.disable(false));

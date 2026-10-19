@@ -44,7 +44,7 @@ Cada relógio é montado à mão a partir das escolhas do cliente, peça por pe�
 - Fotos reais: `assets/carbon-edition.jpg`, `assets/verde-fume.jpg`, `assets/panda-reverso.jpg`, `assets/atelie.jpg`, `assets/movimento.jpg`. Logos em `assets/logo/`.
 - O relógio desenhado em SVG (`js/watch.js`) com todas as peças, camadas da vista explodida e movimento animado.
 - Não existem depoimentos, número de clientes, prêmios ou imprensa: não inventar.
-- Não confirmados pelo dono: estojo, certificado e garantia de 12 meses (estão no texto atual da etapa Entrega).
+- Fora do site até o dono confirmar (2026-10-18): estojo, certificado, garantia de 12 meses, teste de vedação, fotos da bancada enviadas ao cliente e prazo fixo de 15 a 30 dias úteis. O texto de Montagem, Entrega e da dúvida sobre prazo foi reescrito sem essas promessas.
 
 ## Product Principles
 

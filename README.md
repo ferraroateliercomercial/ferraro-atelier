@@ -4,18 +4,21 @@ Site da Ferraro Atelier, relojoaria sob encomenda. O cliente não compra relógi
 
 ## Página inicial: o mostrador vivo
 
-A tela inteira é um mostrador de relógio visto de perto. Laca fumê azul (o azul é só o padrão: a cor é livre), impressão branca de mostrador, partes claras em opalino e o vermelho do ponteiro de segundos como único acento. Fontes: Archivo (texto) e Michroma (impressão de mostrador), do Google Fonts.
+A primeira tela é o mostrador inteiro de um relógio, visto de cima. Laca fumê azul (o azul é só o padrão: a cor é livre), impressão branca de mostrador, partes claras em opalino e o vermelho do ponteiro de segundos como único acento. Os fundos escuros do site inteiro são a mesma laca fumê: azul no meio, quase preta nas bordas.
 
-- **Abertura em motion design** (uma vez por visita; quem volta na mesma sessão vê uma versão curta): a caixa aparece, a luneta gira até travar, a laca escorre do centro, o trilho de minutos é impresso, os índices descem um a um, a logo é impressa, a janela da data gira até o dia de hoje (é o contador da abertura) e os ponteiros saem do meio-dia até a hora de quem está visitando. Tudo no compasso de 8 batidas por segundo, como um Sellita. Um toque, clique, tecla ou tentativa de rolar acelera o resto.
-- **Primeira dobra sem botões**: o título é impresso no mostrador e a ação é a **coroa**, à direita da caixa ("Monte o seu"). No celular, o título fica embaixo do relógio, com o link "Monte o seu".
-- O relógio marca a hora real, com o segundo andando 8 vezes por segundo. No computador, o brilho de raios de sol do mostrador acompanha o mouse; no celular, ele oscila sozinho.
-- **Ao rolar**: o mostrador gigante se afasta (a luneta gira em cliques de meio minuto) até virar o relógio inteiro, que então se desmonta em sete peças com legendas. No computador, passar o mouse numa legenda isola a peça.
+- **Abertura em motion design** (uma vez por visita; quem volta na mesma sessão vê uma versão curta): a laca escorre do centro até cobrir a tela, o trilho de minutos é impresso pelas bordas da tela, os índices descem um a um, o 12 e o 6 gigantes entram cortados pela borda (no computador), a logo é impressa, a janela da data gira até o dia de hoje (é o contador da abertura) e os ponteiros saem do meio-dia e acertam a hora de quem está vendo. Um toque, clique, tecla ou tentativa de rolar acelera o resto.
+- **Primeira tela sem botões**: só o mostrador, o título impresso na metade de baixo ("Seu relógio, peça por peça.") e a **coroa** na borda direita, que é a ação ("Monte o seu"). O cabeçalho com o menu só aparece quando a pessoa começa a rolar (ou ao navegar pelo teclado).
+- O relógio marca a hora real, com o segundo andando 8 vezes por segundo. O brilho de raios de sol acompanha o mouse; no celular, ele oscila sozinho. Das 19h às 6h (no relógio de quem visita), o lume dos índices e dos ponteiros acende em verde.
+- **Ao rolar**: a laca que cobria a tela se fecha num círculo, o trilho das bordas some e o do mostrador redondo aparece, a luneta e a caixa crescem em volta (a luneta gira em cliques de meio minuto) e o relógio inteiro desce para a vista explodida: sete peças num eixo só, com as legendas dos dois lados, cada uma com um fio até a sua peça. No computador, passar o mouse numa legenda isola a peça.
 - **Cor livre**: oito lacas de exemplo e um controle para qualquer tom. O fundo da seção acompanha a cor; enquanto ninguém mexe, as lacas se alternam sozinhas. "Montar com esta cor" leva a cor para o ateliê.
-- **Três jeitos de marcar o tempo**: quartzo, automático e corda manual funcionando de verdade, com o compasso de cada um (1, 6 ou 8 batidas por segundo).
+- **Três jeitos de marcar o tempo**: quartzo, automático e corda manual funcionando de verdade; o compasso de cada um aparece numa janelinha, como a da data.
 - **Dez estilos de ponteiros** num mostrador de amostra: ao trocar, o ponteiro de minutos dá uma volta e pousa em 10:08. Dá para mudar a cor e levar o ponteiro escolhido para o ateliê.
-- **À venda**, **Da bancada** (no computador, a fileira de fotos anda de lado enquanto a página fica parada), **Do projeto ao pulso** (cada etapa ganha um mini mostrador marcando um quarto de hora), **Dúvidas** e o fechamento **Monte o seu.**
+- **Da bancada**: todas as peças do `PORTFOLIO` num lugar só. As que têm preço aparecem como disponíveis, com "Comprar pelo WhatsApp"; as outras aparecem como portfólio, com "Começar com esta base", que abre o ateliê com aquela configuração.
+- **Na bancada**: a foto do movimento se abre como vista por uma lupa enquanto a página rola.
+- **Do projeto ao pulso** (cada etapa ganha um mini mostrador marcando um quarto de hora), **Dúvidas** e o fechamento, com a coroa de novo como botão final.
+- Os divisores são réguas de minutos (um traço por minuto, um maior a cada cinco).
 - **Menu**: abre em círculo a partir do botão; o ponteiro do mostrador aponta para o item sob o mouse.
-- Rolagem suave com Lenis e animações com GSAP + ScrollTrigger, carregados do cdnjs e do unpkg. Com "reduzir movimento" ligado no aparelho, ou se essas bibliotecas não carregarem, a página aparece completa e parada, sem abertura.
+- Rolagem suave com Lenis e animações com GSAP + ScrollTrigger, carregados do cdnjs e do unpkg. Com "reduzir movimento" ligado no aparelho, ou se essas bibliotecas não carregarem, a página aparece completa e parada: o mostrador ocupa a primeira tela e o relógio inteiro aparece embaixo, com as peças listadas.
 - O código da página inicial fica em `js/home.js`; os dados (peças, ponteiros, receitas) continuam em `js/app.js`.
 
 ## Ateliê virtual (`#personalizar`)
@@ -50,10 +53,10 @@ Página para a Ferraro Atelier ver o relógio que o cliente montou. Abra o site 
 ## Como editar
 
 - `js/app.js`, começo do arquivo: `STORE.whatsapp` e `STORE.instagram` (@ferraro_atelier).
-- `js/app.js`, `PORTFOLIO`: fotos e descrições do portfólio. Fotos ficam em `assets/`. Para pôr uma peça à venda, coloque `price: 1500` nela; para tirar da venda, apague o `price`.
+- `js/app.js`, `PORTFOLIO`: fotos e descrições das peças da seção "Da bancada". Fotos ficam em `assets/`. Para pôr uma peça à venda, coloque `price: 1500` nela; para tirar da venda, apague o `price` (ela continua no site como portfólio).
 - `js/watch.js`: desenho do relógio e funcionamento dos movimentos.
-- `js/home.js`: abertura, mostrador vivo, vista explodida e animações da página inicial. As lacas de exemplo ficam em `LACQUERS`.
-- `css/styles.css`, começo do arquivo: as cores da casa (laca, impressão, opalino e o vermelho do ponteiro de segundos).
+- `js/home.js`: abertura, mostrador vivo, vista explodida, lupa e animações da página inicial. As lacas de exemplo ficam em `LACQUERS`; o horário do lume noturno, em `setNight`.
+- `css/styles.css`, começo do arquivo: as cores da casa (laca, impressão, opalino, o vermelho do ponteiro de segundos e o fundo de laca `--ground`).
 
 ## Análise de visitas (Vercel)
 

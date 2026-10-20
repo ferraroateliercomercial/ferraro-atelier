@@ -282,7 +282,7 @@ html { scrollbar-gutter: stable; }
 }
 /* a dica de rolar só cabe na tela em pé; deitada, o 6 cortado ocupa o lugar */
 .hero__hint {
-  display: none; justify-items: center; gap: 8px;
+  display: flex; align-items: center; gap: 14px; position: absolute; left: calc(50% - 50vw + var(--gutter) + 12px); bottom: 64px; justify-items: center;
   font-family: var(--font-print); font-stretch: 125%; font-weight: 500; font-size: .75rem; letter-spacing: .24em; text-transform: uppercase; color: var(--print);
 }
 .hero__hint i { position: relative; display: block; width: 1px; height: 26px; background: var(--rule-n); overflow: hidden; }
@@ -970,7 +970,7 @@ html[data-intro="on"] #masthead, html[data-intro="short"] #masthead { opacity: 0
   .hero__title { position: static; font-size: clamp(1.9rem, 8.4vw, 3rem); line-height: 1.06; }
   .hero__line { white-space: normal; }
   .hero__sub { position: static; margin: 12px auto 0; max-width: 28ch; font-size: .75rem; letter-spacing: .12em; }
-  .hero__hint { display: grid; margin-top: 18px; }
+  .hero__hint { display: grid; position: static; gap: 8px; margin-top: 18px; }
   /* em pé, a coroa desce para a altura das 4h (como nos mergulhadores de coroa às 4) e o rótulo corre na vertical,
      junto à borda: fora do giro dos ponteiros e longe do título. O topo fica logo abaixo do índice das 4. */
   .crown { --cb: 40px; right: 8px; top: calc(var(--cy) + (50vw - 31px) * .577 + 12px); flex-direction: row; align-items: flex-end; gap: 10px; padding: 10px 0 10px 10px; }
@@ -1108,3 +1108,5 @@ html[data-intro="on"] #masthead, html[data-intro="short"] #masthead { opacity: 0
 @media (max-width: 859px) { .zoom-open { bottom: auto; top: 0; } .zoomview__hint { top: auto; bottom: 80px; padding: 0 24px; } }
 .studio__canvas .stack-scene .stack, .studio__canvas .studio__back-view svg { cursor: zoom-in; }
 .studio__canvas [data-crown], .studio__canvas [data-rotor] { cursor: grab; }
+
+@media (min-width: 901px) { .hero__hint { font-size: .85rem; letter-spacing: .22em; gap: 16px; } .hero__hint i { height: 44px; } }

@@ -531,7 +531,7 @@ function bindCrown(container, getMovement) {
 // O relógio da página inicial: mostrador verde-musgo em raios de sol, caixa de bronze, luneta marrom,
 // ponteiros e índices dourados, pulseira de couro.
 const HERO_CFG = {
-  ...DEFAULT_WATCH, dialColor: "#46603a", dialFinish: "raios", caseColor: "#b48a58", bezelColor: "#2c2017",
+  ...DEFAULT_WATCH, dialColor: "#46603a", dialFinish: "raios", caseColor: "#b48a58", bezelColor: "#2c2017", bezelInk: "#d9b56b", bezelGloss: true, dialLabel: false,
   indexColor: "#d9b56b", handStyle: "mercedes", handColor: "#d9b56b", secondColor: "#e0b860",
   strapType: "couro", strapColor: "#5a3a22", stitchColor: "#d9c29a", rotorColor: "#b8924f",
 };

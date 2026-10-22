@@ -134,7 +134,7 @@ const Watch = (() => {
         <stop offset="0" stop-color="#fff" stop-opacity=".14"/><stop offset="1" stop-color="#000" stop-opacity=".28"/>
       </radialGradient>
       <radialGradient id="${u}-fume" cx="50%" cy="46%" r="58%">
-        <stop offset="0" stop-color="#000" stop-opacity="0"/><stop offset=".55" stop-color="#000" stop-opacity=".12"/><stop offset="1" stop-color="#000" stop-opacity=".72"/>
+        <stop offset="0" stop-color="#000" stop-opacity="0"/><stop offset=".55" stop-color="#000" stop-opacity="${Math.min(0.5, 0.12 * (c.dialFumeAmt || 1)).toFixed(2)}"/><stop offset="1" stop-color="#000" stop-opacity="${Math.min(0.96, 0.72 * (c.dialFumeAmt || 1)).toFixed(2)}"/>
       </radialGradient>
       <linearGradient id="${u}-sheen" x1="0" y1="0" x2="1" y2="1">
         <stop offset="0" stop-color="#fff" stop-opacity="0"/><stop offset=".45" stop-color="#fff" stop-opacity=".1"/><stop offset=".55" stop-color="#fff" stop-opacity="0"/>
@@ -263,8 +263,10 @@ const Watch = (() => {
       return s;
     }
     const base = c.bezelColor;
-    const ik = ink(base);
-    let s = `<path d="${ring}" fill-rule="evenodd" fill="${base}"/>`;
+    const ik = c.bezelInk || ink(base);
+    // cerâmica com brilho: o mesmo degradê da luneta da página inicial
+    const cer = c.bezelGloss ? `<defs><radialGradient id="${u}-cer" cx=".38" cy=".3" r=".9"><stop offset="0" stop-color="${shade(base, 0.22)}"/><stop offset=".55" stop-color="${base}"/><stop offset="1" stop-color="${shade(base, -0.5)}"/></radialGradient></defs>` : "";
+    let s = `${cer}<path d="${ring}" fill-rule="evenodd" fill="${c.bezelGloss ? `url(#${u}-cer)` : base}"/>`;
     if (c.bezelTwoTone) s += `<path d="M${CX - 133} ${CY}A133 133 0 0 1 ${CX + 133} ${CY}H${CX + 104}A104 104 0 0 0 ${CX - 104} ${CY}Z" fill="${c.bezelColor2}"/>`;
     const inkAt = (deg) => (c.bezelTwoTone && (deg <= 90 || deg >= 270) ? ink(c.bezelColor2) : ik);
     if (t === "mergulho") {
@@ -400,8 +402,13 @@ const Watch = (() => {
     const shapeD = dialShapePath(c);
     let s = `<path d="${isOct(c) ? roundRectPath(CX - 98, CY - 98, 196, 196, 50) : circlePath(105)}" fill="#14171b"/>`;
     if (isSkeleton(c)) return s + skeletonDial(u, c, dr, shapeD);
-    s += `<path d="${shapeD}" fill="${c.dialColor}"/>`;
-    s += `<g clip-path="url(#${u}-dial)">${dialFinish(u, c)}${c.dialFume ? `<path d="${shapeD}" fill="url(#${u}-fume)"/>` : ""}<path d="${shapeD}" fill="url(#${u}-shade)"/></g>`;
+    if (c.dialImage) {
+      // laca pintada fora (a da página inicial): vale no lugar da cor, do acabamento e do degradê
+      s += `<g clip-path="url(#${u}-dial)"><image href="${c.dialImage}" x="${CX - dr}" y="${CY - dr}" width="${dr * 2}" height="${dr * 2}" preserveAspectRatio="none"/></g>`;
+    } else {
+      s += `<path d="${shapeD}" fill="${c.dialColor}"/>`;
+      s += `<g clip-path="url(#${u}-dial)">${dialFinish(u, c)}${c.dialFume ? `<path d="${shapeD}" fill="url(#${u}-fume)"/>` : ""}<path d="${shapeD}" fill="url(#${u}-shade)"/></g>`;
+    }
     s += indices(c);
     const tk = ink(c.dialColor);
     if (c.dialLayout === "crono") {
@@ -412,7 +419,7 @@ const Watch = (() => {
       s += `<text x="${CX}" y="${CY - dr * 0.3}" text-anchor="middle" font-family="Saira, sans-serif" font-size="4.8" letter-spacing="1.6" fill="${tk}" opacity=".8">CRONÓGRAFO</text>`;
     } else {
       s += mark(CX, CY - dr * 0.5, 50, tk);
-      s += `<text x="${CX}" y="${CY + dr * 0.45}" text-anchor="middle" font-family="Saira, sans-serif" font-size="6" letter-spacing="1.8" fill="${tk}" opacity=".85">${MOVEMENT_LABEL[c.movement]}</text>`;
+      if (c.dialLabel !== false) s += `<text x="${CX}" y="${CY + dr * 0.45}" text-anchor="middle" font-family="Saira, sans-serif" font-size="6" letter-spacing="1.8" fill="${tk}" opacity=".85">${MOVEMENT_LABEL[c.movement]}</text>`;
       if (c.dialLayout === "data") {
         const x = CX + dr * 0.66;
         s += `<rect x="${x - 12}" y="${CY - 9.5}" width="24" height="19" rx="2" fill="#f4f4f1" stroke="${shade(c.dialColor, -0.4)}" stroke-width="1"/>`;

@@ -247,8 +247,8 @@ html { scrollbar-gutter: stable; }
   box-shadow: inset 0 0 calc(var(--D) * .05) rgba(0, 0, 0, .65);
 }
 .dial__print { position: absolute; inset: 0; width: 100%; height: 100%; overflow: visible; }
-/* a logo gira em volta do próprio centro: (0, -285) no desenho de 1000, ou seja 50% e 21,5% */
-.dial__logo { position: absolute; inset: 0; transform-origin: 50% 21.5%; will-change: transform; pointer-events: none; }
+/* a logo gira em volta do próprio centro: (0, -250) no desenho de 1000, ou seja 50% e 25% */
+.dial__logo { position: absolute; inset: 0; transform-origin: 50% 25%; will-change: transform; pointer-events: none; }
 .dial__logo-art { display: block; width: 100%; height: 100%; overflow: visible; }
 .dial__date {
   position: absolute; left: calc(50% + var(--D) * .33 - var(--D) * .059); top: calc(50% - var(--D) * .0465);
@@ -316,6 +316,9 @@ html { scrollbar-gutter: stable; }
 html[data-intro="on"] #heroHead, html[data-intro="short"] #heroHead,
 html[data-intro="on"] #heroCrown, html[data-intro="short"] #heroCrown,
 html[data-intro="on"] #masthead, html[data-intro="short"] #masthead { opacity: 0; }
+/* antes do script rodar, a vista explodida (o texto "Sete peças" e o relógio) ficaria visível no alto da tela: o script a revela na rolagem */
+html[data-intro="on"] .anatomy__text, html[data-intro="short"] .anatomy__text,
+html[data-intro="on"] .anatomy__stage, html[data-intro="short"] .anatomy__stage { visibility: hidden; }
 
 /* à noite (das 19h às 6h de quem visita), o lume dos índices e dos ponteiros acende */
 .is-night .hero__edge .lume, .is-night .print__indices .lume, .is-night #heroHands .hand:not(.hand--shadow) [fill="#eef3df"] { fill: var(--lume); }
@@ -410,8 +413,7 @@ html[data-intro="on"] #masthead, html[data-intro="short"] #masthead { opacity: 0
 .colors {
   --cq: #142116; --cq-hi: #263a24;
   position: relative; overflow: hidden; padding-block: clamp(96px, 12vw, 160px);
-  background: radial-gradient(ellipse 60% 70% at 58% 50%, var(--cq-hi) 0%, var(--cq) 62%, var(--night) 100%);
-  transition: --cq 1.1s var(--ease-out), --cq-hi 1.1s var(--ease-out);
+  background: var(--night);
 }
 .colors__grid { display: grid; grid-template-columns: minmax(0, .9fr) minmax(0, 1.1fr); grid-template-areas: "copy bench" "controls bench"; gap: 28px clamp(32px, 6vw, 96px); align-items: center; }
 .colors__copy { grid-area: copy; display: grid; gap: 22px; align-self: end; }
@@ -425,7 +427,15 @@ html[data-intro="on"] #masthead, html[data-intro="short"] #masthead { opacity: 0
 .colors__bench { grid-area: bench; position: relative; display: grid; place-items: center; min-height: min(78svh, 720px); }
 .colors__watch { position: relative; width: min(440px, 100%); aspect-ratio: 400 / 520; }
 .colors__layer { position: absolute; inset: 0; }
-.colors__layer svg { width: 100%; height: 100%; display: block; overflow: visible; filter: drop-shadow(0 30px 40px rgba(0, 0, 0, .5)); }
+.colors__layer svg { width: 100%; height: 100%; display: block; overflow: visible; }
+.colors__layer { will-change: opacity; }
+/* o fundo troca de cor por opacidade entre duas camadas (nada é repintado durante a troca) */
+.colors__bg { position: absolute; inset: 0; opacity: 0; transition: opacity 1.1s var(--ease-out); pointer-events: none;
+  background: radial-gradient(ellipse 60% 70% at 58% 50%, var(--cq-hi) 0%, var(--cq) 62%, var(--night) 100%); }
+.colors__bg.is-on { opacity: 1; }
+.colors__grid { position: relative; }
+/* sombra parada embaixo do relógio, no lugar do filtro que era repintado a cada troca de cor */
+.colors__watch::before { content: ""; position: absolute; left: 14%; right: 14%; bottom: -3%; height: 12%; border-radius: 50%; background: radial-gradient(closest-side, rgba(0, 0, 0, .5), transparent); }
 .colors__controls { grid-area: controls; display: grid; gap: 22px; align-self: start; }
 .colors__chips { display: flex; flex-wrap: wrap; gap: 8px; }
 .colors__chips button {

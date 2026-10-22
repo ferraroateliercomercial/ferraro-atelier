@@ -83,14 +83,13 @@ const Home = (() => {
   }
 
   function buildBezel() {
-    const R1 = 133 * K, R0 = 104 * K, RC = 146 * K; // luneta 652/510 e caixa 716, numa caixa de 1440
+    const R1 = 133 * K, R0 = 104 * K, RC = 140 * K; // luneta, abertura e caixa: as mesmas medidas do relógio da vista explodida
     let s = `<defs>
       <linearGradient id="hb-case" x1="0" y1="0" x2="1" y2="1">
-        <stop offset="0" stop-color="#f2d9a4"/><stop offset=".22" stop-color="#9a6f3a"/><stop offset=".5" stop-color="#e3bf7f"/>
-        <stop offset=".74" stop-color="#7a5428"/><stop offset="1" stop-color="#c99c5d"/>
+        <stop offset="0" stop-color="${Watch.shade(HERO.caseColor, 0.55)}"/><stop offset=".48" stop-color="${Watch.shade(HERO.caseColor, -0.28)}"/><stop offset="1" stop-color="${Watch.shade(HERO.caseColor, 0.32)}"/>
       </linearGradient>
       <radialGradient id="hb-ceramic" cx=".38" cy=".3" r=".9">
-        <stop offset="0" stop-color="#4a3624"/><stop offset=".55" stop-color="#2a1e15"/><stop offset="1" stop-color="#140e09"/>
+        <stop offset="0" stop-color="${Watch.shade(HERO.bezelColor, 0.22)}"/><stop offset=".55" stop-color="${HERO.bezelColor}"/><stop offset="1" stop-color="${Watch.shade(HERO.bezelColor, -0.5)}"/>
       </radialGradient>
       <linearGradient id="hb-sheen" x1="0" y1="0" x2="1" y2="1">
         <stop offset="0" stop-color="#fff" stop-opacity=".16"/><stop offset=".35" stop-color="#fff" stop-opacity="0"/>
@@ -122,6 +121,8 @@ const Home = (() => {
     }
     const sheen = `<path d="M${-R1} 0a${R1} ${R1} 0 1 0 ${R1 * 2} 0a${R1} ${R1} 0 1 0 ${-R1 * 2} 0ZM${-R0} 0a${R0} ${R0} 0 1 1 ${R0 * 2} 0a${R0} ${R0} 0 1 1 ${-R0 * 2} 0Z" fill="url(#hb-sheen)" fill-rule="evenodd"/>`;
     $("#heroBezel").innerHTML = box("bezel__case", s) + box("bezel__ring", ring, "heroBezelRing") + box("bezel__sheen", sheen);
+    // a luneta entra girada 60° e gira, em cliques, até o 12 ficar no alto, como no relógio da vista explodida
+    $("#heroBezelRing").style.transform = "rotate(60deg)";
   }
 
   function buildPrint() {
@@ -155,7 +156,7 @@ const Home = (() => {
     s += `</g>`;
     $("#dialPrint").innerHTML = s;
     // logo empilhada abaixo do 12, num desenho à parte: ela entra na abertura e se move no recuo sem redesenhar o mostrador
-    $("#dialLogoArt").innerHTML = Watch.mark(0, -285, 214, PRINT);
+    $("#dialLogoArt").innerHTML = Watch.mark(0, -250, 245, PRINT);
   }
 
   function buildDate() {
@@ -203,8 +204,8 @@ const Home = (() => {
       const k = EDGE.m;
       const top = k.e + k.t + k.gap + k.L;
       const want = top + (geo.cy - top) * 0.42;
-      geo.logoY = ((want - (geo.cy - 0.285 * geo.D)) * 1000) / geo.D;
-      geo.logoS = Math.min(2.2, (geo.W * 0.4) / (0.214 * geo.D));
+      geo.logoY = ((want - (geo.cy - 0.25 * geo.D)) * 1000) / geo.D;
+      geo.logoS = Math.min(2.2, (geo.W * 0.4) / (0.245 * geo.D));
     } else {
       geo.logoY = 0;
       geo.logoS = 1;
@@ -310,6 +311,11 @@ const Home = (() => {
     if (c.width === N) return;
     c.width = N;
     c.height = N;
+    drawLacquer(c.getContext("2d"), N);
+  }
+
+  /** A laca do mostrador vivo, num disco de N px: a mesma pintura da tela cheia e do relógio da vista explodida. */
+  function drawLacquer(out, N) {
     const R = N / 2;
     // os raios vão num canvas à parte, para apagar o centro deles sem apagar a laca
     const rays = document.createElement("canvas");
@@ -351,7 +357,6 @@ const Home = (() => {
     // a laca: os tons da casa (--lq-hi, --lq, --lq-lo), recortados no disco, e os raios por cima
     const tok = (name) => getComputedStyle(root).getPropertyValue(name).trim();
     const lq = tok("--lq"), lqHi = tok("--lq-hi"), lqLo = tok("--lq-lo");
-    const out = c.getContext("2d");
     out.clearRect(0, 0, N, N);
     out.save();
     out.beginPath();
@@ -623,6 +628,11 @@ const Home = (() => {
   function initAnatomy() {
     const stack = $("#heroStack");
     anatomy.stack = stack;
+    // o mostrador do relógio redondo é a mesma laca da tela cheia: a cor não muda na troca
+    const lac = document.createElement("canvas");
+    lac.width = lac.height = 720;
+    drawLacquer(lac.getContext("2d"), 720);
+    HERO.dialImage = lac.toDataURL("image/webp", 0.92);
     renderStack(stack, HERO);
     Clockwork.add(new Movement(stack, HERO));
     anatomy.layers = $$(".layer", stack).map((el) => ({ el, m: HERO_MOTION[el.dataset.name] }));
@@ -782,7 +792,7 @@ const Home = (() => {
         const clicks = Math.round(clamp01((p - 0.1) / 0.2) * 20);
         if (clicks !== bezelClicks) {
           bezelClicks = clicks;
-          $("#heroBezelRing").style.transform = `rotate(${-clicks * 3}deg)`;
+          $("#heroBezelRing").style.transform = `rotate(${(20 - clicks) * 3}deg)`;
         }
         $("#masthead").classList.toggle("is-past-hero", p > 0.3);
       },
@@ -814,31 +824,54 @@ const Home = (() => {
       bezelType: "lisa", strapType: "couro", strapColor: "#2b1d16", stitchColor: "#cbb8a2", movement: "automatico",
     };
   }
-  function paintColor(hex, name) {
+  const colorCache = new Map();
+  function paintColor(hex, name, live = false) {
     colors.current = hex;
     colors.name = name;
-    const sec = $("#cores");
-    sec.style.setProperty("--cq", Watch.mix(hex, "#090e08", 0.8));
-    sec.style.setProperty("--cq-hi", Watch.mix(hex, "#090e08", 0.45));
     $("#colorName").textContent = name;
     $("#colorHex").textContent = hex.toUpperCase();
     $$("#colorChips button").forEach((bt) => bt.setAttribute("aria-pressed", String(bt.dataset.hex === hex)));
+    colors.live = live;
     if (colors.pending) return;
     colors.pending = true;
     requestAnimationFrame(() => {
       colors.pending = false;
+      const hex2 = colors.current;
+      const fade = motion && !colors.live;
+      // fundo: duas camadas que se alternam; no arraste do seletor a camada de cima muda direto
+      const sec = $("#cores");
+      const grounds = $$(".colors__bg", sec);
+      let on = grounds.find((g) => g.classList.contains("is-on")) || grounds[0];
+      const next = fade ? grounds.find((g) => g !== on) : on;
+      next.style.setProperty("--cq", Watch.mix(hex2, "#090e08", 0.8));
+      next.style.setProperty("--cq-hi", Watch.mix(hex2, "#090e08", 0.45));
+      if (next !== on) { next.classList.add("is-on"); on.classList.remove("is-on"); } else next.classList.add("is-on");
+      // relógio: a troca por opacidade só nas cores escolhidas; no arraste a única camada é redesenhada
       const host = $("#colorWatch");
-      const cfg = colorCfg(colors.current);
-      const next = document.createElement("div");
-      next.className = "colors__layer";
-      next.innerHTML = Watch.front(cfg, `Relógio com mostrador ${colors.name}`);
-      host.appendChild(next);
+      const cfg = colorCfg(hex2);
+      let svg = colorCache.get(hex2);
+      if (!svg) { svg = Watch.front(cfg, "Relógio com mostrador " + colors.name); if (colorCache.size > 24) colorCache.clear(); colorCache.set(hex2, svg); }
+      const layers = $$(".colors__layer", host);
+      if (!fade) {
+        layers.slice(1).forEach((l) => l.remove());
+        let only = layers[0];
+        if (!only) { only = document.createElement("div"); only.className = "colors__layer"; host.appendChild(only); }
+        gsap.killTweensOf(only);
+        only.style.opacity = "";
+        only.style.visibility = "";
+        only.innerHTML = svg;
+      } else {
+        // uma troca em andamento termina na hora: nunca ficam mais de duas camadas
+        layers.slice(0, -1).forEach((l) => { gsap.killTweensOf(l); l.remove(); });
+        const top = $$(".colors__layer", host)[0];
+        const el = document.createElement("div");
+        el.className = "colors__layer";
+        el.innerHTML = svg;
+        host.appendChild(el);
+        gsap.fromTo(el, { autoAlpha: 0 }, { autoAlpha: 1, duration: 0.6, ease: "none", onComplete: () => top?.remove() });
+      }
       if (!colors.mv) colors.mv = Clockwork.add(new Movement(host, cfg));
       colors.mv.setConfig(cfg);
-      const olds = $$(".colors__layer", host).slice(0, -1);
-      if (motion) {
-        gsap.fromTo(next, { autoAlpha: 0 }, { autoAlpha: 1, duration: 0.5, ease: "none", onComplete: () => olds.forEach((o) => o.remove()) });
-      } else olds.forEach((o) => o.remove());
     });
   }
   function initColors() {
@@ -856,7 +889,7 @@ const Home = (() => {
     hue.addEventListener("input", () => {
       stopAuto();
       const hex = hslHex(+hue.value, 52, 34);
-      paintColor(hex, "Seu tom");
+      paintColor(hex, "Seu tom", true);
     });
     $("#colorsCta").addEventListener("click", () => {
       Studio.apply({ dialColor: colors.current }, "mostrador", "Cor do mostrador aplicada");

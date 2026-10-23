@@ -18,3 +18,27 @@ O QUE PEDIR AO FORNECEDOR
 
 ATENÇÃO
 No tamanho de 28,5 mm o "ATELIER" tem só 0,7 a 0,8 mm de altura. Mesmo engrossado, é quase ilegível a olho nu e pode ser recusado pelo fornecedor. Por isso o arquivo A (sem ATELIER) é o recomendado; o texto "ATELIER" pode ir na caixa ou no fundo do relógio.
+
+
+MÁSCARA ADESIVA PARA PINTAR A LOGO (asas + FERRARO)
+
+ARQUIVOS
+- ferraro-mascara-28-5mm-1un.svg        uma máscara (disco de 28,5 mm).
+- ferraro-mascara-28-5mm-folha-6un.svg  folha com 6 máscaras para a mesma encomenda.
+
+CORES DO ARQUIVO (todos os traços de 0,02 mm, para corte a laser)
+- VERMELHO: contorno da logo, cortar de lado a lado.
+- AZUL: contorno do disco de 28,5 mm; o entalhe triangular no topo marca o 12h.
+
+O QUE PEDIR
+- Película adesiva de máscara fina (tipo Kapton ou vinil de máscara/frisket), corte a laser, com compensação do corte (kerf) para os traços finos de ~0,1 mm.
+- Prova antes do lote.
+
+USO
+1. Cole a máscara no mostrador, com o entalhe no 12h.
+2. Retire só as peças da logo (o miolo do O e do A fica colado).
+3. Pinte em camadas finas.
+4. Retire o resto da máscara antes de a tinta secar por completo.
+5. Passe o verniz depois de seco.
+
+O furo central do mostrador (do eixo dos ponteiros) não está no arquivo: a máscara cobre o furo e a película pode ser perfurada na hora.

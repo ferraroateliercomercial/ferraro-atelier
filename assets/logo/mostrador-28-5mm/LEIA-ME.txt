@@ -1,0 +1,20 @@
+LOGO PARA MOSTRADOR DE 28,5 mm (adesivo metálico)
+
+Todas as unidades são milímetros. Abra os SVG no Illustrator, Inkscape ou CorelDRAW: o tamanho já vem certo.
+
+ARQUIVOS
+- ferraro-adesivo-A-asas-e-ferraro-9mm.svg    (RECOMENDADO) asas + FERRARO, 9 mm de largura, 12,1 x 6,5 mm com margem.
+- ferraro-adesivo-B-completa-10mm.svg         logo completa, 10 mm de largura, ATELIER engrossado.
+- ferraro-guia-mostrador-28-5mm.pdf / .svg    guia 1:1 para imprimir a 100%: borda do mostrador, centro, 12h e a logo na posição final.
+
+POSIÇÃO NO MOSTRADOR
+Centro da logo a 7,1 mm acima do eixo (abaixo do índice das 12h), centralizada na vertical do 12.
+
+O QUE PEDIR AO FORNECEDOR
+- Adesivo de níquel eletroformado (ou aço fino), 0,05 a 0,1 mm, com cola.
+- Peças soltas no mesmo papel de transferência, NA POSIÇÃO FINAL (como está no arquivo), para colar tudo de uma vez.
+- Pergunte o menor traço que ele corta (o arquivo A tem traços finos de ~0,12 mm; o B, ATELIER de ~0,1 mm).
+- Peça pelo menos 30% a mais de unidades e uma prova antes do lote.
+
+ATENÇÃO
+No tamanho de 28,5 mm o "ATELIER" tem só 0,7 a 0,8 mm de altura. Mesmo engrossado, é quase ilegível a olho nu e pode ser recusado pelo fornecedor. Por isso o arquivo A (sem ATELIER) é o recomendado; o texto "ATELIER" pode ir na caixa ou no fundo do relógio.

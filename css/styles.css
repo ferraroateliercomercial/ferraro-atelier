@@ -94,6 +94,7 @@ button, a, label, input, textarea { touch-action: manipulation; }
 html.lenis, html.lenis body { height: auto; }
 .lenis.lenis-smooth { scroll-behavior: auto !important; }
 .lenis.lenis-stopped { overflow: hidden; }
+@media (hover: hover) and (pointer: fine) { html.lenis.lenis-stopped.is-holding { overflow: visible; } }
 html { scrollbar-gutter: stable; }
 
 .skip { position: absolute; left: -999px; top: 8px; background: var(--print); color: var(--ink); padding: 8px 14px; z-index: 200; }
@@ -425,6 +426,12 @@ html[data-intro="on"] .anatomy__stage, html[data-intro="short"] .anatomy__stage 
 }
 .film__kicker { font-family: var(--font-print); font-stretch: 125%; font-weight: 500; font-size: .75rem; letter-spacing: .22em; text-transform: uppercase; color: var(--second); }
 .film__copy h2 { font-size: var(--step-4); line-height: 1; }
+/* o título sobe de dentro de uma fresta, como impressão saindo da borda */
+.film__line { display: block; overflow: hidden; padding-bottom: .12em; margin-bottom: -.12em; }
+.film__line > span { display: block; will-change: transform; }
+/* um reflexo de luz atravessa o vidro uma vez, quando a janela toma a tela */
+.film__glint { position: absolute; inset: 0; pointer-events: none; opacity: 0; will-change: transform, opacity;
+  background: linear-gradient(105deg, rgba(255, 246, 225, 0) 38%, rgba(255, 246, 225, .14) 50%, rgba(255, 246, 225, 0) 62%); }
 .film__copy p:not(.film__kicker) { color: var(--print); opacity: .86; max-width: 40ch; }
 .film__copy .link-arrow { margin-top: 6px; }
 .film__toggle {
@@ -1020,7 +1027,9 @@ html[data-intro="on"] .anatomy__stage, html[data-intro="short"] .anatomy__stage 
   .hero__title { position: static; font-size: clamp(1.9rem, 8.4vw, 3rem); line-height: 1.06; }
   .hero__line { white-space: normal; }
   .hero__sub { position: static; margin: 12px auto 0; max-width: 28ch; font-size: .75rem; letter-spacing: .12em; }
-  .hero__hint { display: grid; position: static; gap: 8px; margin-top: 18px; }
+  .hero__hint { display: grid; position: static; gap: 10px; margin-top: 18px; }
+  /* em pé: primeiro a palavra, depois o fio com a luz dourada descendo, apontando para onde rolar */
+  .hero__hint i { order: 2; height: 32px; background: color-mix(in srgb, var(--print) 30%, transparent); }
   /* em pé, a coroa desce para a altura das 4h (como nos mergulhadores de coroa às 4) e o rótulo corre na vertical,
      junto à borda: fora do giro dos ponteiros e longe do título. O topo fica logo abaixo do índice das 4. */
   .crown { --cb: 40px; right: 8px; top: calc(var(--cy) + (50vw - 31px) * .577 + 12px); flex-direction: row; align-items: flex-end; gap: 10px; padding: 10px 0 10px 10px; }
@@ -1053,17 +1062,16 @@ html[data-intro="on"] .anatomy__stage, html[data-intro="short"] .anatomy__stage 
 @media (max-height: 560px) and (min-aspect-ratio: 1/1) {
   .hero__sub { display: none; }
 }
-/* celular baixo (a maioria dos celulares, com as barras do navegador): a dica de rolar continua, numa linha só e sem o
-   fio, para o texto não encostar no índice das 6; nos mais baixos ainda, o subtítulo cede o lugar a ela */
-@media (max-height: 700px) and (max-aspect-ratio: 1/1), (max-height: 700px) and (max-width: 759px) {
-  .hero__hint { margin-top: 8px; gap: 0; font-size: .7rem; }
-  .hero__hint span { animation: hint-fade 2.2s var(--ease-in-out) infinite; }
-  .hero__hint i { display: none; }
+/* celular baixo (a maioria, com as barras do navegador): o subtítulo cede o lugar e a dica de rolar fica inteira,
+   com o fio dourado, logo abaixo do título e longe do índice das 6 */
+@media (max-height: 760px) and (max-aspect-ratio: 1/1), (max-height: 760px) and (max-width: 759px) {
+  .hero__sub { display: none; }
+  .hero__hint { margin-top: 22px; }
 }
 @media (max-height: 600px) and (max-aspect-ratio: 1/1), (max-height: 600px) and (max-width: 759px) {
-  .hero__sub { display: none; }
+  .hero__hint { margin-top: 14px; gap: 8px; }
+  .hero__hint i { height: 22px; }
 }
-@keyframes hint-fade { 0%, 100% { opacity: .72; } 50% { opacity: 1; } }
 @media (max-width: 900px) {
   .colors__grid { grid-template-columns: 1fr; grid-template-areas: "copy" "bench" "controls"; }
   .colors__copy h2 { max-width: none; }
@@ -1139,7 +1147,7 @@ html[data-intro="on"] .anatomy__stage, html[data-intro="short"] .anatomy__stage 
 /* Movimento reduzido: menos e mais suave, não zero. Mantém fades e mudanças de cor; tira deslocamentos e laços. */
 @media (prefers-reduced-motion: reduce) {
   *, *::before, *::after { animation-duration: .2s !important; animation-delay: 0s !important; animation-iteration-count: 1 !important; transition-duration: .15s !important; transition-delay: 0s !important; }
-  .hero__hint i::after, .hero__hint span { animation: none !important; }
+  .hero__hint i::after { animation: none !important; }
   .btn:active, .choice:active, .toggle:active, .color-field__btn:active, .crown:active .crown__body { transform: none; }
 }
 

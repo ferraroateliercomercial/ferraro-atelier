@@ -55,9 +55,16 @@ const Home = (() => {
     gsap.ticker.lagSmoothing(0);
   }
 
+  // rolagem feita pelo site (menu, links internos): o filme não segura a página no meio do caminho
+  let navigating = false;
+  let navTimer = 0;
   function scrollToY(y, immediate = false) {
-    if (lenis) lenis.scrollTo(y, { immediate, duration: 1.4, easing: (t) => 1 - Math.pow(1 - t, 4) });
-    else window.scrollTo({ top: y, behavior: immediate || reduce ? "auto" : "smooth" });
+    navigating = true;
+    clearTimeout(navTimer);
+    const done = () => { clearTimeout(navTimer); navTimer = setTimeout(() => { navigating = false; }, 120); };
+    if (lenis) lenis.scrollTo(y, { immediate, duration: 1.4, easing: (t) => 1 - Math.pow(1 - t, 4), onComplete: done });
+    else { window.scrollTo({ top: y, behavior: immediate || reduce ? "auto" : "smooth" }); navTimer = setTimeout(() => { navigating = false; }, 1600); }
+    if (immediate) done();
   }
   /** Rola até uma seção da página inicial. A anatomia vive dentro do mostrador fixado. */
   function goTo(id, immediate = false) {
@@ -1150,32 +1157,103 @@ const Home = (() => {
     label();
 
     if (!motion) return;
-    // a janela começa em pé no centro (como o vídeo foi filmado) e se abre até a tela inteira
-    const open = { p: 0 };
+    // A janela começa em pé no centro (como o vídeo foi filmado). Quando a pessoa chega rolando, a página segura a
+    // rolagem, desliza até o filme e a janela se abre sozinha: primeiro na altura, depois na largura, com um reflexo
+    // passando pelo vidro. Em 1,8 s a rolagem volta. Subindo de volta, a janela se fecha no mesmo caminho.
+    const shape = { y: 0, x: 0 };
     const paint = () => {
       const W = pin.clientWidth, H = pin.clientHeight;
       const h = H * (tall() ? 0.6 : 0.68);
       const w = Math.min(W * 0.84, h * (tall() ? 0.66 : 0.6));
-      const u = 1 - open.p;
-      win.style.setProperty("--wy", `${(((H - h) / 2) * u).toFixed(1)}px`);
-      win.style.setProperty("--wx", `${(((W - w) / 2) * u).toFixed(1)}px`);
-      win.style.setProperty("--wr", `${(14 * u).toFixed(1)}px`);
+      win.style.setProperty("--wy", `${(((H - h) / 2) * (1 - shape.y)).toFixed(1)}px`);
+      win.style.setProperty("--wx", `${(((W - w) / 2) * (1 - shape.x)).toFixed(1)}px`);
+      win.style.setProperty("--wr", `${(14 * (1 - shape.x)).toFixed(1)}px`);
     };
-    // a abertura roda sozinha, no tempo, quando o filme chega na tela; depois a rolagem segue normal
-    const tl = gsap.timeline({ paused: true });
-    tl.fromTo(open, { p: 0 }, { p: 1, duration: 1.7, ease: "power3.inOut", onUpdate: paint }, 0)
-      .fromTo(video, { scale: 1.14 }, { scale: 1, duration: 2.4, ease: "power2.out" }, 0)
-      .fromTo("#filmCopy", { autoAlpha: 0, y: 32 }, { autoAlpha: 1, y: 0, duration: 0.9, ease: OUT }, 1.15)
-      .fromTo(toggle, { autoAlpha: 0 }, { autoAlpha: 1, duration: 0.6, ease: "none" }, 1.5);
+    const glint = $(".film__glint", win);
+    const copy = [$(".film__kicker", sec), $("#filmCopy p:not(.film__kicker)"), $("#filmOpen")];
+    const tl = gsap.timeline({ paused: true, onComplete: release, onReverseComplete: release });
+    tl.fromTo(shape, { y: 0 }, { y: 1, duration: 0.65, ease: IN_OUT, onUpdate: paint }, 0.2)
+      .fromTo(shape, { x: 0 }, { x: 1, duration: 1.05, ease: IN_OUT, onUpdate: paint }, 0.7)
+      .fromTo(video, { scale: 1.3 }, { scale: 1, duration: 2.6, ease: OUT }, 0)
+      .fromTo(glint, { xPercent: -70 }, { xPercent: 70, duration: 0.9, ease: IN_OUT }, 1.35)
+      .to(glint, { keyframes: { autoAlpha: [0, 1, 0] }, duration: 0.9, ease: "none" }, 1.35)
+      .fromTo("#filmCopy", { autoAlpha: 0 }, { autoAlpha: 1, duration: 0.01 }, 1.34)
+      .fromTo(".film__line > span", { yPercent: 105 }, { yPercent: 0, duration: 0.9, ease: OUT }, 1.42)
+      .fromTo(copy, { autoAlpha: 0, y: 18 }, { autoAlpha: 1, y: 0, duration: 0.7, ease: OUT, stagger: 0.08 }, 1.36)
+      .fromTo(toggle, { autoAlpha: 0 }, { autoAlpha: 1, duration: 0.5, ease: "none" }, 1.7);
+    // a rolagem é solta antes do texto terminar de entrar: ninguém fica preso esperando
+    const RELEASE = 1.8;
+    tl.call(() => release(), null, RELEASE);
+
+    let holding = false;
+    let holdTimer = 0;
+    const keys = (e) => { if ([" ", "PageDown", "PageUp", "ArrowDown", "ArrowUp", "Home", "End"].includes(e.key)) e.preventDefault(); };
+    const block = (e) => e.preventDefault();
+    function hold() {
+      if (holding) return;
+      holding = true;
+      root.classList.add("is-holding");
+      if (lenis) lenis.stop();
+      else {
+        root.style.overflow = "hidden";
+        window.addEventListener("wheel", block, { passive: false });
+        window.addEventListener("touchmove", block, { passive: false });
+      }
+      window.addEventListener("keydown", keys);
+      // segurança: nunca segura por mais de 3 s, aconteça o que acontecer
+      clearTimeout(holdTimer);
+      holdTimer = setTimeout(release, 3000);
+    }
+    function release() {
+      if (!holding) return;
+      holding = false;
+      clearTimeout(holdTimer);
+      root.classList.remove("is-holding");
+      window.removeEventListener("keydown", keys);
+      if (lenis) { if ($("#lightbox").hidden) lenis.start(); }
+      else {
+        root.style.overflow = "";
+        window.removeEventListener("wheel", block);
+        window.removeEventListener("touchmove", block);
+      }
+    }
+    // desliza até o topo do filme, com a mesma curva de saída dos links internos
+    function glide() {
+      const y = sec.getBoundingClientRect().top + window.scrollY;
+      const ease = (t) => 1 - Math.pow(1 - t, 4);
+      if (lenis) lenis.scrollTo(y, { duration: 0.9, easing: ease, force: true });
+      else {
+        const from = window.scrollY, p = { t: 0 };
+        gsap.to(p, { t: 1, duration: 0.9, ease: "none", onUpdate: () => window.scrollTo(0, from + (y - from) * ease(p.t)) });
+      }
+    }
+    // só segura quando quem rola é a pessoa (roda do mouse, dedo ou teclado), nunca num recarregar no meio da página
+    let armed = false;
+    const arm = () => { armed = true; };
+    ["wheel", "touchstart", "keydown"].forEach((t) => window.addEventListener(t, arm, { passive: true, once: true }));
+    function arrive() {
+      if (tl.progress() === 1 && !tl.reversed()) return;
+      // de passagem (menu, link interno) ou sem gesto ainda: a janela já aparece aberta, sem segurar nada
+      if (navigating || !introDone || !armed) { tl.timeScale(1).progress(1).pause(); paint(); return; }
+      hold();
+      glide();
+      tl.timeScale(1).play();
+    }
+    function leave() {
+      if (navigating) { tl.progress(0).pause(); paint(); return; }
+      // subindo de volta: a janela se fecha pelo mesmo caminho, sem pular, e abre de novo na próxima descida
+      tl.timeScale(1.7).reverse();
+    }
     ScrollTrigger.create({
       trigger: "#filme",
-      start: "top 28%",
-      onEnter: () => tl.play(),
-      // voltou para cima do filme: ele se fecha de novo e abre outra vez na próxima chegada
-      onLeaveBack: () => { tl.pause(0); paint(); },
+      start: "top 45%",
+      onEnter: arrive,
+      onLeaveBack: leave,
       invalidateOnRefresh: true,
       onRefresh: paint,
     });
+    // a página abriu já depois do filme (recarregar no meio, link direto): a janela fica aberta
+    if (sec.getBoundingClientRect().top < window.innerHeight * 0.45) tl.progress(1).pause();
     paint();
   }
 

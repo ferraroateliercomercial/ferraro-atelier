@@ -345,6 +345,9 @@ Labels orbit an exploded watch, alternating sides at the height of their part: a
 ### Quarter Dials (signature)
 Ordered steps are counted by a dial, never a numeral: a 56px linen dial with a minute ring, a hand that turns to its quarter hour as the step arrives (1.0s) and a Gold Ink pin. A dashed 1px rail joins the dials and fills with Gold Ink as the visitor scrolls.
 
+### Film Window (signature)
+The Carbon Edition film after the exploded view. A rectangle opens as a window: a portrait window centred on the night ground (68% of the viewport's height, 60% as wide as it is tall, 14px corners) widens to full bleed while the film inside settles from 112% to 100%, scrubbed over 1.3 viewports with the section pinned. The copy arrives last, bottom left over a night gradient: a Gold kicker in the label voice, the title at display size, one line of Ivory Print and a link arrow; a pill toggle (pause or play) sits bottom right. The film is muted, landscape on wide screens and portrait on tall ones, loads only when the section is a screen and a half away and plays only while it is visible; under reduced motion it waits for the toggle.
+
 ### Power Meter
 A 3px track (Print Hairline on dark grounds, Ink Hairline on linen) filled from the left in Seconds-Hand Gold in proportion to the power reserve.
 

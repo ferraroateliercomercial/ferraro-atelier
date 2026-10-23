@@ -409,6 +409,46 @@ html[data-intro="on"] .anatomy__stage, html[data-intro="short"] .anatomy__stage 
 [data-ground="opaline"] .sec-head p { color: var(--ink-2); }
 [data-ground="opaline"] :focus-visible { outline-color: var(--second-ink); }
 
+/* ---------- o filme ----------
+   Uma janela no centro da tela (recorte retangular, como manda a regra das janelas) que se abre até a tela inteira.
+   O vídeo já roda dentro dela; só o recorte e a escala do vídeo mudam com a rolagem. */
+.film { position: relative; background: var(--night); color: var(--print); }
+.film__pin { position: relative; height: 100svh; min-height: 520px; overflow: hidden; }
+.film__window { position: absolute; inset: 0; background: #05080a; clip-path: inset(var(--wy, 0px) var(--wx, 0px) round var(--wr, 0px)); }
+.film__video { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; display: block; transform-origin: 50% 50%; }
+.film__shade { position: absolute; inset: 0; pointer-events: none;
+  background: linear-gradient(0deg, rgba(9, 14, 8, .9) 0%, rgba(9, 14, 8, .62) 34%, rgba(9, 14, 8, 0) 62%),
+    linear-gradient(180deg, rgba(9, 14, 8, .5) 0%, rgba(9, 14, 8, 0) 20%); }
+.film__copy {
+  position: absolute; left: max(var(--gutter), calc((100% - 1280px) / 2)); bottom: clamp(36px, 8svh, 88px);
+  width: min(520px, 100% - 2 * var(--gutter)); display: grid; gap: 14px; justify-items: start;
+}
+.film__kicker { font-family: var(--font-print); font-stretch: 125%; font-weight: 500; font-size: .75rem; letter-spacing: .22em; text-transform: uppercase; color: var(--second); }
+.film__copy h2 { font-size: var(--step-4); line-height: 1; }
+.film__copy p:not(.film__kicker) { color: var(--print); opacity: .86; max-width: 40ch; }
+.film__copy .link-arrow { margin-top: 6px; }
+.film__toggle {
+  position: absolute; right: max(var(--gutter), calc((100% - 1280px) / 2)); bottom: clamp(36px, 8svh, 88px);
+  display: inline-flex; align-items: center; gap: 10px; min-height: 40px; padding: 8px 16px;
+  font-family: var(--font-print); font-stretch: 125%; font-weight: 500; font-size: .75rem; letter-spacing: .18em; text-transform: uppercase;
+  color: var(--print); border: 1px solid var(--rule-n); border-radius: 999px; background: rgba(9, 14, 8, .45);
+  transition: border-color .2s var(--ease-out), background-color .2s var(--ease-out), transform .16s var(--ease-out);
+}
+.film__toggle:active { transform: scale(.97); }
+@media (hover: hover) and (pointer: fine) { .film__toggle:hover { border-color: var(--print); background: rgba(9, 14, 8, .7); } }
+/* pausar: duas barras; tocar: um triângulo */
+.film__toggle-ico { position: relative; width: 10px; height: 12px; }
+.film__toggle-ico::before, .film__toggle-ico::after { content: ""; position: absolute; top: 0; bottom: 0; width: 3px; background: currentColor; border-radius: 1px; }
+.film__toggle-ico::before { left: 1px; }
+.film__toggle-ico::after { right: 1px; }
+.film__toggle.is-paused .film__toggle-ico::before { left: 1px; width: 0; height: 0; top: 0; border-style: solid; border-width: 6px 0 6px 10px; border-color: transparent transparent transparent currentColor; background: none; border-radius: 0; }
+.film__toggle.is-paused .film__toggle-ico::after { display: none; }
+@media (max-width: 759px) {
+  .film__copy { bottom: 92px; gap: 10px; }
+  .film__copy h2 { font-size: clamp(2.6rem, 13vw, 3.4rem); }
+  .film__toggle { left: var(--gutter); right: auto; bottom: 32px; }
+}
+
 /* ---------- cor livre ---------- */
 .colors {
   --cq: #142116; --cq-hi: #263a24;

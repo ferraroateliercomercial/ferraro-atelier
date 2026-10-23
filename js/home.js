@@ -1084,6 +1084,103 @@ const Home = (() => {
   }
 
   // ---------------------------------------------------------------------------
+  // O filme: horizontal no computador, em pé no celular. Só carrega perto da tela e só roda enquanto aparece.
+  // ---------------------------------------------------------------------------
+  function initFilm() {
+    const sec = $("#filme");
+    if (!sec) return;
+    const pin = $("#filmPin");
+    const win = $("#filmWindow");
+    const video = $("#filmVideo");
+    const toggle = $("#filmToggle");
+    const tall = () => pin.clientWidth / pin.clientHeight < 0.9;
+    let kind = "";
+    let near = false;
+    let inView = false;
+    // movimento reduzido: o filme não começa sozinho, só com o botão
+    let userPaused = !motion;
+    const pick = () => {
+      const want = tall() ? "port" : "land";
+      if (want === kind) return;
+      kind = want;
+      video.poster = video.dataset[`${want}Poster`];
+      if (!near) return;
+      const t = video.currentTime || 0;
+      // VP9 (WebM) primeiro, que é mais leve; H.264 (MP4) para quem não tem VP9
+      const base = video.dataset[want];
+      video.innerHTML = `<source src="${base}.webm" type='video/webm; codecs="vp9"' /><source src="${base}.mp4" type='video/mp4; codecs="avc1.640028"' />`;
+      video.muted = true;
+      video.load();
+      if (t) video.addEventListener("loadedmetadata", () => { try { video.currentTime = t % (video.duration || 1); } catch (e) {} }, { once: true });
+      sync();
+    };
+    const label = () => {
+      const paused = video.paused || userPaused;
+      toggle.classList.toggle("is-paused", paused);
+      toggle.setAttribute("aria-label", paused ? "Assistir ao filme" : "Pausar o filme");
+      $(".film__toggle-txt", toggle).textContent = paused ? "Assistir" : "Pausar";
+    };
+    const sync = () => {
+      if (inView && !userPaused) video.play().catch(() => {}).then(label);
+      else video.pause();
+      label();
+    };
+    // carrega quando falta uma tela e meia para chegar; toca só com o filme na tela
+    new IntersectionObserver(([e]) => {
+      if (!e.isIntersecting || near) return;
+      near = true;
+      kind = "";
+      pick();
+    }, { rootMargin: "150% 0px" }).observe(sec);
+    new IntersectionObserver(([e]) => { inView = e.isIntersecting; sync(); }, { threshold: 0.15 }).observe(pin);
+    document.addEventListener("visibilitychange", () => { if (document.hidden) video.pause(); else sync(); });
+    video.addEventListener("pause", label);
+    video.addEventListener("play", label);
+    toggle.addEventListener("click", () => {
+      userPaused = !(video.paused || userPaused);
+      if (!userPaused && !near) { near = true; kind = ""; pick(); }
+      if (!userPaused) inView = true;
+      sync();
+    });
+    $("#filmOpen").addEventListener("click", () => $('#saleGrid [data-open="carbon"]')?.click());
+    let rt = 0;
+    window.addEventListener("resize", () => { clearTimeout(rt); rt = setTimeout(pick, 200); });
+    kind = "";
+    pick();
+    label();
+
+    if (!motion) return;
+    // a janela começa em pé no centro (como o vídeo foi filmado) e se abre até a tela inteira
+    const open = { p: 0 };
+    const paint = () => {
+      const W = pin.clientWidth, H = pin.clientHeight;
+      const h = H * (tall() ? 0.6 : 0.68);
+      const w = Math.min(W * 0.84, h * (tall() ? 0.66 : 0.6));
+      const u = 1 - open.p;
+      win.style.setProperty("--wy", `${(((H - h) / 2) * u).toFixed(1)}px`);
+      win.style.setProperty("--wx", `${(((W - w) / 2) * u).toFixed(1)}px`);
+      win.style.setProperty("--wr", `${(14 * u).toFixed(1)}px`);
+    };
+    const tl = gsap.timeline({ defaults: { ease: "none" } });
+    tl.fromTo(open, { p: 0 }, { p: 1, duration: 1, ease: "power2.inOut", onUpdate: paint }, 0)
+      .fromTo(video, { scale: 1.12 }, { scale: 1, duration: 1, ease: "power2.out" }, 0)
+      .fromTo("#filmCopy", { autoAlpha: 0, y: 32 }, { autoAlpha: 1, y: 0, duration: 0.3, ease: OUT }, 0.78)
+      .fromTo(toggle, { autoAlpha: 0 }, { autoAlpha: 1, duration: 0.2 }, 0.85)
+      .to({}, { duration: 0.35 }, 1);
+    ScrollTrigger.create({
+      animation: tl,
+      trigger: "#filme",
+      start: "top top",
+      end: () => `+=${Math.round(window.innerHeight * 1.3)}`,
+      pin: pin,
+      scrub: 0.6,
+      invalidateOnRefresh: true,
+      onRefresh: paint,
+    });
+    paint();
+  }
+
+  // ---------------------------------------------------------------------------
   // Menu: os itens são horas; o ponteiro aponta para onde você vai
   // ---------------------------------------------------------------------------
   function initMenu() {
@@ -1274,6 +1371,7 @@ const Home = (() => {
     initMenu();
     startLenis();
     initScroll();
+    initFilm();
     initLoupe();
     initMasthead();
     initReveals();

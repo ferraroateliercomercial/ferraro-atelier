@@ -1053,10 +1053,17 @@ html[data-intro="on"] .anatomy__stage, html[data-intro="short"] .anatomy__stage 
 @media (max-height: 560px) and (min-aspect-ratio: 1/1) {
   .hero__sub { display: none; }
 }
-/* celular baixo: a dica de rolar sai para o texto não encostar no índice das 6 */
+/* celular baixo (a maioria dos celulares, com as barras do navegador): a dica de rolar continua, numa linha só e sem o
+   fio, para o texto não encostar no índice das 6; nos mais baixos ainda, o subtítulo cede o lugar a ela */
 @media (max-height: 700px) and (max-aspect-ratio: 1/1), (max-height: 700px) and (max-width: 759px) {
-  .hero__hint { display: none; }
+  .hero__hint { margin-top: 8px; gap: 0; font-size: .7rem; }
+  .hero__hint span { animation: hint-fade 2.2s var(--ease-in-out) infinite; }
+  .hero__hint i { display: none; }
 }
+@media (max-height: 600px) and (max-aspect-ratio: 1/1), (max-height: 600px) and (max-width: 759px) {
+  .hero__sub { display: none; }
+}
+@keyframes hint-fade { 0%, 100% { opacity: .72; } 50% { opacity: 1; } }
 @media (max-width: 900px) {
   .colors__grid { grid-template-columns: 1fr; grid-template-areas: "copy" "bench" "controls"; }
   .colors__copy h2 { max-width: none; }
@@ -1132,7 +1139,7 @@ html[data-intro="on"] .anatomy__stage, html[data-intro="short"] .anatomy__stage 
 /* Movimento reduzido: menos e mais suave, não zero. Mantém fades e mudanças de cor; tira deslocamentos e laços. */
 @media (prefers-reduced-motion: reduce) {
   *, *::before, *::after { animation-duration: .2s !important; animation-delay: 0s !important; animation-iteration-count: 1 !important; transition-duration: .15s !important; transition-delay: 0s !important; }
-  .hero__hint i::after { animation: none !important; }
+  .hero__hint i::after, .hero__hint span { animation: none !important; }
   .btn:active, .choice:active, .toggle:active, .color-field__btn:active, .crown:active .crown__body { transform: none; }
 }
 

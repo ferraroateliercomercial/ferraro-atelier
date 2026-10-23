@@ -1161,19 +1161,18 @@ const Home = (() => {
       win.style.setProperty("--wx", `${(((W - w) / 2) * u).toFixed(1)}px`);
       win.style.setProperty("--wr", `${(14 * u).toFixed(1)}px`);
     };
-    const tl = gsap.timeline({ defaults: { ease: "none" } });
-    tl.fromTo(open, { p: 0 }, { p: 1, duration: 1, ease: "power2.inOut", onUpdate: paint }, 0)
-      .fromTo(video, { scale: 1.12 }, { scale: 1, duration: 1, ease: "power2.out" }, 0)
-      .fromTo("#filmCopy", { autoAlpha: 0, y: 32 }, { autoAlpha: 1, y: 0, duration: 0.3, ease: OUT }, 0.78)
-      .fromTo(toggle, { autoAlpha: 0 }, { autoAlpha: 1, duration: 0.2 }, 0.85)
-      .to({}, { duration: 0.35 }, 1);
+    // a abertura roda sozinha, no tempo, quando o filme chega na tela; depois a rolagem segue normal
+    const tl = gsap.timeline({ paused: true });
+    tl.fromTo(open, { p: 0 }, { p: 1, duration: 1.7, ease: "power3.inOut", onUpdate: paint }, 0)
+      .fromTo(video, { scale: 1.14 }, { scale: 1, duration: 2.4, ease: "power2.out" }, 0)
+      .fromTo("#filmCopy", { autoAlpha: 0, y: 32 }, { autoAlpha: 1, y: 0, duration: 0.9, ease: OUT }, 1.15)
+      .fromTo(toggle, { autoAlpha: 0 }, { autoAlpha: 1, duration: 0.6, ease: "none" }, 1.5);
     ScrollTrigger.create({
-      animation: tl,
       trigger: "#filme",
-      start: "top top",
-      end: () => `+=${Math.round(window.innerHeight * 1.3)}`,
-      pin: pin,
-      scrub: 0.6,
+      start: "top 28%",
+      onEnter: () => tl.play(),
+      // voltou para cima do filme: ele se fecha de novo e abre outra vez na próxima chegada
+      onLeaveBack: () => { tl.pause(0); paint(); },
       invalidateOnRefresh: true,
       onRefresh: paint,
     });

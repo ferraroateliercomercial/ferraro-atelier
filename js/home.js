@@ -1160,13 +1160,14 @@ const Home = (() => {
     });
     const copy = [$(".film__kicker", sec), $("#filmCopy p:not(.film__kicker)"), $("#filmOpen")];
     const reveal = gsap.timeline({ paused: true });
-    reveal.fromTo(video, { autoAlpha: 0 }, { autoAlpha: 1, duration: 1.3, ease: "power2.out" }, 0)
-      .fromTo(video, { scale: 1.18 }, { scale: 1.1, duration: 2, ease: OUT }, 0)
-      .fromTo("#filmCopy", { autoAlpha: 0 }, { autoAlpha: 1, duration: 0.01 }, 0.6)
-      .fromTo(".film__line > span", { yPercent: 105 }, { yPercent: 0, duration: 0.9, ease: OUT }, 0.68)
-      .fromTo(copy, { autoAlpha: 0, y: 18 }, { autoAlpha: 1, y: 0, duration: 0.7, ease: OUT, stagger: 0.08 }, 0.62)
-      .fromTo(toggle, { autoAlpha: 0 }, { autoAlpha: 1, duration: 0.5, ease: "none" }, 1);
-    ScrollTrigger.create({ trigger: sec, start: "top 70%", once: true, onEnter: () => reveal.play() });
+    // o filme se dissolve do escuro devagar, como numa sala de cinema (2,8 s, sem arranque)
+    reveal.fromTo(video, { autoAlpha: 0 }, { autoAlpha: 1, duration: 2.8, ease: "sine.inOut" }, 0)
+      .fromTo(video, { scale: 1.16 }, { scale: 1.1, duration: 3.6, ease: OUT }, 0)
+      .fromTo("#filmCopy", { autoAlpha: 0 }, { autoAlpha: 1, duration: 0.01 }, 1.4)
+      .fromTo(".film__line > span", { yPercent: 105 }, { yPercent: 0, duration: 1.1, ease: OUT }, 1.5)
+      .fromTo(copy, { autoAlpha: 0, y: 14 }, { autoAlpha: 1, y: 0, duration: 1, ease: OUT, stagger: 0.12 }, 1.42)
+      .fromTo(toggle, { autoAlpha: 0 }, { autoAlpha: 1, duration: 0.8, ease: "none" }, 2);
+    ScrollTrigger.create({ trigger: sec, start: "top 80%", once: true, onEnter: () => reveal.play() });
   }
 
   // ---------------------------------------------------------------------------

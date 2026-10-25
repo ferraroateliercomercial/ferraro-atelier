@@ -94,7 +94,6 @@ button, a, label, input, textarea { touch-action: manipulation; }
 html.lenis, html.lenis body { height: auto; }
 .lenis.lenis-smooth { scroll-behavior: auto !important; }
 .lenis.lenis-stopped { overflow: hidden; }
-@media (hover: hover) and (pointer: fine) { html.lenis.lenis-stopped.is-holding { overflow: visible; } }
 html { scrollbar-gutter: stable; }
 
 .skip { position: absolute; left: -999px; top: 8px; background: var(--print); color: var(--ink); padding: 8px 14px; z-index: 200; }
@@ -411,11 +410,11 @@ html[data-intro="on"] .anatomy__stage, html[data-intro="short"] .anatomy__stage 
 [data-ground="opaline"] :focus-visible { outline-color: var(--second-ink); }
 
 /* ---------- o filme ----------
-   Uma janela no centro da tela (recorte retangular, como manda a regra das janelas) que se abre até a tela inteira.
-   O vídeo já roda dentro dela; só o recorte e a escala do vídeo mudam com a rolagem. */
+   Em tela cheia, como os filmes das grandes marcas: acende do escuro na primeira chegada e corre um pouco mais devagar
+   que a página (paralaxe suave). Nada segura a rolagem. */
 .film { position: relative; background: var(--night); color: var(--print); }
 .film__pin { position: relative; height: 100svh; min-height: 520px; overflow: hidden; }
-.film__window { position: absolute; inset: 0; background: #05080a; clip-path: inset(var(--wy, 0px) var(--wx, 0px) round var(--wr, 0px)); }
+.film__window { position: absolute; inset: 0; overflow: hidden; background: #05080a; }
 .film__video { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; display: block; transform-origin: 50% 50%; }
 .film__shade { position: absolute; inset: 0; pointer-events: none;
   background: linear-gradient(0deg, rgba(9, 14, 8, .9) 0%, rgba(9, 14, 8, .62) 34%, rgba(9, 14, 8, 0) 62%),
@@ -429,9 +428,6 @@ html[data-intro="on"] .anatomy__stage, html[data-intro="short"] .anatomy__stage 
 /* o título sobe de dentro de uma fresta, como impressão saindo da borda */
 .film__line { display: block; overflow: hidden; padding-bottom: .12em; margin-bottom: -.12em; }
 .film__line > span { display: block; will-change: transform; }
-/* um reflexo de luz atravessa o vidro uma vez, quando a janela toma a tela */
-.film__glint { position: absolute; inset: 0; pointer-events: none; opacity: 0; will-change: transform, opacity;
-  background: linear-gradient(105deg, rgba(255, 246, 225, 0) 38%, rgba(255, 246, 225, .14) 50%, rgba(255, 246, 225, 0) 62%); }
 .film__copy p:not(.film__kicker) { color: var(--print); opacity: .86; max-width: 40ch; }
 .film__copy .link-arrow { margin-top: 6px; }
 .film__toggle {

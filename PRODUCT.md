@@ -30,7 +30,7 @@ Cada relógio é montado à mão a partir das escolhas do cliente, peça por pe�
 - Ateliê virtual em 8 etapas (caixa, mostrador, ponteiros, luneta, pulseira, movimento, referência, resumo), com Surpreenda-me, aviso de combinação, modo noite, vista explodida e fundo, link de projeto.
 - Sem preços no configurador e sem gravação. Mostrador esqueleto só nos movimentos suíços; fundo de vidro só nos mecânicos.
 - Códigos de projeto CT1, CT2 e CT3 continuam válidos.
-- Peças à venda: Carbon Edition (R$ 1.799) e Verde Fumê (R$ 1.600). Panda Reverso aparece no portfólio, sem preço.
+- Peças à venda: Carbon Edition (R$ 2.199) e Verde Fumê (R$ 1.599, movimento Miyota 8215). Panda Reverso aparece no portfólio, sem preço.
 
 ## Brand Commitments
 

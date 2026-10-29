@@ -172,15 +172,15 @@ const brl = new Intl.NumberFormat("pt-BR", { style: "currency", currency: "BRL",
 const buyUrl = (p) => whatsUrl(`Olá, Ferraro Atelier! Quero comprar o ${p.name} (${brl.format(p.price)}). Ainda está disponível?`);
 const PORTFOLIO = [
   {
-    id: "carbon", name: "Carbon Edition", img: "assets/carbon-edition.jpg", price: 1799,
+    id: "carbon", name: "Carbon Edition", img: "assets/carbon-edition.jpg", price: 2199,
     text: "Mostrador azul texturizado, luneta de aço com relevo e fundo de vidro com rotor turquesa.",
     spec: [["Caixa", "Redonda, aço"], ["Mostrador", "Azul texturizado"], ["Ponteiros", "Espada com lume"], ["Movimento", "Automático"]],
     cfg: { caseShape: "redonda", dialColor: "#1d4e8f", dialFinish: "texturizado", dialFume: true, dialLayout: "data", indexStyle: "bastao", handStyle: "espada", handColor: "#e6e9ee", secondColor: "#3fc1c9", bezelType: "mergulho", bezelColor: "#575d64", bezelTwoTone: false, strapType: "nato", strapColor: "#1e3a6e", movement: "automatico", rotorColor: "#3fbfbd" },
   },
   {
-    id: "verde", name: "Verde Fumê", img: "assets/verde-fume.jpg", price: 1600,
+    id: "verde", name: "Verde Fumê", img: "assets/verde-fume.jpg", price: 1599,
     text: "Caixa octogonal com parafusos na luneta, pulseira integrada e mostrador verde em degradê com relevo horizontal. Fundo de vidro com rotor verde.",
-    spec: [["Caixa", "Octogonal integrada, aço"], ["Mostrador", "Verde fumê listrado, com data"], ["Ponteiros", "Bastão com lume"], ["Movimento", "Automático, fundo de vidro"], ["Rotor", "Verde"]],
+    spec: [["Caixa", "Octogonal integrada, aço"], ["Mostrador", "Verde fumê listrado, com data"], ["Ponteiros", "Bastão com lume"], ["Movimento", "Miyota 8215, automático, fundo de vidro"], ["Rotor", "Verde"]],
     cfg: { caseShape: "octogonal", caseColor: "#c9cdd2", dialColor: "#2f7a64", dialFume: true, dialFinish: "listrado", dialLayout: "data", indexStyle: "bastao", indexColor: "#e9ecef", lume: true, handStyle: "bastao", handColor: "#e6e9ee", secondColor: "#e6e9ee", secondStyle: "agulha", strapType: "integrada", strapTwoTone: false, braceletColor: "#c9cdd2", movement: "automatico", displayBack: true, skeleton: false, rotorColor: "#6d9474" },
   },
   {

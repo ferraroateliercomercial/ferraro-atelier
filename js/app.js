@@ -178,16 +178,16 @@ const PORTFOLIO = [
     cfg: { caseShape: "redonda", dialColor: "#1d4e8f", dialFinish: "texturizado", dialFume: true, dialLayout: "data", indexStyle: "bastao", handStyle: "espada", handColor: "#e6e9ee", secondColor: "#3fc1c9", bezelType: "mergulho", bezelColor: "#575d64", bezelTwoTone: false, strapType: "nato", strapColor: "#1e3a6e", movement: "automatico", rotorColor: "#3fbfbd" },
   },
   {
-    id: "verde", name: "Verde Fumê", img: "assets/verde-fume.jpg", price: 1599,
+    id: "verde", name: "Cipreste", img: "assets/verde-fume.jpg", price: 1599,
     text: "Caixa octogonal com parafusos na luneta, pulseira integrada e mostrador verde em degradê com relevo horizontal. Fundo de vidro com rotor verde.",
     spec: [["Caixa", "Octogonal integrada, aço"], ["Mostrador", "Verde fumê listrado, com data"], ["Ponteiros", "Bastão com lume"], ["Movimento", "Miyota 8215, automático, fundo de vidro"], ["Rotor", "Verde"]],
     cfg: { caseShape: "octogonal", caseColor: "#c9cdd2", dialColor: "#2f7a64", dialFume: true, dialFinish: "listrado", dialLayout: "data", indexStyle: "bastao", indexColor: "#e9ecef", lume: true, handStyle: "bastao", handColor: "#e6e9ee", secondColor: "#e6e9ee", secondStyle: "agulha", strapType: "integrada", strapTwoTone: false, braceletColor: "#c9cdd2", movement: "automatico", displayBack: true, skeleton: false, rotorColor: "#6d9474" },
   },
   {
-    id: "panda", name: "Panda Reverso", img: "assets/panda-reverso.jpg",
-    text: "Cronógrafo de mostrador preto com submostradores claros e luneta taquimétrica.",
-    spec: [["Caixa", "Redonda, aço"], ["Mostrador", "Preto, submostradores prata"], ["Luneta", "Taquímetro preta"], ["Movimento", "Cronógrafo de quartzo"]],
-    cfg: { caseShape: "redonda", caseColor: "#c9cdd2", dialColor: "#111316", dialFume: false, dialFinish: "liso", dialLayout: "crono", subdialColor: "#d9dad6", indexStyle: "bastao", indexColor: "#e9ecef", handStyle: "bastao", handColor: "#e6e9ee", secondColor: "#e6e9ee", bezelType: "taquimetro", bezelColor: "#141517", bezelTwoTone: false, strapType: "oyster", movement: "quartzo" },
+    id: "geleira", name: "Geleira", img: "assets/geleira.jpg", price: 1499,
+    text: "Mostrador azul-gelo com raios de sol, algarismos romanos aplicados e janelas de dia da semana e data. Luneta canelada, pulseira de couro marrom com fecho borboleta e fundo de vidro com rotor azul.",
+    spec: [["Caixa", "Redonda, aço, luneta canelada"], ["Mostrador", "Azul-gelo, raios de sol, dia e data"], ["Ponteiros", "Bastão, aço"], ["Movimento", "Miyota 8285, automático, fundo de vidro"], ["Pulseira", "Couro marrom, fecho borboleta"]],
+    cfg: { caseShape: "redonda", caseColor: "#c9cdd2", dialColor: "#8fcbe0", dialFume: false, dialFinish: "raios", dialLayout: "data", indexStyle: "romanos", indexColor: "#d9dde1", lume: false, handStyle: "bastao", handColor: "#d9dde1", secondColor: "#d9dde1", secondStyle: "agulha", bezelType: "canelada", strapType: "couro", strapColor: "#4a2618", stitchColor: "#e8dcc6", movement: "automatico", displayBack: true, rotorColor: "#6cc6dc" },
   },
 ];
 

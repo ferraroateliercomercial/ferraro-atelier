@@ -186,7 +186,7 @@ const PORTFOLIO = [
   {
     id: "arcanjo", name: "Arcanjo", img: "assets/arcanjo.jpg", price: 1599,
     text: "Mostrador branco com uma cruz e asas abertas em traço preto, como pintadas à mão. Pulseira de aço de cinco fileiras com fecho borboleta e fundo de vidro com rotor preto.",
-    spec: [["Caixa", "Redonda, aço"], ["Mostrador", "Branco, cruz com asas em preto"], ["Ponteiros", "Aço com lume"], ["Movimento", "Automático, fundo de vidro"], ["Pulseira", "Aço, cinco fileiras, fecho borboleta"], ["Resistência à água", "20 ATM (200 m)"]],
+    spec: [["Caixa", "Redonda, aço"], ["Mostrador", "Branco, cruz com asas em preto"], ["Ponteiros", "Aço com lume"], ["Movimento", "Miyota 8215, automático, fundo de vidro"], ["Pulseira", "Aço, cinco fileiras, fecho borboleta"], ["Resistência à água", "20 ATM (200 m)"]],
     cfg: { caseShape: "redonda", caseColor: "#c9cdd2", dialColor: "#f2f2ef", dialFume: false, dialFinish: "liso", dialLayout: "sem-data", indexStyle: "bastao", indexColor: "#16171a", lume: true, handStyle: "dauphine", handColor: "#c9cdd2", secondColor: "#2a2b2e", secondStyle: "agulha", bezelType: "lisa", strapType: "jubile", strapTwoTone: false, braceletColor: "#c9cdd2", movement: "automatico", displayBack: true, rotorColor: "#1d1e21" },
   },
 ];

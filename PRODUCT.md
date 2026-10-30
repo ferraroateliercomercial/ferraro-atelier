@@ -30,7 +30,7 @@ Cada relógio é montado à mão a partir das escolhas do cliente, peça por pe�
 - Ateliê virtual em 8 etapas (caixa, mostrador, ponteiros, luneta, pulseira, movimento, referência, resumo), com Surpreenda-me, aviso de combinação, modo noite, vista explodida e fundo, link de projeto.
 - Sem preços no configurador e sem gravação. Mostrador esqueleto só nos movimentos suíços; fundo de vidro só nos mecânicos.
 - Códigos de projeto CT1, CT2 e CT3 continuam válidos.
-- Peças à venda: Carbon Edition (R$ 2.199), Cipreste (R$ 1.599, movimento Miyota 8215; antes chamado Verde Fumê) e Geleira (R$ 1.499, movimento Miyota 8285, dia e data).
+- Peças à venda, nesta ordem: Carbon Edition (R$ 2.199, 20 ATM), Geleira (R$ 1.399, Miyota 8285, dia e data, 10 ATM) e Arcanjo (R$ 1.599, mostrador branco com cruz e asas, 20 ATM). O Cipreste (antes Verde Fumê) saiu da loja.
 
 ## Brand Commitments
 
@@ -42,7 +42,7 @@ Cada relógio é montado à mão a partir das escolhas do cliente, peça por pe�
 
 ## Evidence on Hand
 
-- Fotos reais: `assets/carbon-edition.jpg`, `assets/verde-fume.jpg`, `assets/geleira.jpg`, `assets/atelie.jpg`, `assets/movimento.jpg`. Logos em `assets/logo/`.
+- Fotos reais: `assets/carbon-edition.jpg`, `assets/geleira.jpg`, `assets/arcanjo.jpg`, `assets/atelie.jpg`, `assets/movimento.jpg`. Logos em `assets/logo/`.
 - O relógio desenhado em SVG (`js/watch.js`) com todas as peças, camadas da vista explodida e movimento animado.
 - Não existem depoimentos, número de clientes, prêmios ou imprensa: não inventar.
 - Fora do site até o dono confirmar (2026-10-18): estojo, certificado, garantia de 12 meses, teste de vedação, fotos da bancada enviadas ao cliente e prazo fixo de 15 a 30 dias úteis. O texto de Montagem, Entrega e da dúvida sobre prazo foi reescrito sem essas promessas.

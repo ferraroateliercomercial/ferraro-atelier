@@ -180,7 +180,7 @@ const PORTFOLIO = [
   {
     id: "geleira", name: "Geleira", img: "assets/geleira.jpg", price: 1399,
     text: "Mostrador azul-gelo com raios de sol, algarismos romanos aplicados e janelas de dia da semana e data. Luneta canelada, pulseira de couro marrom com fecho borboleta e fundo de vidro com rotor azul.",
-    spec: [["Caixa", "Redonda, aço, luneta canelada"], ["Diâmetro", "39 mm"], ["Mostrador", "Azul-gelo, raios de sol, dia e data"], ["Ponteiros", "Bastão, aço"], ["Movimento", "Miyota 8285, automático, fundo de vidro"], ["Pulseira", "Couro marrom, fecho borboleta"], ["Resistência à água", "10 ATM (100 m)"]],
+    spec: [["Caixa", "Redonda, aço, luneta canelada"], ["Diâmetro", "36 mm"], ["Mostrador", "Azul-gelo, raios de sol, dia e data"], ["Ponteiros", "Bastão, aço"], ["Movimento", "Miyota 8285, automático, fundo de vidro"], ["Pulseira", "Couro marrom, fecho borboleta"], ["Resistência à água", "10 ATM (100 m)"]],
     cfg: { caseShape: "redonda", caseColor: "#c9cdd2", dialColor: "#8fcbe0", dialFume: false, dialFinish: "raios", dialLayout: "data", indexStyle: "romanos", indexColor: "#d9dde1", lume: false, handStyle: "bastao", handColor: "#d9dde1", secondColor: "#d9dde1", secondStyle: "agulha", bezelType: "canelada", strapType: "couro", strapColor: "#4a2618", stitchColor: "#e8dcc6", movement: "automatico", displayBack: true, rotorColor: "#6cc6dc" },
   },
   {

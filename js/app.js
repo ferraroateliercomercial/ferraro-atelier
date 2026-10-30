@@ -184,10 +184,10 @@ const PORTFOLIO = [
     cfg: { caseShape: "redonda", caseColor: "#c9cdd2", dialColor: "#8fcbe0", dialFume: false, dialFinish: "raios", dialLayout: "data", indexStyle: "romanos", indexColor: "#d9dde1", lume: false, handStyle: "bastao", handColor: "#d9dde1", secondColor: "#d9dde1", secondStyle: "agulha", bezelType: "canelada", strapType: "couro", strapColor: "#4a2618", stitchColor: "#e8dcc6", movement: "automatico", displayBack: true, rotorColor: "#6cc6dc" },
   },
   {
-    id: "arcanjo", name: "Arcanjo", img: "assets/arcanjo.jpg", price: 1599,
-    text: "Mostrador branco com uma cruz e asas abertas em traço preto, como pintadas à mão. Pulseira de aço de cinco fileiras com fecho borboleta e fundo de vidro com rotor preto.",
-    spec: [["Caixa", "Redonda, aço"], ["Diâmetro", "36 mm"], ["Mostrador", "Branco, cruz com asas em preto"], ["Ponteiros", "Aço com lume"], ["Movimento", "Miyota 8215, automático, fundo de vidro"], ["Pulseira", "Aço, cinco fileiras, fecho borboleta"], ["Resistência à água", "20 ATM (200 m)"]],
-    cfg: { caseShape: "redonda", caseColor: "#c9cdd2", dialColor: "#f2f2ef", dialFume: false, dialFinish: "liso", dialLayout: "sem-data", indexStyle: "bastao", indexColor: "#16171a", lume: true, handStyle: "dauphine", handColor: "#c9cdd2", secondColor: "#2a2b2e", secondStyle: "agulha", bezelType: "lisa", strapType: "jubile", strapTwoTone: false, braceletColor: "#c9cdd2", movement: "automatico", displayBack: true, rotorColor: "#1d1e21" },
+    id: "coracao", name: "Coração da Mata", img: "assets/coracao-da-mata.jpg", price: 1599,
+    text: "Mostrador verde com coração aberto às 9 horas, onde se vê o balanço batendo, índices redondos com lume e triângulo no 12. Luneta serrilhada, pulseira de couro marrom com fecho borboleta e fundo de vidro com rotor verde gravado com ondas.",
+    spec: [["Caixa", "Redonda, aço, luneta serrilhada"], ["Mostrador", "Verde, coração aberto"], ["Ponteiros", "Mercedes com lume"], ["Movimento", "Seiko NH39, automático, coração aberto, fundo de vidro"], ["Pulseira", "Couro marrom, fecho borboleta"], ["Resistência à água", "10 ATM (100 m)"]],
+    cfg: { caseShape: "redonda", caseColor: "#c9cdd2", dialColor: "#1e5a3c", dialFume: false, dialFinish: "liso", dialLayout: "sem-data", indexStyle: "pontos", indexColor: "#e9ecef", lume: true, handStyle: "mercedes", handColor: "#d9dde1", secondColor: "#d9dde1", secondStyle: "agulha", bezelType: "canelada", strapType: "couro", strapColor: "#4a2618", stitchColor: "#e8dcc6", movement: "automatico", displayBack: true, rotorColor: "#3f9a6a" },
   },
 ];
 

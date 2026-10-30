@@ -174,19 +174,19 @@ const PORTFOLIO = [
   {
     id: "carbon", name: "Carbon Edition", img: "assets/carbon-edition.jpg", price: 2199,
     text: "Mostrador azul texturizado, luneta de aço com relevo e fundo de vidro com rotor turquesa.",
-    spec: [["Caixa", "Redonda, aço"], ["Mostrador", "Azul texturizado"], ["Ponteiros", "Espada com lume"], ["Movimento", "Automático"], ["Resistência à água", "20 ATM (200 m)"]],
+    spec: [["Caixa", "Redonda, aço"], ["Diâmetro", "40 mm"], ["Mostrador", "Azul texturizado"], ["Ponteiros", "Espada com lume"], ["Movimento", "Automático"], ["Resistência à água", "20 ATM (200 m)"]],
     cfg: { caseShape: "redonda", dialColor: "#1d4e8f", dialFinish: "texturizado", dialFume: true, dialLayout: "data", indexStyle: "bastao", handStyle: "espada", handColor: "#e6e9ee", secondColor: "#3fc1c9", bezelType: "mergulho", bezelColor: "#575d64", bezelTwoTone: false, strapType: "nato", strapColor: "#1e3a6e", movement: "automatico", rotorColor: "#3fbfbd" },
   },
   {
     id: "geleira", name: "Geleira", img: "assets/geleira.jpg", price: 1399,
     text: "Mostrador azul-gelo com raios de sol, algarismos romanos aplicados e janelas de dia da semana e data. Luneta canelada, pulseira de couro marrom com fecho borboleta e fundo de vidro com rotor azul.",
-    spec: [["Caixa", "Redonda, aço, luneta canelada"], ["Mostrador", "Azul-gelo, raios de sol, dia e data"], ["Ponteiros", "Bastão, aço"], ["Movimento", "Miyota 8285, automático, fundo de vidro"], ["Pulseira", "Couro marrom, fecho borboleta"], ["Resistência à água", "10 ATM (100 m)"]],
+    spec: [["Caixa", "Redonda, aço, luneta canelada"], ["Diâmetro", "39 mm"], ["Mostrador", "Azul-gelo, raios de sol, dia e data"], ["Ponteiros", "Bastão, aço"], ["Movimento", "Miyota 8285, automático, fundo de vidro"], ["Pulseira", "Couro marrom, fecho borboleta"], ["Resistência à água", "10 ATM (100 m)"]],
     cfg: { caseShape: "redonda", caseColor: "#c9cdd2", dialColor: "#8fcbe0", dialFume: false, dialFinish: "raios", dialLayout: "data", indexStyle: "romanos", indexColor: "#d9dde1", lume: false, handStyle: "bastao", handColor: "#d9dde1", secondColor: "#d9dde1", secondStyle: "agulha", bezelType: "canelada", strapType: "couro", strapColor: "#4a2618", stitchColor: "#e8dcc6", movement: "automatico", displayBack: true, rotorColor: "#6cc6dc" },
   },
   {
     id: "arcanjo", name: "Arcanjo", img: "assets/arcanjo.jpg", price: 1599,
     text: "Mostrador branco com uma cruz e asas abertas em traço preto, como pintadas à mão. Pulseira de aço de cinco fileiras com fecho borboleta e fundo de vidro com rotor preto.",
-    spec: [["Caixa", "Redonda, aço"], ["Mostrador", "Branco, cruz com asas em preto"], ["Ponteiros", "Aço com lume"], ["Movimento", "Miyota 8215, automático, fundo de vidro"], ["Pulseira", "Aço, cinco fileiras, fecho borboleta"], ["Resistência à água", "20 ATM (200 m)"]],
+    spec: [["Caixa", "Redonda, aço"], ["Diâmetro", "36 mm"], ["Mostrador", "Branco, cruz com asas em preto"], ["Ponteiros", "Aço com lume"], ["Movimento", "Miyota 8215, automático, fundo de vidro"], ["Pulseira", "Aço, cinco fileiras, fecho borboleta"], ["Resistência à água", "20 ATM (200 m)"]],
     cfg: { caseShape: "redonda", caseColor: "#c9cdd2", dialColor: "#f2f2ef", dialFume: false, dialFinish: "liso", dialLayout: "sem-data", indexStyle: "bastao", indexColor: "#16171a", lume: true, handStyle: "dauphine", handColor: "#c9cdd2", secondColor: "#2a2b2e", secondStyle: "agulha", bezelType: "lisa", strapType: "jubile", strapTwoTone: false, braceletColor: "#c9cdd2", movement: "automatico", displayBack: true, rotorColor: "#1d1e21" },
   },
 ];

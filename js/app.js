@@ -174,7 +174,7 @@ const PORTFOLIO = [
   {
     id: "carbon", name: "Carbon Edition", img: "assets/carbon-edition.jpg", price: 2199,
     text: "Mostrador azul texturizado, luneta de aço com relevo e fundo de vidro com rotor turquesa.",
-    spec: [["Caixa", "Redonda, aço"], ["Diâmetro", "40 mm"], ["Mostrador", "Azul texturizado"], ["Ponteiros", "Espada com lume"], ["Movimento", "Automático"], ["Resistência à água", "20 ATM (200 m)"]],
+    spec: [["Caixa", "Redonda, aço"], ["Diâmetro", "40 mm"], ["Mostrador", "Azul texturizado"], ["Ponteiros", "Espada com lume"], ["Movimento", "Seiko NH35, automático, fundo de vidro"], ["Resistência à água", "20 ATM (200 m)"]],
     cfg: { caseShape: "redonda", dialColor: "#1d4e8f", dialFinish: "texturizado", dialFume: true, dialLayout: "data", indexStyle: "bastao", handStyle: "espada", handColor: "#e6e9ee", secondColor: "#3fc1c9", bezelType: "mergulho", bezelColor: "#575d64", bezelTwoTone: false, strapType: "nato", strapColor: "#1e3a6e", movement: "automatico", rotorColor: "#3fbfbd" },
   },
   {

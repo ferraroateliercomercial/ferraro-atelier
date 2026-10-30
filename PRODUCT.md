@@ -30,7 +30,7 @@ Cada relógio é montado à mão a partir das escolhas do cliente, peça por pe�
 - Ateliê virtual em 8 etapas (caixa, mostrador, ponteiros, luneta, pulseira, movimento, referência, resumo), com Surpreenda-me, aviso de combinação, modo noite, vista explodida e fundo, link de projeto.
 - Sem preços no configurador e sem gravação. Mostrador esqueleto só nos movimentos suíços; fundo de vidro só nos mecânicos.
 - Códigos de projeto CT1, CT2 e CT3 continuam válidos.
-- Peças à venda, nesta ordem: Carbon Edition (R$ 2.199, 40 mm, Seiko NH35, 20 ATM), Geleira (R$ 1.399, 36 mm, Miyota 8285, dia e data, 10 ATM) e Coração da Mata (R$ 1.599, Seiko NH39 coração aberto, mostrador verde, 10 ATM). O Cipreste (antes Verde Fumê) saiu da loja.
+- Peças à venda, nesta ordem: Carbon Edition (R$ 2.199, 40 mm, Seiko NH35, 20 ATM), Geleira (R$ 1.399, 36 mm, Miyota 8285, dia e data, 10 ATM) e Coração da Mata (R$ 1.599, 36 mm, Seiko NH39 coração aberto, mostrador verde, 10 ATM). O Cipreste (antes Verde Fumê) saiu da loja.
 
 ## Brand Commitments
 

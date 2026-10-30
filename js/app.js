@@ -183,12 +183,6 @@ const PORTFOLIO = [
     spec: [["Caixa", "Redonda, aço, luneta canelada"], ["Diâmetro", "36 mm"], ["Mostrador", "Azul-gelo, raios de sol, dia e data"], ["Ponteiros", "Bastão, aço"], ["Movimento", "Miyota 8285, automático, fundo de vidro"], ["Pulseira", "Couro marrom, fecho borboleta"], ["Resistência à água", "10 ATM (100 m)"]],
     cfg: { caseShape: "redonda", caseColor: "#c9cdd2", dialColor: "#8fcbe0", dialFume: false, dialFinish: "raios", dialLayout: "data", indexStyle: "romanos", indexColor: "#d9dde1", lume: false, handStyle: "bastao", handColor: "#d9dde1", secondColor: "#d9dde1", secondStyle: "agulha", bezelType: "canelada", strapType: "couro", strapColor: "#4a2618", stitchColor: "#e8dcc6", movement: "automatico", displayBack: true, rotorColor: "#6cc6dc" },
   },
-  {
-    id: "coracao", name: "Coração da Mata", img: "assets/coracao-da-mata.jpg", price: 1599,
-    text: "Mostrador verde com coração aberto às 9 horas, onde se vê o balanço batendo, índices redondos com lume e triângulo no 12. Luneta serrilhada, pulseira de couro marrom com fecho borboleta e fundo de vidro com rotor verde gravado com ondas.",
-    spec: [["Caixa", "Redonda, aço, luneta serrilhada"], ["Diâmetro", "36 mm"], ["Mostrador", "Verde, coração aberto"], ["Ponteiros", "Mercedes com lume"], ["Movimento", "Seiko NH39, automático, coração aberto, fundo de vidro"], ["Pulseira", "Couro marrom, fecho borboleta"], ["Resistência à água", "10 ATM (100 m)"]],
-    cfg: { caseShape: "redonda", caseColor: "#c9cdd2", dialColor: "#1e5a3c", dialFume: false, dialFinish: "liso", dialLayout: "sem-data", indexStyle: "pontos", indexColor: "#e9ecef", lume: true, handStyle: "mercedes", handColor: "#d9dde1", secondColor: "#d9dde1", secondStyle: "agulha", bezelType: "canelada", strapType: "couro", strapColor: "#4a2618", stitchColor: "#e8dcc6", movement: "automatico", displayBack: true, rotorColor: "#3f9a6a" },
-  },
 ];
 
 // ---------------------------------------------------------------------------

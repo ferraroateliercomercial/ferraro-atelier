@@ -183,12 +183,6 @@ const PORTFOLIO = [
     spec: [["Caixa", "Redonda, aço, luneta canelada"], ["Diâmetro", "36 mm"], ["Mostrador", "Azul-gelo, raios de sol, dia e data"], ["Ponteiros", "Bastão, aço"], ["Movimento", "Miyota 8285, automático, fundo de vidro"], ["Pulseira", "Couro marrom, fecho borboleta"], ["Resistência à água", "10 ATM (100 m)"]],
     cfg: { caseShape: "redonda", caseColor: "#c9cdd2", dialColor: "#8fcbe0", dialFume: false, dialFinish: "raios", dialLayout: "data", indexStyle: "romanos", indexColor: "#d9dde1", lume: false, handStyle: "bastao", handColor: "#d9dde1", secondColor: "#d9dde1", secondStyle: "agulha", bezelType: "canelada", strapType: "couro", strapColor: "#4a2618", stitchColor: "#e8dcc6", movement: "automatico", displayBack: true, rotorColor: "#6cc6dc" },
   },
-  {
-    id: "gambler", name: "The Gambler", img: "assets/the-gambler.jpg", price: 2399,
-    text: "Inspirado nas mesas de cassino: mostrador preto com os quatro naipes do baralho (espadas, copas, ouros e paus) no lugar dos números, luneta de 24 horas em preto e vermelho, pulseira de aço Jubilee com fecho borboleta e fundo de vidro com o rotor gravado com um leque de cartas.",
-    spec: [["Caixa", "Redonda, aço"], ["Diâmetro", "40 mm"], ["Mostrador", "Preto, naipes de baralho"], ["Luneta", "24 horas, preta e vermelha"], ["Ponteiros", "Mercedes e bastão, com lume"], ["Movimento", "Seiko NH35, automático, fundo de vidro"], ["Rotor", "Gravado com cartas de baralho"], ["Pulseira", "Aço Jubilee, fecho borboleta"], ["Resistência à água", "10 ATM (100 m)"]],
-    cfg: { caseShape: "redonda", caseColor: "#c9cdd2", dialColor: "#0e0e10", dialFume: false, dialFinish: "liso", dialLayout: "sem-data", indexStyle: "pontos", indexColor: "#f2f2ef", lume: true, handStyle: "mercedes", handColor: "#e9ecef", secondColor: "#e9ecef", secondStyle: "agulha", bezelType: "mergulho", bezelColor: "#a51f2b", bezelTwoTone: true, bezelColor2: "#141517", strapType: "jubile", strapTwoTone: false, braceletColor: "#c9cdd2", movement: "automatico", displayBack: true, rotorColor: "#8a8d92" },
-  },
 ];
 
 // ---------------------------------------------------------------------------

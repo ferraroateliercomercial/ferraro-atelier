@@ -173,7 +173,9 @@ const Home = (() => {
   // ---------------------------------------------------------------------------
   // A tela é o mostrador: geometria, trilho de minutos nas bordas e os raios de sol
   // ---------------------------------------------------------------------------
-  const geo = { W: 0, H: 0, cx: 0, cy: 0, D: 0, Rr: 0, RS: 0, logoY: 0, logoS: 1, handS: 1, key: "" };
+  const geo = { W: 0, H: 0, cx: 0, cy: 0, D: 0, Rr: 0, RS: 0, RF: 0, logoY: 0, logoS: 1, handS: 1, key: "" };
+  // o canvas da laca é 15% maior que a parte opaca: a borda esfumada fica fora da tela quando ela cobre tudo
+  const FIELD_BLEED = 1.15;
   // medidas do trilho das bordas (celular / computador)
   const EDGE = { m: { e: 10, t: 9, gap: 12, L: 34, bw: 8 }, d: { e: 18, t: 13, gap: 20, L: 70, bw: 15 } };
 
@@ -188,9 +190,11 @@ const Home = (() => {
     if (!geo.W || !geo.D) return false;
     // distância do eixo até o canto mais longe da tela
     geo.Rr = Math.hypot(Math.max(geo.cx, geo.W - geo.cx), Math.max(geo.cy, geo.H - geo.cy));
-    // o disco de laca passa um pouco do canto mais longe, para a borda nunca aparecer na tela cheia
+    // o disco de laca passa um pouco do canto mais longe, para a borda nunca aparecer na tela cheia (RS: a parte
+    // opaca); por fora dela vem uma borda esfumada (RF: o canvas inteiro), que só se vê enquanto a laca se derrama
     geo.RS = Math.ceil(geo.Rr * 2 * 1.02);
-    head.style.setProperty("--RS", `${geo.RS}px`);
+    geo.RF = Math.ceil(geo.RS * FIELD_BLEED);
+    head.style.setProperty("--RS", `${geo.RF}px`);
     // o trilho das bordas mora dentro da cabeça (abaixo dos ponteiros), mas cobre a tela inteira
     const edge = $("#heroEdge");
     edge.style.left = `${-head.offsetLeft}px`;
@@ -293,11 +297,13 @@ const Home = (() => {
       s += part("edge__bt", mx - ex, my - ey, ex * 2 + sh[0], ey * 2 + sh[1], h === 0 ? bar(-bw * 0.85) + bar(bw * 0.85) : bar(0));
     }
 
-    // 12 e 6 grandes, cortados pela borda da tela
+    // 12 e 6 impressos inteiros, no anel dos índices (no lugar dos bastões), um algarismo e meio de altura
     if (numerals) {
-      const fs = H * 0.3;
-      const num = (txt, base) => part("edge__num", cx - fs, base - fs * 0.85, fs * 2, fs, `<text x="${f(cx)}" y="${f(base)}" fill="${PRINT}" font-family="Saira, sans-serif" font-weight="200" font-stretch="125%" text-anchor="middle" font-size="${f(fs)}">${txt}</text>`);
-      s += num("12", fs * 0.36) + num("6", H + fs * 0.34);
+      const glyph = Math.max(86, Math.min(140, H * 0.1)); // altura do algarismo: na Saira, 0,70 do corpo
+      const fs = glyph / 0.7;
+      const top = e + t + gap;
+      const num = (txt, base) => part("edge__num", cx - fs, base - glyph - 6, fs * 2, glyph + 12, `<text x="${f(cx)}" y="${f(base)}" fill="${PRINT}" font-family="Saira, sans-serif" font-weight="300" font-stretch="125%" text-anchor="middle" font-size="${f(fs)}">${txt}</text>`);
+      s += num("12", top + glyph) + num("6", H - top);
     }
     $("#heroEdge").innerHTML = s;
   }
@@ -307,15 +313,17 @@ const Home = (() => {
   function paintField() {
     const c = $("#heroLacquer");
     const dpr = Math.min(window.devicePixelRatio || 1, 2);
-    const N = Math.min(isMobile() ? 1536 : 2048, Math.max(512, Math.round(geo.RS * dpr)));
+    const N = Math.min(isMobile() ? 1536 : 2048, Math.max(512, Math.round(geo.RF * dpr)));
     if (c.width === N) return;
     c.width = N;
     c.height = N;
-    drawLacquer(c.getContext("2d"), N);
+    drawLacquer(c.getContext("2d"), N, 1 / FIELD_BLEED);
   }
 
-  /** A laca do mostrador vivo, num disco de N px: a mesma pintura da tela cheia e do relógio da vista explodida. */
-  function drawLacquer(out, N) {
+  /** A laca do mostrador vivo, num disco de N px: a mesma pintura da tela cheia e do relógio da vista explodida.
+      `inner` é a parte do raio que fica opaca; dali até a borda a laca se esfuma até sumir (na tela cheia essa borda
+      fica fora da tela e só aparece enquanto a laca se derrama; no relógio é um fio sob o aro). */
+  function drawLacquer(out, N, inner = 0.985) {
     const R = N / 2;
     // os raios vão num canvas à parte, para apagar o centro deles sem apagar a laca
     const rays = document.createElement("canvas");
@@ -364,14 +372,25 @@ const Home = (() => {
     out.clip();
     const fume = out.createRadialGradient(R, R, 0, R, R, R);
     fume.addColorStop(0, lqHi);
-    fume.addColorStop(0.3, lq);
-    fume.addColorStop(0.62, Watch.mix(lq, lqLo, 0.55));
+    fume.addColorStop(0.3 * inner, lq);
+    fume.addColorStop(0.62 * inner, Watch.mix(lq, lqLo, 0.55));
+    fume.addColorStop(inner, lqLo);
     fume.addColorStop(1, lqLo);
     out.fillStyle = fume;
     out.fillRect(0, 0, N, N);
     out.drawImage(rays, 0, 0);
+    // de `inner` até a borda a laca se esfuma: some depressa no começo e devagar no fim, como luz
+    out.globalCompositeOperation = "destination-in";
+    const edge = out.createRadialGradient(R, R, R * inner, R, R, R);
+    edge.addColorStop(0, "rgba(0,0,0,1)");
+    edge.addColorStop(0.3, "rgba(0,0,0,.45)");
+    edge.addColorStop(0.65, "rgba(0,0,0,.12)");
+    edge.addColorStop(1, "rgba(0,0,0,0)");
+    out.fillStyle = edge;
+    out.fillRect(0, 0, N, N);
     out.restore();
   }
+
 
   /** O reflexo dos raios de sol: dois feixes de luz opostos, pintados uma vez num canvas pequeno. Só ele gira. */
   function paintLight() {
@@ -457,11 +476,14 @@ const Home = (() => {
   }
 
   // luz dos raios de sol: segue o ponteiro do mouse; no celular, oscila devagar sozinha
-  const light = { target: -30, cur: -30, el: null, last: "" };
+  const light = { target: -30, cur: -30, el: null, last: "", sweeping: false };
   function lightFrame(now, dt) {
     if (!light.el) return;
-    if (!fine) light.target = -30 + Math.sin(now / 2600) * 22;
-    light.cur += (light.target - light.cur) * (1 - Math.exp(-dt * 4));
+    // na abertura a volta da luz é guiada pela linha do tempo (light.cur), sem o seguir do mouse
+    if (!light.sweeping) {
+      if (!fine) light.target = -30 + Math.sin(now / 2600) * 22;
+      light.cur += (light.target - light.cur) * (1 - Math.exp(-dt * 4));
+    }
     const v = light.cur.toFixed(1);
     if (v !== light.last) { light.last = v; light.el.style.transform = `rotate(${v}deg)`; }
   }
@@ -484,14 +506,25 @@ const Home = (() => {
 
     gsap.set(["#heroHead", "#heroEdge", "#heroCopy", "#heroCrown"], { autoAlpha: 1 });
     // a laca começa como uma gota no eixo dos ponteiros
-    gsap.set("#heroPour", { scale: 0.02, autoAlpha: 0, force3D: true });
+    gsap.set("#heroPour", { scale: 0.08, autoAlpha: 0, force3D: true });
+    gsap.set("#heroGlare", { autoAlpha: 0 });
+    // enquanto a laca escorre, o reflexo dos raios de sol dá uma volta inteira, como um mostrador virado sob a luz
+    const lightSweep = (dur) => gsap.fromTo(light, { cur: -30 - 360 }, {
+      cur: -30, duration: dur, ease: "power2.out", immediateRender: false,
+      onStart: () => { light.sweeping = true; },
+      onComplete: () => { light.sweeping = false; light.target = -30; },
+    });
+    // o cristal entra por cima: um reflexo atravessa a tela uma vez
+    const glare = (dur) => gsap.timeline()
+      .set("#heroGlare", { autoAlpha: 1 })
+      .fromTo("#heroGlare i", { xPercent: -100 }, { xPercent: 100, duration: dur, ease: "power1.inOut" })
+      .set("#heroGlare", { autoAlpha: 0 });
     gsap.set("#heroEdge .edge__rails", { autoAlpha: 0 });
     gsap.set(ticks, { autoAlpha: 0 });
     gsap.set(batons, { autoAlpha: 0, scale: 1.3, transformOrigin: "50% 50%" });
     // durante a abertura cada peça do trilho é uma camada própria; no fim elas voltam a ser um desenho só
     $("#heroEdge").classList.add("is-printing");
-    if (nums[0]) gsap.set(nums[0], { autoAlpha: 0, yPercent: -24 });
-    if (nums[1]) gsap.set(nums[1], { autoAlpha: 0, yPercent: 24 });
+    gsap.set(nums, { autoAlpha: 0, scale: 1.25, transformOrigin: "50% 50%" });
     gsap.set("#dialLogoArt", { autoAlpha: 0, y: 10 });
     gsap.set(titleLines, { autoAlpha: 0, yPercent: 40 });
     gsap.set(["#heroSub", "#heroHint"], { autoAlpha: 0, y: 12 });
@@ -504,7 +537,9 @@ const Home = (() => {
 
     if (short) {
       tl.to("#heroPour", { autoAlpha: 1, duration: 0.15, ease: "none" }, 0.05)
-        .to("#heroPour", { scale: 1, duration: 0.8, ease: IN_OUT }, 0.05)
+        .to("#heroPour", { scale: 1, duration: 1.0, ease: "power3.out" }, 0.05)
+        .add(lightSweep(1.1), 0.05)
+        .add(glare(0.9), 0.85)
         .to("#heroEdge .edge__rails", { autoAlpha: 1, duration: 0.3, ease: "none" }, 0.15)
         .to(ticks, { autoAlpha: 1, duration: 0.3, stagger: 0.02, ease: "none" }, 0.2)
         .to(batons, { autoAlpha: 1, scale: 1, duration: 0.4, stagger: 0.02 }, 0.3)
@@ -512,9 +547,13 @@ const Home = (() => {
         .to("#dialDate", { autoAlpha: 1, duration: 0.3 }, 0.4)
         .to(dateState, { n: today, duration: 0.6, ease: "power2.inOut", onUpdate: () => setDate(dateState.n) }, 0.4);
     } else {
-      // 1. a laca escorre do eixo dos ponteiros até cobrir a tela inteira
-      tl.to("#heroPour", { autoAlpha: 1, duration: 0.2, ease: "none" }, 0.25)
-        .to("#heroPour", { scale: 1, duration: 1.35, ease: IN_OUT }, 0.25)
+      // 1. a laca se derrama do eixo dos ponteiros: rápida no começo e assentando devagar, com a borda esfumada
+      //    (nada de círculo duro crescendo); a luz dos raios dá uma volta enquanto ela escorre e, no fim, o cristal
+      //    entra por cima com um reflexo atravessando a tela
+      tl.to("#heroPour", { autoAlpha: 1, duration: 0.3, ease: "none" }, 0.25)
+        .to("#heroPour", { scale: 1, duration: 1.7, ease: "power3.out" }, 0.25)
+        .add(lightSweep(1.9), 0.25)
+        .add(glare(1.2), 1.55)
         // 2. o trilho é impresso pelas bordas, no sentido horário, a partir do 12
         .to("#heroEdge .edge__rails", { autoAlpha: 1, duration: 0.5, ease: "none" }, 0.75)
         .to(ticks, { autoAlpha: 1, duration: 0.35, stagger: 0.075, ease: "none" }, 0.875)
@@ -527,8 +566,8 @@ const Home = (() => {
         .to(dateState, { n: today, duration: 1.25, ease: "power2.inOut", onUpdate: () => setDate(dateState.n) }, 1.5);
     }
 
-    // o 12 e o 6 (só no computador) entram cortados pela borda
-    if (nums.length) tl.to(nums, { autoAlpha: 1, yPercent: 0, duration: short ? 0.6 : 1.0, stagger: short ? 0 : BEAT }, short ? 0.3 : 1.25);
+    // o 12 e o 6 (só no computador) descem no mostrador como os índices
+    if (nums.length) tl.to(nums, { autoAlpha: 1, scale: 1, duration: short ? 0.5 : 0.8, stagger: short ? 0 : BEAT }, short ? 0.3 : 1.25);
 
     // os ponteiros saem do meio-dia e acertam a hora de agora
     const endAt = (k) => () => timeAngles(Date.now() + sweepDur * 1000)[k];
@@ -602,6 +641,8 @@ const Home = (() => {
       gsap.set(["#heroCrown .crown__body", "#heroCrown .crown__label"], { clearProps: "all" });
     }
     $("#heroEdge").classList.remove("is-printing");
+    light.sweeping = false;
+    if (hasG) gsap.set("#heroGlare", { clearProps: "opacity,visibility" });
     lenis?.start();
     if (hasG) gsap.ticker.lagSmoothing(0);
     if (refreshAfterIntro) refreshWhenIdle();

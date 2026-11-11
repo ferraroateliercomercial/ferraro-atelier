@@ -221,8 +221,9 @@ html { scrollbar-gutter: stable; }
 /* o aro gira em cliques de meio minuto: camada própria, a transição roda sem repintar a luneta */
 .head__bezel .bezel__ring { transition: transform .14s var(--ease-out); will-change: transform; }
 
-/* a laca: um disco do tamanho da tela (do eixo até o canto mais longe), pintado uma vez num canvas com os raios de sol.
-   A abertura e o recuo só mudam a escala desse disco: nada é repintado a cada quadro. */
+/* a laca: um disco do tamanho da tela (do eixo até o canto mais longe), pintado uma vez num canvas com os raios de sol,
+   com uma borda esfumada por fora da parte que cobre a tela (--RS inclui essa borda). A abertura e o recuo só mudam a
+   escala desse disco: nada é repintado a cada quadro. */
 .head__field {
   position: absolute; left: 50%; top: 50%; width: var(--RS, 200vmax); height: var(--RS, 200vmax);
   margin: calc(var(--RS, 200vmax) / -2) 0 0 calc(var(--RS, 200vmax) / -2); will-change: transform;
@@ -231,6 +232,12 @@ html { scrollbar-gutter: stable; }
 .field__lacquer, .field__light { position: absolute; inset: 0; width: 100%; height: 100%; display: block; }
 /* o reflexo é um degradê suave: um canvas pequeno ampliado basta, e só ele gira */
 .field__light { will-change: transform; }
+/* o reflexo do cristal: uma faixa de luz atravessa a tela uma vez, no fim da abertura, quando o vidro entra por cima */
+.hero__glare { position: absolute; inset: 0; z-index: 3; overflow: hidden; pointer-events: none; opacity: 0; visibility: hidden; }
+.hero__glare i {
+  position: absolute; top: -25%; bottom: -25%; left: 0; width: 100%; display: block; will-change: transform;
+  background: linear-gradient(104deg, transparent 32%, rgba(250, 238, 205, .05) 43%, rgba(250, 238, 205, .13) 50%, rgba(250, 238, 205, .05) 57%, transparent 68%);
+}
 /* trilho de minutos e índices pelas bordas da tela (desenhados pelo script no tamanho da tela) */
 .hero__edge { position: absolute; left: 0; top: 0; pointer-events: none; will-change: opacity; }
 .edge__part { position: absolute; overflow: visible; }
@@ -280,7 +287,17 @@ html { scrollbar-gutter: stable; }
   font-size: max(.75rem, calc(var(--D) * .0185)); font-weight: 500; font-stretch: 112%; letter-spacing: .14em; text-transform: uppercase; line-height: 1.6;
   color: var(--print); /* sobre o verde do mostrador, o tom secundário não chega a 4,5:1; aqui vai o marfim */
 }
-/* a dica de rolar só cabe na tela em pé; deitada, o 6 cortado ocupa o lugar */
+/* tela deitada (computador): o 12 e o 6 ficam inteiros no anel dos índices, e o texto sobe um pouco para não encostar no 6 */
+@media (min-width: 760px) and (min-aspect-ratio: 21/20) {
+  .hero__title { top: calc(50% + var(--D) * .22); }
+  .hero__sub { top: calc(50% + var(--D) * .385); }
+}
+/* computador baixo (notebook): um pouco mais para cima ainda, para o subtítulo não encostar no 6 */
+@media (min-width: 760px) and (min-aspect-ratio: 21/20) and (max-height: 820px) {
+  .hero__title { top: calc(50% + var(--D) * .19); }
+  .hero__sub { top: calc(50% + var(--D) * .355); }
+}
+/* a dica de rolar só cabe na tela em pé; deitada, o 6 ocupa o meio da borda de baixo */
 .hero__hint {
   display: flex; align-items: center; gap: 14px; position: absolute; left: calc(50% - 50vw + var(--gutter) + 12px); bottom: 64px; justify-items: center;
   font-family: var(--font-print); font-stretch: 125%; font-weight: 500; font-size: .75rem; letter-spacing: .24em; text-transform: uppercase; color: var(--print);

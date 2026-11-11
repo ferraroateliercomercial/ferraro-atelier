@@ -409,36 +409,47 @@ html[data-intro="on"] .anatomy__stage, html[data-intro="short"] .anatomy__stage 
 [data-ground="opaline"] .sec-head p { color: var(--ink-2); }
 [data-ground="opaline"] :focus-visible { outline-color: var(--second-ink); }
 
-/* ---------- o filme ----------
-   Em tela cheia, como os filmes das grandes marcas: acende do escuro na primeira chegada e corre um pouco mais devagar
-   que a página (paralaxe suave). Nada segura a rolagem. */
-.film { position: relative; background: var(--night); color: var(--print); }
-.film__pin { position: relative; height: 100svh; min-height: 520px; overflow: hidden; }
-.film__window { position: absolute; inset: 0; overflow: hidden; background: #05080a; }
-.film__video { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; display: block; transform-origin: 50% 50%; }
-.film__shade { position: absolute; inset: 0; pointer-events: none;
-  background: linear-gradient(0deg, rgba(9, 14, 8, .9) 0%, rgba(9, 14, 8, .62) 34%, rgba(9, 14, 8, 0) 62%),
-    linear-gradient(180deg, rgba(9, 14, 8, .5) 0%, rgba(9, 14, 8, 0) 20%); }
-.film__copy {
-  position: absolute; left: max(var(--gutter), calc((100% - 1280px) / 2)); bottom: clamp(36px, 8svh, 88px);
-  width: min(520px, 100% - 2 * var(--gutter)); display: grid; gap: 14px; justify-items: start;
+/* ---------- sob encomenda (o filme) ----------
+   Página dupla, como nos sites das grandes casas: o texto fala da personalização à esquerda e o filme, em pé como foi
+   filmado, fica emoldurado à direita, inteiro dentro da tela. No celular o filme vem primeiro, de borda a borda, com o
+   título impresso sobre ele, e o texto segue no linho. */
+.film { position: relative; padding-block: clamp(88px, 9vw, 128px); }
+.film__grid {
+  /* a moldura e a legenda cabem inteiras abaixo do cabeçalho: 72 de cabeçalho, 48 de respiro em cima e embaixo, 34 de legenda */
+  --film-h: clamp(460px, calc(100svh - 202px), 880px); --film-w: calc(var(--film-h) * 2 / 3);
+  display: grid; grid-template-columns: minmax(0, 1fr) auto; grid-template-rows: auto auto 1fr;
+  grid-template-areas: "title film" "lead film" "body film"; column-gap: clamp(48px, 7vw, 120px);
 }
-.film__kicker { font-family: var(--font-print); font-stretch: 125%; font-weight: 500; font-size: .75rem; letter-spacing: .22em; text-transform: uppercase; color: var(--second); }
-.film__copy h2 { font-size: var(--step-4); line-height: 1; }
-/* o título sobe de dentro de uma fresta, como impressão saindo da borda */
-.film__line { display: block; overflow: hidden; padding-bottom: .12em; margin-bottom: -.12em; }
-.film__line > span { display: block; will-change: transform; }
-.film__copy p:not(.film__kicker) { color: var(--print); opacity: .86; max-width: 40ch; }
-.film__copy .link-arrow { margin-top: 6px; }
+.film__title { grid-area: title; font-size: clamp(2.6rem, 5vw, 5.25rem); max-width: 11ch; margin-top: -.08em; }
+.film__lead { grid-area: lead; display: grid; gap: 16px; margin-top: clamp(24px, 2.6vw, 36px); max-width: 46ch; }
+.film__lead p { color: var(--ink-2); }
+.film__lead .film__intro { color: var(--ink); font-size: clamp(1.25rem, 1.7vw, 1.5rem); font-weight: 300; font-stretch: 108%; line-height: 1.35; letter-spacing: -.01em; max-width: 30ch; }
+.film__body { grid-area: body; align-self: end; display: grid; gap: clamp(24px, 2.6vw, 32px); margin-top: clamp(32px, 3.4vw, 48px); max-width: 580px; }
+.film__vows { position: relative; list-style: none; margin: 0; padding: 9px 0 0; display: grid; color: var(--ink); }
+.film__vows::before { content: ""; position: absolute; left: 0; right: 0; top: 0; height: 9px; background: var(--ticks); opacity: .4; pointer-events: none; }
+.film__vows li { display: grid; grid-template-columns: minmax(0, 15em) minmax(0, 1fr); gap: 4px 28px; align-items: baseline; padding-block: 13px; border-bottom: 1px solid var(--rule); }
+.film__vows h3 { font-size: 1.15rem; font-weight: 400; line-height: 1.25; letter-spacing: -.005em; }
+.film__vows p { color: var(--ink-2); font-size: .92rem; line-height: 1.45; }
+.film__actions { display: flex; flex-wrap: wrap; align-items: center; gap: 16px 32px; }
+.film__actions .link-arrow { color: var(--ink); }
+
+/* em telas baixas o texto passa da altura do filme: a moldura acompanha a leitura, presa logo abaixo do cabeçalho */
+.film__frame { grid-area: film; margin: 0; display: grid; gap: 14px; align-content: start; align-self: start; width: var(--film-w); position: sticky; top: 120px; }
+.film__window { position: relative; height: var(--film-h); overflow: hidden; background: #05080a; }
+.film__video { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; display: block; transform-origin: 50% 50%; }
+.film__caption { color: var(--ink-2); font-size: .85rem; line-height: 1.5; }
+.film__see { color: var(--ink); font-weight: 500; text-decoration: underline; text-underline-offset: .22em; text-decoration-thickness: 1px; white-space: nowrap; }
+@media (hover: hover) and (pointer: fine) { .film__see:hover { color: var(--second-ink); } }
 .film__toggle {
-  position: absolute; right: max(var(--gutter), calc((100% - 1280px) / 2)); bottom: clamp(36px, 8svh, 88px);
+  position: absolute; right: 14px; bottom: 14px;
   display: inline-flex; align-items: center; gap: 10px; min-height: 40px; padding: 8px 16px;
   font-family: var(--font-print); font-stretch: 125%; font-weight: 500; font-size: .75rem; letter-spacing: .18em; text-transform: uppercase;
-  color: var(--print); border: 1px solid var(--rule-n); border-radius: 999px; background: rgba(9, 14, 8, .45);
+  color: var(--print); border: 1px solid var(--rule-n); border-radius: 999px; background: rgba(9, 14, 8, .5);
   transition: border-color .2s var(--ease-out), background-color .2s var(--ease-out), transform .16s var(--ease-out);
 }
+.film__toggle:focus-visible { outline-color: var(--second); }
 .film__toggle:active { transform: scale(.97); }
-@media (hover: hover) and (pointer: fine) { .film__toggle:hover { border-color: var(--print); background: rgba(9, 14, 8, .7); } }
+@media (hover: hover) and (pointer: fine) { .film__toggle:hover { border-color: var(--print); background: rgba(9, 14, 8, .75); } }
 /* pausar: duas barras; tocar: um triângulo */
 .film__toggle-ico { position: relative; width: 10px; height: 12px; }
 .film__toggle-ico::before, .film__toggle-ico::after { content: ""; position: absolute; top: 0; bottom: 0; width: 3px; background: currentColor; border-radius: 1px; }
@@ -446,10 +457,19 @@ html[data-intro="on"] .anatomy__stage, html[data-intro="short"] .anatomy__stage 
 .film__toggle-ico::after { right: 1px; }
 .film__toggle.is-paused .film__toggle-ico::before { left: 1px; width: 0; height: 0; top: 0; border-style: solid; border-width: 6px 0 6px 10px; border-color: transparent transparent transparent currentColor; background: none; border-radius: 0; }
 .film__toggle.is-paused .film__toggle-ico::after { display: none; }
-@media (max-width: 759px) {
-  .film__copy { bottom: 92px; gap: 10px; }
-  .film__copy h2 { font-size: clamp(2.6rem, 13vw, 3.4rem); }
-  .film__toggle { left: var(--gutter); right: auto; bottom: 32px; }
+/* coluna de texto estreita: cada compromisso empilha título e explicação */
+@media (max-width: 1240px) { .film__vows li { grid-template-columns: minmax(0, 1fr); } }
+/* tela estreita ou em pé: o filme primeiro, de borda a borda, com o título sobre ele */
+@media (max-width: 900px), (max-aspect-ratio: 1/1) {
+  .film { padding-top: 0; padding-bottom: clamp(72px, 14vw, 104px); }
+  .film__grid { --film-h: min(100svh, 177.78vw); --film-w: auto; grid-template-columns: minmax(0, 1fr); grid-template-rows: auto; grid-template-areas: "film" "lead" "body"; }
+  .film__frame { position: static; width: auto; margin-inline: calc(var(--gutter) * -1); }
+  .film__window::after { content: ""; position: absolute; inset: 0; pointer-events: none; background: linear-gradient(0deg, rgba(9, 14, 8, .88) 0%, rgba(9, 14, 8, .5) 26%, rgba(9, 14, 8, 0) 52%); }
+  .film__toggle { z-index: 1; right: var(--gutter); bottom: 20px; }
+  .film__caption { padding-inline: var(--gutter); }
+  .film__title { grid-area: film; z-index: 1; align-self: start; margin-top: calc(var(--film-h) - 84px); translate: 0 -100%; color: var(--print); font-size: clamp(2.6rem, 12vw, 3.6rem); max-width: 9ch; pointer-events: none; }
+  .film__lead { margin-top: 36px; }
+  .film__vows li { grid-template-columns: minmax(0, 1fr); }
 }
 
 /* ---------- cor livre ---------- */

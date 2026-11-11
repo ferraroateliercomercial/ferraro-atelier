@@ -1084,34 +1084,26 @@ const Home = (() => {
   }
 
   // ---------------------------------------------------------------------------
-  // O filme: horizontal no computador, em pé no celular. Só carrega perto da tela e só roda enquanto aparece.
+  // O filme: sempre em pé, como foi filmado, emoldurado ao lado do texto. Só carrega perto da tela e só roda enquanto aparece.
   // ---------------------------------------------------------------------------
   function initFilm() {
     const sec = $("#filme");
     if (!sec) return;
-    const pin = $("#filmPin");
     const win = $("#filmWindow");
     const video = $("#filmVideo");
     const toggle = $("#filmToggle");
-    const tall = () => pin.clientWidth / pin.clientHeight < 0.9;
-    let kind = "";
-    let near = false;
+    let loaded = false;
     let inView = false;
     // movimento reduzido: o filme não começa sozinho, só com o botão
     let userPaused = !motion;
-    const pick = () => {
-      const want = tall() ? "port" : "land";
-      if (want === kind) return;
-      kind = want;
-      video.poster = video.dataset[`${want}Poster`];
-      if (!near) return;
-      const t = video.currentTime || 0;
+    const load = () => {
+      if (loaded) return;
+      loaded = true;
       // VP9 (WebM) primeiro, que é mais leve; H.264 (MP4) para quem não tem VP9
-      const base = video.dataset[want];
+      const base = video.dataset.src;
       video.innerHTML = `<source src="${base}.webm" type='video/webm; codecs="vp9"' /><source src="${base}.mp4" type='video/mp4; codecs="avc1.640028"' />`;
       video.muted = true;
       video.load();
-      if (t) video.addEventListener("loadedmetadata", () => { try { video.currentTime = t % (video.duration || 1); } catch (e) {} }, { once: true });
       sync();
     };
     const label = () => {
@@ -1121,53 +1113,38 @@ const Home = (() => {
       $(".film__toggle-txt", toggle).textContent = paused ? "Assistir" : "Pausar";
     };
     const sync = () => {
-      if (inView && !userPaused) video.play().catch(() => {}).then(label);
+      if (loaded && inView && !userPaused) video.play().catch(() => {}).then(label);
       else video.pause();
       label();
     };
     // carrega quando falta uma tela e meia para chegar; toca só com o filme na tela
-    new IntersectionObserver(([e]) => {
-      if (!e.isIntersecting || near) return;
-      near = true;
-      kind = "";
-      pick();
-    }, { rootMargin: "150% 0px" }).observe(sec);
-    new IntersectionObserver(([e]) => { inView = e.isIntersecting; sync(); }, { threshold: 0.15 }).observe(pin);
+    new IntersectionObserver(([e]) => { if (e.isIntersecting) load(); }, { rootMargin: "150% 0px" }).observe(sec);
+    new IntersectionObserver(([e]) => { inView = e.isIntersecting; sync(); }, { threshold: 0.2 }).observe(win);
     document.addEventListener("visibilitychange", () => { if (document.hidden) video.pause(); else sync(); });
     video.addEventListener("pause", label);
     video.addEventListener("play", label);
     toggle.addEventListener("click", () => {
       userPaused = !(video.paused || userPaused);
-      if (!userPaused && !near) { near = true; kind = ""; pick(); }
-      if (!userPaused) inView = true;
+      if (!userPaused) { load(); inView = true; }
       sync();
     });
     $("#filmOpen").addEventListener("click", () => $('#saleGrid [data-open="carbon"]')?.click());
-    let rt = 0;
-    window.addEventListener("resize", () => { clearTimeout(rt); rt = setTimeout(pick, 200); });
-    kind = "";
-    pick();
     label();
 
     if (!motion) return;
-    // Como as grandes marcas mostram os seus filmes: em tela cheia, sem segurar a rolagem. Na primeira chegada o
-    // filme acende a partir do escuro, assentando de leve, e o texto sobe logo depois; enquanto a página passa,
-    // o filme corre um pouco mais devagar que ela (paralaxe suave, presa à rolagem, então nunca pula).
+    // Nada segura a rolagem. Na primeira chegada a moldura se abre como uma janela e o filme se dissolve do escuro,
+    // devagar; o texto ao lado entra em sequência. Enquanto a página passa, o filme corre um pouco mais devagar
+    // que a moldura (paralaxe presa à rolagem, então nunca pula).
     gsap.set(video, { scale: 1.1 });
-    gsap.fromTo(video, { yPercent: -4 }, {
-      yPercent: 4, ease: "none",
-      scrollTrigger: { trigger: sec, start: "top bottom", end: "bottom top", scrub: true },
-    });
-    const copy = [$(".film__kicker", sec), $("#filmCopy p:not(.film__kicker)"), $("#filmOpen")];
-    const reveal = gsap.timeline({ paused: true });
-    // o filme se dissolve do escuro devagar, como numa sala de cinema (2,8 s, sem arranque)
-    reveal.fromTo(video, { autoAlpha: 0 }, { autoAlpha: 1, duration: 2.8, ease: "sine.inOut" }, 0)
-      .fromTo(video, { scale: 1.16 }, { scale: 1.1, duration: 3.6, ease: OUT }, 0)
-      .fromTo("#filmCopy", { autoAlpha: 0 }, { autoAlpha: 1, duration: 0.01 }, 1.4)
-      .fromTo(".film__line > span", { yPercent: 105 }, { yPercent: 0, duration: 1.1, ease: OUT }, 1.5)
-      .fromTo(copy, { autoAlpha: 0, y: 14 }, { autoAlpha: 1, y: 0, duration: 1, ease: OUT, stagger: 0.12 }, 1.42)
-      .fromTo(toggle, { autoAlpha: 0 }, { autoAlpha: 1, duration: 0.8, ease: "none" }, 2);
-    ScrollTrigger.create({ trigger: sec, start: "top 80%", once: true, onEnter: () => reveal.play() });
+    gsap.fromTo(video, { yPercent: -3.5 }, { yPercent: 3.5, ease: "none", scrollTrigger: { trigger: win, start: "top bottom", end: "bottom top", scrub: true } });
+    const reveal = gsap.timeline({ scrollTrigger: { trigger: win, start: "top 82%", once: true } });
+    reveal.fromTo(win, { clipPath: "inset(9% 11% 9% 11%)" }, { clipPath: "inset(0% 0% 0% 0%)", duration: 1.5, ease: OUT, clearProps: "clipPath" }, 0)
+      .fromTo(video, { autoAlpha: 0 }, { autoAlpha: 1, duration: 2.6, ease: "sine.inOut" }, 0.1)
+      .fromTo([toggle, ".film__caption"], { autoAlpha: 0 }, { autoAlpha: 1, duration: 0.8, ease: "none" }, 1.3);
+    gsap.from(".film__lead p", { y: 22, autoAlpha: 0, duration: 1.0, ease: OUT, stagger: 0.1, scrollTrigger: { trigger: ".film__lead", start: "top 86%", once: true } });
+    gsap.from("#filmVows li", { y: 18, autoAlpha: 0, duration: 0.9, ease: OUT, stagger: 0.09, scrollTrigger: { trigger: "#filmVows", start: "top 88%", once: true } });
+    // o conjunto entra de uma vez: o botão tem transição própria de opacidade e não pode ser animado direto
+    gsap.from(".film__actions", { y: 14, autoAlpha: 0, duration: 0.9, ease: OUT, scrollTrigger: { trigger: ".film__actions", start: "top 96%", once: true } });
   }
 
   // ---------------------------------------------------------------------------
@@ -1287,7 +1264,7 @@ const Home = (() => {
   function initReveals() {
     if (!motion) return;
     // títulos de seção: a linha sobe de dentro de uma máscara
-    $$(".sec-head h2, .process__body h2, .faq-sec h2, .colors__copy h2").forEach((h) => {
+    $$(".sec-head h2, .process__body h2, .faq-sec h2, .colors__copy h2, .film__title").forEach((h) => {
       h.innerHTML = `<span class="mask"><span class="mask__in">${h.innerHTML}</span></span>`;
       gsap.from($(".mask__in", h), { yPercent: 110, duration: 1.1, ease: OUT, scrollTrigger: { trigger: h, start: "top 88%", once: true } });
     });

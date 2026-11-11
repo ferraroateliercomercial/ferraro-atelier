@@ -143,24 +143,34 @@
         </div>
       </section>
 
-      <!-- O FILME: em tela cheia; acende do escuro na primeira chegada -->
-      <section class="film" id="filme" aria-labelledby="filmTitle">
-        <div class="film__pin" id="filmPin">
-          <div class="film__window" id="filmWindow">
-            <video class="film__video" id="filmVideo" muted loop playsinline preload="none"
-              poster="assets/film/ferraro-filme-16x9.webp"
-              data-land="assets/film/ferraro-filme-16x9" data-land-poster="assets/film/ferraro-filme-16x9.webp"
-              data-port="assets/film/ferraro-filme-9x16" data-port-poster="assets/film/ferraro-filme-9x16.webp"
-              aria-label="Filme da Carbon Edition: o mostrador, a coroa, a logo de perto, o fundo de vidro com o rotor e o relógio na água"></video>
-            <div class="film__shade" aria-hidden="true"></div>
+      <!-- SOB ENCOMENDA: o texto fala da personalização e o filme, em pé, mostra uma peça que saiu da bancada -->
+      <section class="film" id="filme" data-ground="opaline" aria-labelledby="filmTitle">
+        <div class="wrap film__grid">
+          <h2 class="film__title" id="filmTitle">O seu ainda não existe.</h2>
+          <div class="film__lead">
+            <p class="film__intro">Na Ferraro, um relógio começa com uma pergunta: como você quer o seu?</p>
+            <p>Em vez de escolher entre modelos prontos, você decide como ele vai ser, peça por peça, na cor que quiser. Depois o ateliê monta esse relógio à mão, só para você.</p>
           </div>
-          <div class="film__copy" id="filmCopy">
-            <p class="film__kicker">Carbon Edition, em filme</p>
-            <h2 id="filmTitle"><span class="film__line"><span>De perto.</span></span></h2>
-            <p>O mostrador azul texturizado, a logo de perto e o fundo de vidro com o rotor turquesa à mostra.</p>
-            <button class="link-arrow" type="button" id="filmOpen">Ver a Carbon Edition<svg class="ico" viewBox="0 0 24 24" aria-hidden="true"><use href="#i-arrow" /></svg></button>
+          <figure class="film__frame" id="filmFrame">
+            <div class="film__window" id="filmWindow">
+              <video class="film__video" id="filmVideo" muted loop playsinline preload="none"
+                poster="assets/film/ferraro-filme-9x16.webp" data-src="assets/film/ferraro-filme-9x16"
+                aria-label="Filme da Carbon Edition: o mostrador, a coroa, a logo de perto, o fundo de vidro com o rotor e o relógio na água"></video>
+              <button class="film__toggle" type="button" id="filmToggle" aria-label="Pausar o filme"><span class="film__toggle-ico" aria-hidden="true"></span><span class="film__toggle-txt">Pausar</span></button>
+            </div>
+            <figcaption class="film__caption">No filme, a Carbon Edition, uma das peças montadas no ateliê. <button class="film__see" type="button" id="filmOpen">Ver a peça</button></figcaption>
+          </figure>
+          <div class="film__body">
+            <ul class="film__vows" id="filmVows">
+              <li><h3>Seis escolhas, todas suas</h3><p>Caixa, mostrador, ponteiros, luneta, pulseira e movimento. Nenhuma vem decidida de fábrica.</p></li>
+              <li><h3>Nada é montado sem o seu sim</h3><p>Peças, cores, prazo e valor são confirmados com você antes de qualquer pagamento.</p></li>
+              <li><h3>A sua ideia cabe aqui</h3><p>Um relógio de referência, uma foto ou um desenho: mande pelo WhatsApp e avaliamos juntos.</p></li>
+            </ul>
+            <div class="film__actions">
+              <a class="btn" href="#personalizar">Montar o meu relógio</a>
+              <a class="link-arrow" href="#atelie">Como funciona<svg class="ico" viewBox="0 0 24 24" aria-hidden="true"><use href="#i-arrow" /></svg></a>
+            </div>
           </div>
-          <button class="film__toggle" type="button" id="filmToggle" aria-label="Pausar o filme"><span class="film__toggle-ico" aria-hidden="true"></span><span class="film__toggle-txt">Pausar</span></button>
         </div>
       </section>
 

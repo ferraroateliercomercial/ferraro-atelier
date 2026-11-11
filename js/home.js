@@ -664,7 +664,8 @@ const Home = (() => {
     "cristal": { level: 6, dy: 0, rot: 0, half: 0.3 },
   };
 
-  const anatomy = { target: 0, cur: 0, layers: [], stack: null, isolated: null, captionKey: "", active: true };
+  // target/cur: a vista explodida (0 = relógio fechado, 1 = aberto) · zoom/zoomCur: a câmera chegando no mostrador
+  const anatomy = { target: 0, cur: 0, zoom: 0, zoomCur: 0, zt: null, layers: [], stack: null, isolated: null, captionKey: "", active: true };
 
   function initAnatomy() {
     const stack = $("#heroStack");
@@ -698,43 +699,88 @@ const Home = (() => {
     $$("#heroCallouts li").forEach((li) => li.classList.toggle("is-focus", li.dataset.name === name));
   }
 
+  /** Para onde a câmera vai no zoom: o mostrador do relógio aberto cresce até um diâmetro que cabe na tela e, no
+      computador, desliza para a esquerda (o texto novo entra à direita). Medido uma vez por tamanho de tela. */
+  function zoomTarget() {
+    if (anatomy.zt) return anatomy.zt;
+    const stack = anatomy.stack;
+    const sw = stack.offsetWidth;
+    if (!sw) return { k: 1, x: 0 };
+    const dialD = sw * (204 / 400);
+    const W = window.innerWidth, H = window.innerHeight;
+    const mobile = isMobile();
+    const want = mobile ? Math.min(W * 0.8, H * 0.46) : Math.min(H * 0.62, W * 0.42);
+    const scene = $("#heroScene").getBoundingClientRect();
+    const x = mobile ? 0 : W * 0.3 - (scene.left + scene.width / 2);
+    anatomy.zt = { k: Math.max(1, want / dialD), x };
+    return anatomy.zt;
+  }
+
   function anatomyFrame(now, dt) {
     const stack = anatomy.stack;
     // parado (movimento reduzido ou sem bibliotecas), o relógio fica inteiro e as legendas viram lista
-    if (!motion || !stack || !anatomy.active || stack.offsetParent === null) return;
-    anatomy.cur += (anatomy.target - anatomy.cur) * (1 - Math.exp(-dt * 6));
+    if (!motion || !stack || stack.offsetParent === null) return;
+    // fora da cena, só termina o que ainda estava assentando (um pulo direto para o fim não pode congelar no meio)
+    const settled = Math.abs(anatomy.target - anatomy.cur) < 0.002 && Math.abs(anatomy.zoom - anatomy.zoomCur) < 0.002;
+    if (!anatomy.active && settled) return;
+    const ease = 1 - Math.exp(-dt * 6);
+    anatomy.cur += (anatomy.target - anatomy.cur) * ease;
+    anatomy.zoomCur += (anatomy.zoom - anatomy.zoomCur) * ease;
     const cur = anatomy.cur;
     const e = smooth(clamp01(cur));
+    // z: a câmera indo até o mostrador; o relógio volta a ficar de frente enquanto ela chega
+    const z = smooth(clamp01(anatomy.zoomCur));
+    const front = 1 - z;
     const mobile = isMobile();
     const t = now / 1000;
     const W = stack.offsetWidth;
     const k = W / 330;
     const gap = (mobile ? 50 : 64) * k;
-    const tilt = 58 * e;
-    const spin = -14 * e - 10 * cur;
+    // o relógio se inclina para trás e vira de lado (três quartos) enquanto se abre
+    const tilt = 58 * e * front;
+    const yaw = (mobile ? -18 : -28) * e * front;
+    const spin = (-14 * e - 10 * cur) * front;
     const sinT = Math.sin((tilt * Math.PI) / 180);
     const cosT = Math.cos((tilt * Math.PI) / 180);
     const lift = 2.6 * gap * sinT * 0.92;
     stack.style.setProperty("--tilt", `${tilt.toFixed(2)}deg`);
+    stack.style.setProperty("--yaw", `${yaw.toFixed(2)}deg`);
     stack.style.setProperty("--spin", `${spin.toFixed(2)}deg`);
     stack.style.setProperty("--lift", `${lift.toFixed(1)}px`);
+
+    // a câmera: a cena cresce em volta do mostrador e, no computador, desliza para o outro lado
+    const zooming = z > 0.001;
+    if (zooming !== anatomy.zooming) { anatomy.zooming = zooming; stack.classList.toggle("is-zooming", zooming); }
+    const zoomed = z > 0.985;
+    if (zoomed !== anatomy.zoomed) { anatomy.zoomed = zoomed; stack.classList.toggle("is-zoomed", zoomed); $("#heroStage").classList.toggle("is-zoomed", zoomed); }
+    const zt = zooming ? zoomTarget() : null;
+    const sceneT = zooming ? `translate3d(${(zt.x * z).toFixed(1)}px, 0, 0) scale(${(1 + (zt.k - 1) * z).toFixed(4)})` : "";
+    if (sceneT !== anatomy.sceneT) { anatomy.sceneT = sceneT; $("#heroScene").style.transform = sceneT; }
 
     const pos = {};
     for (const { el, m } of anatomy.layers) {
       // as peças de cima saem primeiro
       const ei = smooth(clamp01((e - (6 - m.level) * 0.055) / 0.67));
       const breathe = Math.sin(t * 1.3 + m.level * 0.9) * 4 * ei;
-      const z = m.level * gap * ei + breathe;
+      const zz = m.level * gap * ei + breathe;
       const y = m.dy * k * ei;
-      el.style.transform = `translate3d(0px, ${y.toFixed(1)}px, ${z.toFixed(1)}px) rotate(${(m.rot * ei).toFixed(1)}deg)`;
-      pos[m.level === 0 ? (m.baseY ? 0 : -1) : m.level] = { y: y + (m.baseY || 0) * (W / 400), z, half: m.half };
+      el.style.transform = `translate3d(0px, ${y.toFixed(1)}px, ${zz.toFixed(1)}px) rotate(${(m.rot * ei).toFixed(1)}deg)`;
+      pos[m.level === 0 ? (m.baseY ? 0 : -1) : m.level] = { y: y + (m.baseY || 0) * (W / 400), z: zz, half: m.half };
+      // no zoom, o que está na frente do mostrador passa pela câmera e some; o que está atrás fica escondido por ele
+      let op = "";
+      if (zooming && m.level !== 3 && m.level !== 4) {
+        const start = m.level > 4 ? 0 : 0.12;
+        op = (1 - smooth(clamp01((z - start) / 0.5))).toFixed(3);
+      }
+      if (op !== el._op) { el._op = op; el.style.opacity = op; }
     }
 
     const callouts = $$("#heroCallouts li");
+    const showCallouts = z < 0.02;
     if (mobile) {
       // uma legenda por vez, embaixo, com a última peça que se soltou
       let shown = null;
-      callouts.forEach((li, idx) => { if (e > 0.12 + idx * 0.11) shown = li; });
+      if (showCallouts) callouts.forEach((li, idx) => { if (e > 0.12 + idx * 0.11) shown = li; });
       const key = shown ? shown.dataset.layer : "";
       if (key !== anatomy.captionKey) {
         anatomy.captionKey = key;
@@ -744,27 +790,31 @@ const Home = (() => {
       }
       return;
     }
-    // cada legenda fica na altura da sua peça, de um lado ou do outro, com o fio até a borda dela
+    // cada legenda fica na altura da sua peça (a peça medida na tela, já virada), de um lado ou do outro,
+    // com o fio até a borda dela
     const stage = $("#heroStage");
     const sr = stage.getBoundingClientRect();
     const scene = $("#heroScene").getBoundingClientRect();
     const cx = scene.left + scene.width / 2 - sr.left;
-    const cy = scene.top + scene.height / 2 - sr.top + lift;
     const reach = W * 0.46 + 28;
     const prev = { l: -Infinity, r: -Infinity };
     callouts.forEach((li, idx) => {
       const p = pos[+li.dataset.layer];
-      if (!p) return;
+      const layer = anatomy.layers.find((l) => l.m.level === +li.dataset.layer);
+      if (!p || !layer) return;
       const side = li.dataset.side;
-      const yScreen = Math.max(cy + p.y * cosT - p.z * sinT, prev[side] + 58);
+      const r = layer.el.getBoundingClientRect();
+      const yScreen = Math.max(r.top + r.height / 2 - sr.top, prev[side] + 72);
       prev[side] = yScreen;
       li.style.transform = `translate3d(0, ${(yScreen - 14).toFixed(1)}px, 0)`;
       // lado e comprimento do fio só mudam quando a tela muda de tamanho
-      const x = side === "r" ? `${(cx + reach).toFixed(1)}px` : `${(sr.width - cx + reach).toFixed(1)}px`;
-      const lead = `${Math.max(16, reach - p.half * W - 10).toFixed(1)}px`;
+      // o relógio virado de lado avança para a esquerda: as legendas da esquerda ficam um pouco mais longe
+      const rch = side === "r" ? reach : reach + 48;
+      const x = side === "r" ? `${(cx + rch).toFixed(1)}px` : `${(sr.width - cx + rch).toFixed(1)}px`;
+      const lead = `${Math.max(16, rch - p.half * W - 10).toFixed(1)}px`;
       if (li._x !== x) { li._x = x; li.style[side === "r" ? "left" : "right"] = x; }
       if (li._lead !== lead) { li._lead = lead; li.style.setProperty("--lead", lead); }
-      li.classList.toggle("is-on", e > 0.26 + idx * 0.045);
+      li.classList.toggle("is-on", showCallouts && e > 0.26 + idx * 0.045);
     });
   }
 
@@ -793,28 +843,34 @@ const Home = (() => {
     const tl = gsap.timeline({ defaults: { ease: "none" } });
     let target = pullTarget();
     const lg = { t: 0 };
-    // 1. a laca que cobria a tela se fecha num círculo; o trilho e os índices das bordas somem, os do
-    //    mostrador redondo aparecem, a logo volta ao lugar e a luneta e a caixa crescem em volta: vira um relógio
-    tl.to("#heroCopy", { autoAlpha: 0, y: -30, duration: 0.08 }, 0.01)
-      .to("#heroCrown", { autoAlpha: 0, x: 30, duration: 0.06 }, 0.01)
-      .to("#heroEdge", { autoAlpha: 0, duration: 0.08 }, 0.03)
-      .fromTo("#heroField", { scale: 1 }, { scale: () => geo.D / geo.RS, duration: 0.15, ease: "power2.inOut" }, 0.02)
-      .fromTo(lg, { t: 0 }, { t: 1, duration: 0.15, ease: "power2.inOut", onUpdate: () => placeParts(lg.t) }, 0.02)
-      .fromTo([".dial__rim", "#dialPrint .print__track", "#dialPrint .print__indices"], { autoAlpha: 0 }, { autoAlpha: 1, duration: 0.06 }, 0.1)
-      .fromTo([".head__case", "#heroBezel"], { autoAlpha: 0, scale: 1.1 }, { autoAlpha: 1, scale: 1, duration: 0.08, ease: "power2.out" }, 0.11)
-      // 2. o relógio inteiro vai até o lugar da vista explodida
-      .to("#heroHead", { x: () => target.x, y: () => target.y, scale: () => target.k, duration: 0.14, ease: "power2.inOut" }, 0.17)
-      .to(".head__case", { autoAlpha: 0, duration: 0.05 }, 0.26)
-      .fromTo("#heroStage", { autoAlpha: 0 }, { autoAlpha: 1, duration: 0.05 }, 0.27)
-      .to("#heroHead", { autoAlpha: 0, duration: 0.04 }, 0.31)
-      .fromTo("#anatomyText", { autoAlpha: 0, y: 40 }, { autoAlpha: 1, y: 0, duration: 0.1 }, 0.33)
-      .to({}, { duration: 0.55 }, 0.45);
+    // 1. a laca que cobria a tela se fecha num círculo enquanto o relógio já vai para o seu lugar, ao lado do texto:
+    //    o trilho e os índices das bordas somem, os do mostrador redondo aparecem, a logo volta ao lugar e a luneta e a
+    //    caixa crescem em volta. Ele nunca fica sozinho no meio da tela.
+    tl.to("#heroCopy", { autoAlpha: 0, y: -30, duration: 0.06 }, 0.01)
+      .to("#heroCrown", { autoAlpha: 0, x: 30, duration: 0.05 }, 0.01)
+      .to("#heroEdge", { autoAlpha: 0, duration: 0.06 }, 0.02)
+      .fromTo("#heroField", { scale: 1 }, { scale: () => geo.D / geo.RS, duration: 0.12, ease: "power2.inOut" }, 0.02)
+      .fromTo(lg, { t: 0 }, { t: 1, duration: 0.12, ease: "power2.inOut", onUpdate: () => placeParts(lg.t) }, 0.02)
+      .fromTo([".dial__rim", "#dialPrint .print__track", "#dialPrint .print__indices"], { autoAlpha: 0 }, { autoAlpha: 1, duration: 0.05 }, 0.08)
+      .fromTo([".head__case", "#heroBezel"], { autoAlpha: 0, scale: 1.1 }, { autoAlpha: 1, scale: 1, duration: 0.06, ease: "power2.out" }, 0.09)
+      .to("#heroHead", { x: () => target.x, y: () => target.y, scale: () => target.k, duration: 0.15, ease: "power2.inOut" }, 0.07)
+      // 2. troca pelo relógio em camadas e o texto entra
+      .to(".head__case", { autoAlpha: 0, duration: 0.04 }, 0.19)
+      .fromTo("#heroStage", { autoAlpha: 0 }, { autoAlpha: 1, duration: 0.04 }, 0.2)
+      .to("#heroHead", { autoAlpha: 0, duration: 0.03 }, 0.23)
+      .fromTo("#anatomyText", { autoAlpha: 0, y: 40 }, { autoAlpha: 1, y: 0, duration: 0.08 }, 0.15)
+      // 3. (no onUpdate) o relógio vira de lado e se abre em camadas, com as legendas
+      // 4. a câmera entra pelo cristal até o mostrador, que desliza para o outro lado; o texto troca
+      .to("#heroCallouts", { autoAlpha: 0, duration: 0.04 }, 0.64)
+      .to("#anatomyText", { autoAlpha: 0, y: -30, duration: 0.06 }, 0.66)
+      .fromTo("#anatomyText2", { autoAlpha: 0, y: 40 }, { autoAlpha: 1, y: 0, duration: 0.08 }, 0.84)
+      .to({}, { duration: 0.08 }, 0.92);
 
     heroST = ScrollTrigger.create({
       animation: tl,
       trigger: "#topo",
       start: "top top",
-      end: () => `+=${Math.round(window.innerHeight * (isMobile() ? 2.6 : 3.2))}`,
+      end: () => `+=${Math.round(window.innerHeight * (isMobile() ? 3.4 : 4.2))}`,
       pin: "#heroPin",
       scrub: 0.6,
       anticipatePin: 1,
@@ -822,20 +878,22 @@ const Home = (() => {
       // medidas novas antes de o ScrollTrigger recalcular (mudou o tamanho da tela, voltou do ateliê)
       onRefreshInit: () => {
         gsap.set("#heroHead", { x: 0, y: 0, scale: 1 });
+        anatomy.zt = null;
         layoutHero();
         target = pullTarget();
       },
       onToggle: (self) => { anatomy.active = self.isActive || self.progress < 1; },
       onUpdate: (self) => {
         const p = self.progress;
-        anatomy.target = clamp01((p - 0.34) / 0.56);
+        anatomy.target = clamp01((p - 0.3) / 0.32);
+        anatomy.zoom = clamp01((p - 0.66) / 0.24);
         // a luneta gira em cliques de meio minuto enquanto o mostrador vira relógio
-        const clicks = Math.round(clamp01((p - 0.1) / 0.2) * 20);
+        const clicks = Math.round(clamp01((p - 0.08) / 0.14) * 20);
         if (clicks !== bezelClicks) {
           bezelClicks = clicks;
           $("#heroBezelRing").style.transform = `rotate(${(20 - clicks) * 3}deg)`;
         }
-        $("#masthead").classList.toggle("is-past-hero", p > 0.3);
+        $("#masthead").classList.toggle("is-past-hero", p > 0.22);
       },
     });
   }

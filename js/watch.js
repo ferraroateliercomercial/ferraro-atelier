@@ -783,7 +783,11 @@ class Movement {
     const min = t.getMinutes() + sec / 60;
     const hr = (t.getHours() % 12) + min / 60;
 
-    const rot = (els, deg, cx = 200, cy = 260) => els.forEach((e) => e.setAttribute("transform", `rotate(${deg.toFixed(2)} ${e.dataset.cx || cx} ${e.dataset.cy || cy})`));
+    // só escreve no SVG o que mudou: cada escrita repinta o relógio inteiro
+    const rot = (els, deg, cx = 200, cy = 260) => els.forEach((e) => {
+      const v = `rotate(${deg.toFixed(2)} ${e.dataset.cx || cx} ${e.dataset.cy || cy})`;
+      if (e._tr !== v) { e._tr = v; e.setAttribute("transform", v); }
+    });
     rot(this.el.h, hr * 30);
     rot(this.el.m, min * 6);
     rot(this.el.s, sec * 6);
@@ -802,20 +806,42 @@ class Movement {
     const swing = this.running ? Math.sin(now / 1000 * Math.PI * 2 * (this.cfg.swiss ? 4 : 3)) * 160 : 0;
     rot(this.el.balance, swing);
     rot(this.el.ratchet, this.ratchet);
-    this.el.knurl.forEach((k) => k.setAttribute("transform", `translate(0 ${this.knurl.toFixed(2)})`));
+    const kn = `translate(0 ${this.knurl.toFixed(2)})`;
+    this.el.knurl.forEach((k) => { if (k._tr !== kn) { k._tr = kn; k.setAttribute("transform", kn); } });
   }
 }
 
-/** Um único laço de animação para todos os relógios da página. */
+/** Um único laço de animação para todos os relógios da página. Só anda o que está na tela (ou perto dela):
+    cada relógio escondido ou fora da tela pararia de repintar de graça. */
 const Clockwork = {
   items: new Set(),
   started: false,
-  add(m) { this.items.add(m); this.start(); return m; },
-  remove(m) { this.items.delete(m); },
+  io: null,
+  add(m) {
+    this.items.add(m);
+    if ("IntersectionObserver" in window) {
+      if (!this.io) this.io = new IntersectionObserver((entries) => {
+        for (const en of entries) { const it = en.target._clockwork; if (it) it.visible = en.isIntersecting; }
+      }, { rootMargin: "20% 0px" });
+      m.root._clockwork = m;
+      m.visible = true;
+      this.io.observe(m.root);
+    }
+    this.start();
+    return m;
+  },
+  remove(m) { this.items.delete(m); this.io?.unobserve(m.root); },
   start() {
     if (this.started) return;
     this.started = true;
-    const loop = (now) => { this.items.forEach((m) => { if (m.root.isConnected) m.tick(now); else this.items.delete(m); }); requestAnimationFrame(loop); };
+    const loop = (now) => {
+      this.items.forEach((m) => {
+        if (!m.root.isConnected) { this.items.delete(m); this.io?.unobserve(m.root); return; }
+        if (m.visible === false) { m.last = now; return; }
+        m.tick(now);
+      });
+      requestAnimationFrame(loop);
+    };
     requestAnimationFrame(loop);
   },
 };

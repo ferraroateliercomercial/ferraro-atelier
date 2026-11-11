@@ -354,6 +354,8 @@ html[data-intro="on"] .anatomy__stage, html[data-intro="short"] .anatomy__stage 
 .anatomy__text h2 span { color: var(--print-2); }
 .anatomy__text p { color: var(--print-2); max-width: 34ch; }
 .anatomy__text .link-arrow { justify-self: start; }
+/* o segundo texto entra do outro lado quando a câmera chega no mostrador (o script o acende) */
+.anatomy__text--close { left: auto; right: var(--side); opacity: 0; visibility: hidden; }
 .anatomy__stage { position: absolute; top: 72px; bottom: 0; left: calc(var(--side) + var(--text) + 32px); right: var(--side); pointer-events: auto; }
 .anatomy__stage .stack-scene { position: absolute; inset: 0; display: grid; place-items: center; }
 
@@ -361,8 +363,15 @@ html[data-intro="on"] .anatomy__stage, html[data-intro="short"] .anatomy__stage 
 .stack {
   --tilt: 0deg; --spin: 0deg; --gap: 0px; --lift: 0px;
   position: relative; width: min(330px, 62vw); aspect-ratio: 400 / 520; max-width: 100%;
-  transform-style: preserve-3d; transform: translateY(var(--lift)) rotateX(var(--tilt)) rotateZ(var(--spin));
+  transform-style: preserve-3d; transform: translateY(var(--lift)) rotateX(var(--tilt)) rotateY(var(--yaw, 0deg)) rotateZ(var(--spin));
 }
+/* a cena inteira é o que a câmera aproxima e desloca (escala e translação pelo script) */
+#heroScene { will-change: transform; transform-origin: 50% 50%; }
+/* no zoom as peças somem uma a uma pelo script, sem a transição do isolar */
+#heroStack.is-zooming .layer { transition: none; }
+/* com a câmera parada no mostrador, as camadas são repintadas no tamanho novo (o will-change congela a pintura
+   no tamanho antigo e deixaria o mostrador ampliado borrado) */
+#heroStack.is-zoomed, #heroStack.is-zoomed .layer, .anatomy__stage.is-zoomed #heroScene { will-change: auto; }
 #heroStack { width: min(400px, 25vw, calc((100svh - 170px) * .77)); will-change: transform; }
 #heroStack .layer { will-change: transform; transition: opacity .3s var(--ease-out); }
 #heroStack.is-isolating .layer:not(.is-focus) { opacity: .16; }
@@ -408,6 +417,7 @@ html[data-intro="on"] .anatomy__stage, html[data-intro="short"] .anatomy__stage 
 .home--static .hero__stage { position: relative; inset: auto; height: 100svh; min-height: 520px; overflow: hidden; }
 .home--static .anatomy { position: relative; inset: auto; display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1.25fr); gap: 32px; align-items: center; width: min(1280px, 100% - 2 * var(--gutter)); margin: 0 auto; padding-block: 96px; }
 .home--static .anatomy__text { position: static; translate: none; width: auto; }
+.home--static .anatomy__text--close { display: none; }
 .home--static .anatomy__stage { position: relative; inset: auto; display: grid; grid-template-columns: minmax(0, 1fr) auto; gap: 32px; align-items: center; }
 .home--static .anatomy__stage .stack-scene { position: relative; inset: auto; }
 .home--static #heroStack { width: min(360px, 100%); }
@@ -1073,6 +1083,7 @@ html[data-intro="on"] .anatomy__stage, html[data-intro="short"] .anatomy__stage 
   .anatomy__text h2 { font-size: clamp(1.7rem, 7vw, 2.4rem); }
   .anatomy__text p { display: none; }
   .anatomy__text .link-arrow { justify-self: center; }
+  .anatomy__text--close { left: var(--gutter); right: var(--gutter); }
   .anatomy__stage { left: 0; right: 0; top: 0; }
   .anatomy__stage .stack-scene { inset: 150px 0 70px; }
   #heroStack { width: min(70vw, calc((100svh - 300px) * .77)); }

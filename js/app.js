@@ -553,9 +553,11 @@ function initMovements() {
 
   const autoMeter = $("#mvAutoMeter");
   const manualMeter = $("#mvManualMeter");
+  let lastAuto = "", lastManual = "";
   frameHooks.add(() => {
-    autoMeter.style.setProperty("--v", mvs.mvAutomatico.reserve.toFixed(3));
-    manualMeter.style.setProperty("--v", mvs.mvManual.reserve.toFixed(3));
+    const a = mvs.mvAutomatico.reserve.toFixed(3), m = mvs.mvManual.reserve.toFixed(3);
+    if (a !== lastAuto) { lastAuto = a; autoMeter.style.setProperty("--v", a); }
+    if (m !== lastManual) { lastManual = m; manualMeter.style.setProperty("--v", m); }
   });
 }
 

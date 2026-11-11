@@ -91,6 +91,19 @@ const Watch = (() => {
   function roundRectPath(x, y, w, h, r) {
     return `M${x + r} ${y}H${x + w - r}A${r} ${r} 0 0 1 ${x + w} ${y + r}V${y + h - r}A${r} ${r} 0 0 1 ${x + w - r} ${y + h}H${x + r}A${r} ${r} 0 0 1 ${x} ${y + h - r}V${y + r}A${r} ${r} 0 0 1 ${x + r} ${y}Z`;
   }
+  // Caixa almofada: uma superelipse (|x/a|^n + |y/a|^n = 1), que é a forma dos relógios "coussin". Os lados são
+  // abaulados e os cantos vão fechando aos poucos, sem o canto reto de um quadrado arredondado.
+  function cushionPath(a, n = 2.9, cx = CX, cy = CY) {
+    const pts = [];
+    for (let i = 0; i < 120; i++) {
+      const t = (i / 120) * Math.PI * 2;
+      const c = Math.cos(t), s = Math.sin(t);
+      pts.push([(cx + a * Math.sign(c) * Math.abs(c) ** (2 / n)).toFixed(2), (cy + a * Math.sign(s) * Math.abs(s) ** (2 / n)).toFixed(2)]);
+    }
+    return "M" + pts.map((q) => q.join(" ")).join("L") + "Z";
+  }
+  // as asas da almofada nascem da própria caixa: curtas, largas na base e afinando para a pulseira
+  const cushionLugs = "M136 150 Q142 120 152 110 H248 Q258 120 264 150 Z M136 370 Q142 400 152 410 H248 Q258 400 264 370 Z";
   function octagonPath(hw, hh, ch) {
     const p = [[CX - hw + ch, CY - hh], [CX + hw - ch, CY - hh], [CX + hw, CY - hh + ch], [CX + hw, CY + hh - ch], [CX + hw - ch, CY + hh], [CX - hw + ch, CY + hh], [CX - hw, CY + hh - ch], [CX - hw, CY - hh + ch]];
     return "M" + p.map((q) => q.join(" ")).join("L") + "Z";
@@ -104,7 +117,7 @@ const Watch = (() => {
   const dialRadius = (c) => (isOct(c) ? 92 : 102);
   const dialShapePath = (c) => (isOct(c) ? roundRectPath(CX - 94, CY - 94, 188, 188, 46) : circlePath(102));
   const strapWidth = (c) => (c.strapType === "integrada" ? 172 : 124);
-  const caseRight = (c) => (c.caseShape === "redonda" ? 340 : c.caseShape === "almofada" ? 336 : 351);
+  const caseRight = (c) => (c.caseShape === "redonda" ? 340 : c.caseShape === "almofada" ? 339 : 351);
   const dateNum = () => new Date().getDate();
 
   // ---------- defs (ids únicos por desenho) ----------
@@ -233,8 +246,10 @@ const Watch = (() => {
       s += `<path d="M138 150 L150 116 H250 L262 150 Z M138 370 L150 404 H250 L262 370 Z" fill="${m}"/>`;
       s += `<path d="${circlePath(140)}${hole}" fill-rule="evenodd" fill="${m}"/><circle cx="${CX}" cy="${CY}" r="139" fill="none" stroke="${edge}" stroke-opacity=".35" stroke-width="2"/>`;
     } else if (c.caseShape === "almofada") {
-      s += `<path d="M146 140 L154 112 H246 L254 140 Z M146 380 L154 408 H246 L254 380 Z" fill="${m}"/>`;
-      s += `<path d="${roundRectPath(64, 124, 272, 272, 82)}${hole}" fill-rule="evenodd" fill="${m}"/><rect x="65" y="125" width="270" height="270" rx="81" fill="none" stroke="${edge}" stroke-opacity=".35" stroke-width="2"/>`;
+      s += `<path d="${cushionLugs}" fill="${m}"/>`;
+      s += `<path d="${cushionPath(139)}${hole}" fill-rule="evenodd" fill="${m}"/><path d="${cushionPath(138)}" fill="none" stroke="${edge}" stroke-opacity=".35" stroke-width="2"/>`;
+      // o aro chanfrado em volta da luneta, como nas caixas almofada de verdade
+      s += `<path d="${cushionPath(139)}${circlePath(134)}" fill-rule="evenodd" fill="${shade(c.caseColor, 0.18)}" fill-opacity=".35"/>`;
     } else {
       s += `<rect x="${CX - 168}" y="${CY - 26}" width="24" height="52" rx="7" fill="${m}"/><rect x="${CX + 144}" y="${CY - 26}" width="24" height="52" rx="7" fill="${m}"/>`;
       s += `<path d="${octagonPath(140, 134, 46)}" fill="none" stroke="${m}" stroke-width="22" stroke-linejoin="round"/>`;
@@ -643,7 +658,7 @@ const Watch = (() => {
     const m = `url(#${u}-metal)`;
     let s = strap(u, c);
     if (c.caseShape === "redonda") s += `<path d="M138 150 L150 116 H250 L262 150 Z M138 370 L150 404 H250 L262 370 Z" fill="${m}"/><circle cx="${CX}" cy="${CY}" r="140" fill="${m}"/>`;
-    else if (c.caseShape === "almofada") s += `<path d="M146 140 L154 112 H246 L254 140 Z M146 380 L154 408 H246 L254 380 Z" fill="${m}"/><rect x="64" y="124" width="272" height="272" rx="82" fill="${m}"/>`;
+    else if (c.caseShape === "almofada") s += `<path d="${cushionLugs}" fill="${m}"/><path d="${cushionPath(139)}" fill="${m}"/>`;
     else s += `<path d="${octagonPath(140, 134, 46)}" fill="${m}" stroke="${m}" stroke-width="22" stroke-linejoin="round"/>`;
     // coroa do lado esquerdo (vista de trás)
     s += `<rect x="${400 - caseRight(c) - 22}" y="${CY - 16}" width="26" height="32" rx="5" fill="${m}"/>`;

@@ -6,3 +6,7 @@
 # Impeccable: motor baixado pelo update (binário de 21 MB) e configurações locais do Claude Code
 .claude/skills/impeccable/scripts/bin/
 .claude/settings.local.json
+
+# branding: PDFs intermediários (cores de tela) e o link para os módulos do Node
+branding/src/out/
+branding/src/node_modules

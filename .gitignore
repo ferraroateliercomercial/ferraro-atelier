@@ -10,3 +10,4 @@
 # branding: PDFs intermediários (cores de tela) e o link para os módulos do Node
 branding/src/out/
 branding/src/node_modules
+__pycache__/

@@ -1,0 +1,10 @@
+Ferraro Atelier: logo com as asas e FERRARO (sem ATELIER), em vetor.
+
+SVG  vetor, para o site, programas de design e corte (plotter, laser).
+PDF  vetor, 60 mm de largura, sem fundo: o formato que gráficas e fornecedores mais pedem.
+     Pode ser ampliado ou reduzido para qualquer tamanho sem perder qualidade.
+PNG  3000 px de largura, fundo transparente, para quem não abre vetor.
+
+Cores: preta, azul-escura (a cor original da logo), dourada, prata, branca e marfim.
+A branca e a marfim são para fundo escuro (no PDF e no PNG elas ficam sem fundo).
+Proporção: 586 x 224 (largura 2,62 vezes a altura).

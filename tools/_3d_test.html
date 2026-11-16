@@ -1,0 +1,18 @@
+<!doctype html>
+<html lang="pt-BR"><head><meta charset="utf-8"><title>teste 3D</title>
+<script type="importmap">{"imports":{"three":"https://cdnjs.cloudflare.com/ajax/libs/three.js/0.170.0/three.module.min.js","three/addons/":"https://cdn.jsdelivr.net/npm/three@0.170.0/examples/jsm/"}}</script>
+<style>body{margin:0;background:#ebe5d4}#v{width:900px;height:700px;background:radial-gradient(circle at 50% 42%,#f4efe2,#ddd5c0 75%)}#v canvas{display:block;width:100%;height:100%}</style>
+</head><body><div id="v"></div>
+<script src="../js/watch.js"></script>
+<script type="module" src="../js/watch3d.js"></script>
+<script>
+window.addEventListener("watch3d-ready", () => {
+  const q = new URLSearchParams(location.search);
+  const cfg = { ...DEFAULT_WATCH, ...(q.get("cfg") ? JSON.parse(q.get("cfg")) : {}) };
+  window.viewer = Watch3D.create(document.getElementById("v"), cfg, { lowTier: q.get("low") === "1", onReady: () => { window.ready = (window.ready || 0) + 1; } });
+  if (q.get("view")) window.viewer.setView(q.get("view"));
+  if (q.get("hide")) setTimeout(() => { for (const n of q.get("hide").split(",")) { const p = window.viewer.model?.parts[n]; if (p) p.visible = false; } window.viewer.needs = true; }, 1500);
+  if (q.get("night") === "1") window.viewer.setNight(true);
+  window.viewer.setAngles({ h: 310, m: 50, s: 200, chrono: 0, cm: 0, ch: 0, rotor: 40, balance: 60, ratchet: 0 });
+});
+</script></body></html>

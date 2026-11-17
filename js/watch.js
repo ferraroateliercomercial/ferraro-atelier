@@ -719,6 +719,7 @@ class Movement {
     this.onState = onState;
     this.last = performance.now();
     this.bind();
+    this.tick(this.last);
   }
 
   setConfig(cfg) {
@@ -727,6 +728,9 @@ class Movement {
     this.type = cfg.movement;
     if (typeChanged) { this.offset = 0; this.stoppedAt = null; this.reserve = Math.max(this.reserve, 0.6); }
     this.bind();
+    // o desenho acabou de ser trocado: os ponteiros novos nascem no 12 e só pegariam a hora no próximo quadro
+    // (um quadro com eles apontando para cima, que aparece como tremida). Acerta tudo agora, antes de pintar.
+    this.tick(performance.now());
   }
 
   bind() {

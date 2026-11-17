@@ -4,6 +4,9 @@
 {
   "name": "ferraro-atelier",
   "compatibility_date": "2025-09-01",
+  // endereço público em ferraro-atelier.<conta>.workers.dev (e links de prévia de cada versão)
+  "workers_dev": true,
+  "preview_urls": true,
   "assets": {
     "directory": "./dist",
     "not_found_handling": "single-page-application"

@@ -715,6 +715,10 @@ html[data-intro="on"] .anatomy__stage, html[data-intro="short"] .anatomy__stage 
 .close__big { font-size: clamp(1.4rem, 2.4vw, 2rem); font-weight: 300; font-stretch: 112%; text-decoration: none; justify-self: start; border-bottom: 1px solid var(--rule-n); transition: border-color .2s var(--ease-out); }
 @media (hover: hover) and (pointer: fine) { .close__big:hover { border-color: var(--print); } }
 .close__small { color: var(--print-2); font-size: .9rem; max-width: 34ch; }
+.close__label--next { margin-top: 18px; }
+/* o e-mail é longo: um degrau abaixo do WhatsApp e do Instagram, e pode quebrar no @ em telas estreitas */
+.close__mid { font-size: clamp(1rem, 1.25vw, 1.15rem); font-weight: 300; font-stretch: 108%; text-decoration: none; justify-self: start; overflow-wrap: anywhere; border-bottom: 1px solid var(--rule-n); transition: border-color .2s var(--ease-out); }
+@media (hover: hover) and (pointer: fine) { .close__mid:hover { border-color: var(--print); } }
 .close__links { list-style: none; margin: 0; padding: 0; display: grid; gap: 8px; }
 .close__links a { text-decoration: none; color: var(--print-2); transition: color .2s; }
 @media (hover: hover) and (pointer: fine) { .close__links a:hover { color: var(--print); } }

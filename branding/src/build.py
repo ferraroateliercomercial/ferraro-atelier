@@ -32,6 +32,7 @@ GOLD, GOLD_INK = "#d4ad5c", "#7a5a1c"
 WHATS = "(48) 99695-0800"
 WHATS_URL = "https://wa.me/5548996950800"
 INSTA = "@ferraro_atelier"
+EMAIL = "ferraroatelier.comercial@gmail.com"
 
 
 def hex2rgb(h):
@@ -301,7 +302,7 @@ def certificate():
               <li>Troca de bateria e relógio aberto fora do ateliê.</li></ul></div>
           </div>
           <p class="label" style="margin-top:4.2mm">Como acionar</p>
-          <p class="g-p" style="margin-top:1.2mm">Fale com o ateliê pelo WhatsApp {WHATS}, informando o número deste certificado. O envio e o reparo são combinados no atendimento.</p>
+          <p class="g-p" style="margin-top:1.2mm">Fale com o ateliê pelo WhatsApp {WHATS} ou pelo e-mail {EMAIL}, informando o número deste certificado. O envio e o reparo são combinados no atendimento.</p>
           <div style="margin:5mm 0 4mm">{tick_rule(112, INK, .42)}</div>
           <h3 class="display i-title">Inspeção final</h3>
           <p class="g-p" style="margin-top:1mm">Feita no ateliê antes da entrega.</p>
@@ -347,7 +348,7 @@ def certificate():
       .rev{{width:100%;border-collapse:collapse;margin-top:2mm;font-size:5.4pt}}
       .rev th{{text-align:left;font-weight:500;font-stretch:125%;letter-spacing:.18em;text-transform:uppercase;color:{INK2};padding:0 0 1.2mm;border-bottom:.2mm solid rgba(42,33,25,.55)}}
       .rev th:nth-child(1){{width:22%}} .rev th:nth-child(3){{width:28%}}
-      .rev td{{height:6.4mm;border-bottom:.15mm solid rgba(42,33,25,.35)}}
+      .rev td{{height:5.6mm;border-bottom:.15mm solid rgba(42,33,25,.35)}}
       .rev td + td, .rev th + th{{border-left:.15mm solid rgba(42,33,25,.2);padding-left:2mm}}
     """
     doc("certificado-garantia", w, h, [front, back], css)
@@ -394,7 +395,7 @@ def flyer():
         </div>
         <div class="abs fb-foot">
           <div class="qr">{qr(WHATS_URL)}</div>
-          <div><p class="label">Fale com o ateliê</p><p class="big">{WHATS}</p><p class="small">WhatsApp · Instagram {INSTA}</p>
+          <div><p class="label">Fale com o ateliê</p><p class="big">{WHATS}</p><p class="small">WhatsApp · Instagram {INSTA}</p><p class="small">{EMAIL}</p>
             <p class="small">Valor e prazo são combinados no atendimento, antes de qualquer pagamento.</p></div>
           <img src="{L['lockup_ink']}" class="lk">
         </div>
@@ -455,7 +456,7 @@ def care():
           <dl>{''.join(f'<div><dt class="label">{t}</dt><dd>{d}</dd></div>' for t, d in items)}</dl>
         </div>
         <div class="abs cb-foot">
-          <div><p class="label">Dúvidas</p><p class="v">WhatsApp {WHATS}</p></div>
+          <div><p class="label">Dúvidas</p><p class="v">WhatsApp {WHATS}</p><p class="v2">{EMAIL}</p></div>
           <img src="{L['wings_ink']}" style="width:12mm;opacity:.8">
         </div>
       </div></section>"""
@@ -469,6 +470,7 @@ def care():
       .cb dd{{font-size:7.2pt;line-height:1.45;margin-top:.7mm;color:{INK}}}
       .cb-foot{{left:10mm;right:10mm;bottom:8.5mm;display:flex;justify-content:space-between;align-items:end}}
       .cb-foot .v{{font-size:8pt;margin-top:.6mm}}
+      .cb-foot .v2{{font-size:6.8pt;margin-top:.4mm;color:{INK2}}}
     """
     doc("cartao-de-cuidados", w, h, [front, back], css)
 

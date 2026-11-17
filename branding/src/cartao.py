@@ -136,7 +136,7 @@ def back(color, wings):
     return f"""<div class="back-in" style="color:{color}">
       <p class="tag">Relojoaria sob encomenda</p>
       <img class="wg" src="{wings}">
-      <div class="ct"><p><span>WhatsApp</span>{B.WHATS}</p><p><span>Instagram</span>{B.INSTA}</p></div>
+      <div class="ct"><p><span>WhatsApp</span>{B.WHATS}</p><p><span>Instagram</span>{B.INSTA}</p><p><span>E-mail</span>{B.EMAIL}</p></div>
     </div>"""
 
 

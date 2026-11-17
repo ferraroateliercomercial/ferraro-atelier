@@ -6,6 +6,7 @@
 const STORE = {
   whatsapp: "5548996950800", // DDI + DDD + número, só dígitos
   instagram: "https://www.instagram.com/ferraro_atelier/",
+  email: "ferraroatelier.comercial@gmail.com",
 };
 
 const $ = (sel, root = document) => root.querySelector(sel);
@@ -1376,6 +1377,7 @@ document.addEventListener("DOMContentLoaded", () => {
   $("#year").textContent = new Date().getFullYear();
   $$(".whats-link").forEach((a) => { a.href = whatsUrl("Olá, Ferraro Atelier! Quero montar um relógio personalizado."); });
   $$(".insta-link").forEach((a) => { a.href = STORE.instagram; });
+  $$(".mail-link").forEach((a) => { a.href = `mailto:${STORE.email}`; a.textContent = STORE.email; });
   initMovements();
   window.Home?.init();
   window.addEventListener("hashchange", route);

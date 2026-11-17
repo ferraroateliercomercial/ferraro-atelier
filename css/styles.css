@@ -373,12 +373,6 @@ html[data-intro="on"] .anatomy__stage, html[data-intro="short"] .anatomy__stage 
    no tamanho antigo e deixaria o mostrador ampliado borrado) */
 #heroStack.is-zoomed, #heroStack.is-zoomed .layer, .anatomy__stage.is-zoomed #heroScene { will-change: auto; }
 #heroStack { width: min(400px, 25vw, calc((100svh - 170px) * .77)); will-change: transform; }
-/* o relógio em 3D cobre a cena inteira; o desenho em camadas fica por baixo (ainda mede o tamanho) */
-.anatomy__3d { position: absolute; inset: 0; opacity: 0; transition: opacity .8s var(--ease-out); pointer-events: none; }
-.anatomy__3d[hidden] { display: none; }
-.anatomy__3d canvas { display: block; width: 100%; height: 100%; }
-.anatomy__stage.is-3d .anatomy__3d { opacity: 1; }
-.anatomy__stage.is-3d #heroStack { visibility: hidden; }
 #heroStack .layer { will-change: transform; transition: opacity .3s var(--ease-out); }
 #heroStack.is-isolating .layer:not(.is-focus) { opacity: .16; }
 .stack::before {
@@ -1213,23 +1207,15 @@ html[data-intro="on"] .anatomy__stage, html[data-intro="short"] .anatomy__stage 
 .zoomview__pan .stack { width: min(92vw, calc((100svh - 150px) * .77)); max-width: none; height: auto; }
 .zoomview__pan .studio__back-view { width: min(92vw, calc(100svh - 150px)); aspect-ratio: 1; }
 .zoomview__pan .studio__back-view svg { width: 100%; height: 100%; }
-.zoomview__bar { position: absolute; z-index: 2; left: 50%; bottom: max(20px, env(safe-area-inset-bottom)); translate: -50% 0; display: flex; gap: 1px; border: 1px solid var(--rule-n); background: color-mix(in srgb, var(--night) 70%, transparent); }
+.zoomview__bar { position: absolute; left: 50%; bottom: max(20px, env(safe-area-inset-bottom)); translate: -50% 0; display: flex; gap: 1px; border: 1px solid var(--rule-n); background: color-mix(in srgb, var(--night) 70%, transparent); }
 .zoomview__bar button, .zoomview__close { color: var(--print); font: inherit; font-size: .75rem; letter-spacing: .16em; text-transform: uppercase; min-width: 48px; height: 44px; padding: 0 16px; }
 .zoomview__bar button:first-child, .zoomview__bar button:last-child { font-size: 1.3rem; letter-spacing: 0; }
-.zoomview__close { position: absolute; z-index: 2; top: max(14px, env(safe-area-inset-top)); right: 16px; border: 1px solid var(--rule-n); background: color-mix(in srgb, var(--night) 70%, transparent); }
+.zoomview__close { position: absolute; top: max(14px, env(safe-area-inset-top)); right: 16px; border: 1px solid var(--rule-n); background: color-mix(in srgb, var(--night) 70%, transparent); }
 .zoomview__hint { position: absolute; left: 0; right: 0; top: max(22px, env(safe-area-inset-top)); text-align: center; font-size: .75rem; letter-spacing: .12em; color: var(--print-2); padding: 0 96px; pointer-events: none; transition: opacity .6s var(--ease-out); }
 .zoomview__hint.is-off { opacity: 0; }
 @media (hover: hover) and (pointer: fine) { .zoomview__bar button:hover, .zoomview__close:hover { background: var(--rule-n); } }
 @media (max-width: 859px) { .zoom-open { bottom: auto; top: 0; } .zoomview__hint { top: auto; bottom: 80px; padding: 0 24px; } }
 .studio__canvas .stack-scene .stack, .studio__canvas .studio__back-view svg { cursor: zoom-in; }
-/* o relógio em 3D cobre o desenho assim que fica pronto */
-.studio__3d { position: absolute; inset: 0; opacity: 0; transition: opacity .5s var(--ease-out); cursor: zoom-in; }
-.studio__3d[hidden] { display: none; }
-.studio__3d canvas { display: block; width: 100%; height: 100%; }
-.studio__canvas.is-3d .studio__3d { opacity: 1; }
-.studio__canvas.is-3d > .stack-scene, .studio__canvas.is-3d > .studio__back-view { visibility: hidden; }
-.zoomview[data-mode="3d"] .zoomview__pan { position: absolute; inset: 0; width: auto; transform: none !important; }
-.zoomview[data-mode="3d"] .zoomview__pan canvas { display: block; width: 100%; height: 100%; }
 .studio__canvas [data-crown], .studio__canvas [data-rotor] { cursor: grab; }
 
 @media (min-width: 901px) { .hero__hint { font-size: .85rem; letter-spacing: .22em; gap: 16px; } .hero__hint i { height: 44px; } }

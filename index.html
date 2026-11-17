@@ -17,7 +17,6 @@
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
   <link href="https://fonts.googleapis.com/css2?family=Saira:wdth,wght@50..125,100..900&display=swap" rel="stylesheet" />
-  <script type="importmap">{"imports":{"three":"https://cdnjs.cloudflare.com/ajax/libs/three.js/0.170.0/three.module.min.js","three/addons/":"https://cdn.jsdelivr.net/npm/three@0.170.0/examples/jsm/"}}</script>
   <link rel="stylesheet" href="css/styles.css" />
   <!-- Vercel Web Analytics (só funciona com o site publicado na Vercel) -->
   <script>
@@ -129,7 +128,7 @@
               <a href="#personalizar" class="link-arrow">Abrir o ateliê virtual<svg class="ico" viewBox="0 0 24 24" aria-hidden="true"><use href="#i-arrow" /></svg></a>
             </div>
             <div class="anatomy__stage" id="heroStage">
-              <div class="stack-scene" id="heroScene"><div class="stack" id="heroStack"></div><div class="anatomy__3d" id="hero3d" hidden aria-hidden="true"></div></div>
+              <div class="stack-scene" id="heroScene"><div class="stack" id="heroStack"></div></div>
               <ol class="callouts" id="heroCallouts" aria-label="Partes do relógio">
                 <li data-layer="6" data-name="cristal"><strong>Cristal</strong><span>Protege o mostrador</span></li>
                 <li data-layer="5" data-name="luneta"><strong>Luneta</strong><span>Mergulho, taquímetro, lisa ou canelada</span></li>
@@ -411,7 +410,6 @@
         <div class="studio__canvas" id="studioCanvas">
           <div class="stack-scene"><div class="stack" id="studioStack"></div></div>
           <div class="studio__back-view" id="studioBack" hidden></div>
-          <div class="studio__3d" id="studio3d" hidden aria-label="Relógio em 3D"></div>
           <button type="button" class="stage-btn zoom-open" id="studioZoom" aria-label="Ampliar o relógio: zoom e arrastar">
             <svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="10.5" cy="10.5" r="6" fill="none" stroke="currentColor" stroke-width="1.4"/><path d="m15 15 5 5M10.5 8v5M8 10.5h5" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round"/></svg>
             <span>Ampliar</span>
@@ -538,7 +536,6 @@
   <script src="js/watch.js"></script>
   <script src="js/picker.js"></script>
   <script src="js/app.js"></script>
-  <script type="module" src="js/watch3d.js"></script>
   <script src="js/home.js"></script>
 </body>
 </html>

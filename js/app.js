@@ -212,9 +212,6 @@ function initZoomView(getSource) {
   const pts = new Map();
   let pinch = null;
   const apply = () => { pan.style.transform = `translate(${x}px, ${y}px) scale(${k})`; };
-  // no modo 3D o próprio visualizador cuida de girar e aproximar (arrastar e rolar); os botões mudam a distância
-  const is3d = () => root.dataset.mode === "3d";
-  let viewer3d = null;
   const clamp = () => {
     // o relógio nunca sai por inteiro da tela
     const w = pan.offsetWidth * k, h = pan.offsetHeight * k, vw = stage.clientWidth, vh = stage.clientHeight;
@@ -254,37 +251,16 @@ function initZoomView(getSource) {
   };
   const close = () => {
     root.hidden = true;
-    if (viewer3d) { viewer3d.dispose(); viewer3d = null; }
-    delete root.dataset.mode;
     pan.innerHTML = "";
     document.documentElement.style.overflow = "";
     lastFocus?.focus?.();
   };
-  /** Tela cheia com o relógio em 3D: arrastar gira, rolar ou pinçar aproxima. */
-  open.open3d = (cfg, view, night) => {
-    lastFocus = document.activeElement;
-    pan.innerHTML = "";
-    root.dataset.mode = "3d";
-    root.hidden = false;
-    document.documentElement.style.overflow = "hidden";
-    pan.style.transform = "none";
-    viewer3d = Watch3D.create(pan, cfg, { orbit: true, distance: 0.92 });
-    viewer3d.setView(view === "explodida" ? "explodida" : "frente");
-    if (view === "fundo") viewer3d.setView("fundo");
-    viewer3d.setNight(!!night);
-    hint.textContent = "Arraste para girar. Role ou pince para aproximar.";
-    hint.classList.remove("is-off");
-    setTimeout(() => hint.classList.add("is-off"), 4500);
-    $("#zoomClose").focus();
-  };
   stage.addEventListener("wheel", (e) => {
-    if (is3d()) return;
     e.preventDefault();
     const r = stage.getBoundingClientRect();
     zoomAt(k * Math.exp(-e.deltaY * (e.ctrlKey ? 0.01 : 0.0018)), e.clientX - r.left, e.clientY - r.top);
   }, { passive: false });
   stage.addEventListener("pointerdown", (e) => {
-    if (is3d()) return;
     stage.setPointerCapture(e.pointerId);
     pts.set(e.pointerId, [e.clientX, e.clientY]);
     stage.classList.add("is-drag");
@@ -312,20 +288,19 @@ function initZoomView(getSource) {
   stage.addEventListener("pointerup", up);
   stage.addEventListener("pointercancel", up);
   stage.addEventListener("dblclick", (e) => {
-    if (is3d()) { viewer3d?.dolly(0); return; }
     const r = stage.getBoundingClientRect();
     if (k > 1.05) { fit(); } else zoomAt(3, e.clientX - r.left, e.clientY - r.top);
   });
-  $("#zoomIn").addEventListener("click", () => (is3d() ? viewer3d?.dolly(1 / 1.5) : zoomAt(k * 1.6, ...center())));
-  $("#zoomOut").addEventListener("click", () => (is3d() ? viewer3d?.dolly(1.5) : zoomAt(k / 1.6, ...center())));
-  $("#zoomReset").addEventListener("click", () => (is3d() ? viewer3d?.dolly(0) : fit()));
+  $("#zoomIn").addEventListener("click", () => zoomAt(k * 1.6, ...center()));
+  $("#zoomOut").addEventListener("click", () => zoomAt(k / 1.6, ...center()));
+  $("#zoomReset").addEventListener("click", fit);
   $("#zoomClose").addEventListener("click", close);
   root.addEventListener("keydown", (e) => {
     if (e.key === "Escape") { e.preventDefault(); close(); }
-    else if (e.key === "+" || e.key === "=") (is3d() ? viewer3d?.dolly(1 / 1.5) : zoomAt(k * 1.6, ...center()));
-    else if (e.key === "-") (is3d() ? viewer3d?.dolly(1.5) : zoomAt(k / 1.6, ...center()));
-    else if (e.key === "0") (is3d() ? viewer3d?.dolly(0) : fit());
-    else if (e.key.startsWith("Arrow") && k > MIN && !is3d()) {
+    else if (e.key === "+" || e.key === "=") zoomAt(k * 1.6, ...center());
+    else if (e.key === "-") zoomAt(k / 1.6, ...center());
+    else if (e.key === "0") fit();
+    else if (e.key.startsWith("Arrow") && k > MIN) {
       const d = 60;
       if (e.key === "ArrowLeft") x += d; else if (e.key === "ArrowRight") x -= d; else if (e.key === "ArrowUp") y += d; else y -= d;
       e.preventDefault(); clamp(); apply();
@@ -336,7 +311,7 @@ function initZoomView(getSource) {
       f[(i + (e.shiftKey ? -1 : 1) + f.length) % f.length].focus();
     }
   });
-  window.addEventListener("resize", () => { if (!root.hidden && k === 1 && !is3d()) fit(); });
+  window.addEventListener("resize", () => { if (!root.hidden && k === 1) fit(); });
   return open;
 }
 
@@ -523,17 +498,12 @@ function holdToWind(btn, getMovement) {
 }
 
 /** Girar a coroa arrastando sobre ela ou com a roda do mouse. */
-/** O que está sob o ponteiro no desenho em SVG: "crown", "pusher:start", "pusher:reset" ou null. */
-const hitSvg = (e) => {
-  const pusher = e.target.closest("[data-pusher]");
-  if (pusher) return "pusher:" + pusher.dataset.pusher;
-  return e.target.closest("[data-crown]") ? "crown" : null;
-};
-function bindCrown(container, getMovement, hit = hitSvg) {
+function bindCrown(container, getMovement) {
   container.addEventListener("pointerdown", (e) => {
-    const what = hit(e);
-    if (what?.startsWith("pusher:")) { getMovement()?.pusher(what.slice(7)); return; }
-    if (what !== "crown") return;
+    const crown = e.target.closest("[data-crown]");
+    const pusher = e.target.closest("[data-pusher]");
+    if (pusher) { getMovement()?.pusher(pusher.dataset.pusher); return; }
+    if (!crown) return;
     e.preventDefault();
     let y = e.clientY;
     container.setPointerCapture(e.pointerId);
@@ -543,7 +513,7 @@ function bindCrown(container, getMovement, hit = hitSvg) {
     container.addEventListener("pointerup", up);
   });
   container.addEventListener("wheel", (e) => {
-    if (hit(e) !== "crown") return;
+    if (!e.target.closest("[data-crown]")) return;
     e.preventDefault();
     getMovement()?.wind(Math.abs(e.deltaY) * 0.0006);
   }, { passive: false });
@@ -762,17 +732,6 @@ const Studio = {
     this.canvas = $("#studioCanvas");
     this.body = $("#studioBody");
     this.mv = Clockwork.add(new Movement(this.canvas, this.cfg));
-    // o relógio em 3D, quando o navegador tem WebGL; o desenho em SVG fica por baixo até ele ficar pronto (e no lugar dele se não der)
-    const start3d = () => {
-      if (!window.Watch3D?.supported() || this.viewer3d) return;
-      const host = $("#studio3d");
-      host.hidden = false;
-      this.viewer3d = Watch3D.create(host, this.cfg, { onReady: () => { this.canvas.classList.add("is-3d"); } });
-      this.viewer3d.setView(this.view);
-      this.viewer3d.setNight(this.night);
-      this.mv.onAngles = (a) => this.viewer3d.setAngles(a);
-    };
-    if (window.Watch3D) start3d(); else window.addEventListener("watch3d-ready", start3d, { once: true });
 
     $("#steps").innerHTML = TABS.map((t, i) => `<button role="tab" data-tab="${t.id}" aria-selected="false"><small>${i + 1}</small>${t.title}</button>`).join("");
     $("#steps").addEventListener("click", (e) => { const b = e.target.closest("[data-tab]"); if (b) this.go(b.dataset.tab); });
@@ -781,23 +740,21 @@ const Studio = {
     $("#stepNext").addEventListener("click", () => this.step(1));
     $$(".views button").forEach((b) => b.addEventListener("click", () => this.setView(b.dataset.view)));
     $("#studioNight").addEventListener("click", () => this.setNight(!this.night));
-    const openZoomSvg = initZoomView(() => (this.view === "fundo" ? this.backEl : this.stack.parentElement));
-    const openZoom = () => (this.viewer3d ? openZoomSvg.open3d(this.cfg, this.view, this.night) : openZoomSvg());
+    const openZoom = initZoomView(() => (this.view === "fundo" ? this.backEl : this.stack.parentElement));
     $("#studioZoom").addEventListener("click", openZoom);
     // clicar no relógio também amplia (a coroa e os botões do relógio seguem com a função deles)
     this.canvas.addEventListener("click", (e) => {
       if (e.target.closest("[data-crown], [data-pusher], [data-rotor], button")) return;
-      if (this.viewer3d && e.target.tagName === "CANVAS") { if (!this.viewer3d.pick(e)) openZoom(); return; }
       if (e.target.closest(".stack, .studio__back-view")) openZoom();
     });
     $("#studioSurprise").addEventListener("click", () => this.surprise());
 
-    bindCrown(this.canvas, () => this.mv, (e) => (this.viewer3d && e.target.tagName === "CANVAS" ? this.viewer3d.pick(e) : hitSvg(e)));
+    bindCrown(this.canvas, () => this.mv);
     holdToWind($("#studioWind"), () => this.mv);
     $("#studioSetTime").addEventListener("click", () => { this.mv.resetTime(); toast("Hora acertada"); });
     let lastX = null;
     this.canvas.addEventListener("pointermove", (e) => {
-      if (e.pointerType === "touch" && !e.target.closest("[data-rotor], .studio__back-view") && !(this.viewer3d && this.view === "fundo")) return;
+      if (e.pointerType === "touch" && !e.target.closest("[data-rotor], .studio__back-view")) return;
       if (lastX !== null) this.mv.shake((e.clientX - lastX) * 0.05);
       lastX = e.clientX;
     });
@@ -879,7 +836,6 @@ const Studio = {
   setView(v) {
     this.view = v;
     $$(".views button").forEach((b) => b.setAttribute("aria-selected", String(b.dataset.view === v)));
-    if (this.viewer3d) { this.viewer3d.setView(v); this.renderWatch(); return; }
     const exploded = v === "explodida";
     const mobile = window.innerWidth < 860;
     this.stack.style.setProperty("--tilt", exploded ? "56deg" : "0deg");
@@ -899,18 +855,12 @@ const Studio = {
   },
 
   renderWatch() {
-    this.mv.setConfig(this.cfg);
-    if (this.viewer3d) {
-      // só reconstrói o 3D quando o projeto mudou de verdade
-      const key = JSON.stringify(this.cfg);
-      if (key !== this.cfgKey3d) { this.cfgKey3d = key; this.viewer3d.setConfig(this.cfg); }
-      return;
-    }
     const back = this.view === "fundo";
     this.stack.parentElement.hidden = back;
     this.backEl.hidden = !back;
     if (back) this.backEl.innerHTML = Watch.back(this.cfg);
     else renderStack(this.stack, this.cfg, this.night);
+    this.mv.setConfig(this.cfg);
   },
 
   surprise() {
@@ -957,7 +907,6 @@ const Studio = {
     const btn = $("#studioNight");
     btn.setAttribute("aria-pressed", String(on));
     $(".studio__stage").classList.toggle("is-night", on);
-    this.viewer3d?.setNight(on);
     if (!this.flipping) this.renderWatch();
     if (on && !this.cfg.lume) toast("Este projeto está sem lume. Ative em Mostrador › Material luminescente.");
     else if (on && this.view === "fundo") toast("O lume fica na frente. Vire o relógio para ver.");

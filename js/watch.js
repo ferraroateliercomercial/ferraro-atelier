@@ -177,7 +177,7 @@ const Watch = (() => {
       const ky = top ? y + 40 : y + 92;
       s += `<rect x="${x - 4}" y="${ky}" width="${w + 8}" height="14" rx="3" fill="url(#${u}-metal)"/>`;
     } else if (t === "couro") {
-      const far = c._rectStrap ? 0 : 10;
+      const far = 10;
       const d = top
         ? `M${x + far} ${y}H${x + w - far}L${x + w} ${y + h}H${x}Z`
         : `M${x} ${y}H${x + w}L${x + w - far} ${y + h}H${x + far}Z`;
@@ -365,7 +365,7 @@ const Watch = (() => {
     const edge = shade(body, -0.35);
     let s = "";
     for (let h = 0; h < 12; h++) {
-      if (skip.has(h) || c._noHourMarks) continue;
+      if (skip.has(h)) continue;
       const deg = h * 30;
       if (c.indexStyle === "romanos" || c.indexStyle === "arabicos") {
         const [x, y] = polar(dr * 0.8, deg);
@@ -687,60 +687,13 @@ const Watch = (() => {
     return wrap(u, c, s, "Fundo do relógio");
   }
 
-  /** Uma peça avulsa, num SVG próprio, para o relógio 3D usar como textura. `box` é o recorte: [x, y, w, h]. */
-  function part(name, c, opts = {}) {
-    const u = `p${++uidCounter}`;
-    const sq = (r) => [CX - r, CY - r, 2 * r, 2 * r];
-    let inner = "", box = sq(140);
-    if (name === "dial") { inner = dial(u, { ...c, ...opts }); box = sq(110); }
-    else if (name === "bezel") { inner = bezel(u, c); box = sq(140); }
-    else if (name === "strapTop" || name === "strapBottom") {
-      const top = name === "strapTop";
-      inner = strapSegment(u, { ...c, _rectStrap: true }, top);
-      const w = strapWidth(c);
-      box = [CX - w / 2, top ? 0 : 370, w, 150];
-    }
-    else if (name === "movement") { inner = movement(u, { ...c, movement: c.movement === "automatico" ? "manual" : c.movement }, 96); box = sq(100); }
-    else if (name === "rotor") {
-      // só o rotor (com o recorte das ondas), sem o resto do movimento
-      const all = movement(u, c, 96);
-      const clip = (all.match(/<clipPath id="[^"]*-rotor">[\s\S]*?<\/clipPath>/) || [""])[0];
-      inner = clip + all.slice(all.indexOf("<g data-rotor>")).replace(/<circle cx="200" cy="260" r="9"[\s\S]*$/, "");
-      box = sq(100);
-    }
-    else if (name === "backClosed" || name === "backRing") {
-      // mapa de aspereza para o 3D: base polida (cinza escuro) e gravação fosca (branca); vale para qualquer cor de metal
-      const base = "#4d4d4d", mark = "#ffffff";
-      inner = `<circle cx="${CX}" cy="${CY}" r="126" fill="${base}"/>`;
-      if (name === "backClosed") {
-        for (let r = 20; r < 110; r += 6) inner += `<circle cx="${CX}" cy="${CY}" r="${r}" fill="none" stroke="#6a6a6a" stroke-width=".7"/>`;
-        inner += wings(CX, CY - 34, 84, mark);
-        inner += `<text x="${CX}" y="${CY - 2}" text-anchor="middle" font-family="Saira, sans-serif" font-size="15" font-weight="500" letter-spacing="2.4" fill="${mark}">Ferraro Atelier</text>`;
-        inner += `<text x="${CX}" y="${CY + 14}" text-anchor="middle" font-family="Saira, sans-serif" font-size="8" letter-spacing="2" fill="${mark}">${MOVEMENT_LABEL[c.movement]} · AÇO · 100 M</text>`;
-      } else {
-        for (let i = 0; i < 90; i++) {
-          const [x1, y1] = polar(124, i * 4);
-          const [x2, y2] = polar(119, i * 4);
-          inner += `<line x1="${x1}" y1="${y1}" x2="${x2}" y2="${y2}" stroke="${mark}" stroke-width="1.4"/>`;
-        }
-        inner += `<path id="${u}-arc" d="M${CX - 103} ${CY} A103 103 0 0 1 ${CX + 103} ${CY}" fill="none"/>`;
-        inner += `<text font-family="Saira, sans-serif" font-size="9.5" font-weight="500" letter-spacing="1.6" fill="${mark}"><textPath href="#${u}-arc" startOffset="50%" text-anchor="middle">Ferraro Atelier · relojoaria sob encomenda</textPath></text>`;
-      }
-      box = sq(126);
-    }
-    const [bx, by, bw, bh] = box;
-    // como imagem, o SVG é XML: atributos sem valor (data-rotor, data-balance...) precisam de valor
-    const xml = `${defs(u, c)}${inner}`.replace(/\sdata-([a-z-]+)(?=[\s>])/g, ' data-$1="1"');
-    return { svg: `<svg viewBox="${bx} ${by} ${bw} ${bh}" width="${bw}" height="${bh}" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink">${xml}</svg>`, box };
-  }
-
   /** Ícone de um estilo de ponteiro, para os botões de escolha. */
   function handIcon(style, color = "#141b26") {
     const c = { ...DEFAULT_WATCH, handColor: color, lume: false, caseShape: "redonda" };
     return `<svg viewBox="140 160 120 130" aria-hidden="true"><g transform="rotate(-50 200 260)">${hand(style, "h", c)}</g><g transform="rotate(48 200 260)">${hand(style, "m", c)}</g><circle cx="200" cy="260" r="4" fill="${color}"/></svg>`;
   }
 
-  return { front, back, layers, handIcon, wings, mark, hand, secondHand, part, cushionPath, octagonPath, dialRadius, caseRight, strapWidth, shade, ink, mix, hexToRgb, rgbToHex, luminance, CX, CY };
+  return { front, back, layers, handIcon, wings, mark, hand, secondHand, shade, ink, mix, hexToRgb, rgbToHex, luminance };
 })();
 
 // ---------------------------------------------------------------------------
@@ -853,7 +806,6 @@ class Movement {
     const swing = this.running ? Math.sin(now / 1000 * Math.PI * 2 * (this.cfg.swiss ? 4 : 3)) * 160 : 0;
     rot(this.el.balance, swing);
     rot(this.el.ratchet, this.ratchet);
-    this.onAngles?.({ h: hr * 30, m: min * 6, s: sec * 6, chrono: (el % 60) * 6, cm: ((el / 60) % 30) * 12, ch: ((el / 3600) % 12) * 30, rotor: this.rotor, balance: swing, ratchet: this.ratchet, running: this.running });
     const kn = `translate(0 ${this.knurl.toFixed(2)})`;
     this.el.knurl.forEach((k) => { if (k._tr !== kn) { k._tr = kn; k.setAttribute("transform", kn); } });
   }

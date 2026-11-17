@@ -54,4 +54,4 @@ node branding/src/render.mjs            # ou: node branding/src/render.mjs carta
 ```
 
 Precisa de Python com `numpy`, `Pillow` e `segno`, do Chromium com Playwright, do Ghostscript (`gs`) e do
-`pdftoppm`. A pasta `branding/` não vai para o site publicado (está no `.vercelignore`).
+`pdftoppm`. A pasta `branding/` não vai para o site publicado (`scripts/build.sh` publica só o site).

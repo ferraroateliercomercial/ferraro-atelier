@@ -26,7 +26,7 @@ Cada relógio é montado à mão a partir das escolhas do cliente, peça por pe�
 
 ## Capabilities and Constraints
 
-- Site estático (HTML, CSS e JavaScript sem etapa de build), publicado na Vercel com Analytics e Speed Insights por script. Também é publicado como Artifact por um build que embute CSS e JS.
+- Site estático (HTML, CSS e JavaScript sem etapa de build), publicado na Cloudflare Pages (scripts/build.sh monta a pasta dist), com o Web Analytics da Cloudflare ligado pelo painel. Também é publicado como Artifact por um build que embute CSS e JS.
 - Ateliê virtual em 8 etapas (caixa, mostrador, ponteiros, luneta, pulseira, movimento, referência, resumo), com Surpreenda-me, aviso de combinação, modo noite, vista explodida e fundo, link de projeto.
 - Sem preços no configurador e sem gravação. Mostrador esqueleto só nos movimentos suíços; fundo de vidro só nos mecânicos.
 - Códigos de projeto CT1, CT2 e CT3 continuam válidos.

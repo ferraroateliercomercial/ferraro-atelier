@@ -11,3 +11,6 @@
 branding/src/out/
 branding/src/node_modules
 __pycache__/
+
+# pasta publicada, gerada por scripts/build.sh
+dist/

@@ -9,7 +9,7 @@ related_targets: []
 
 Scope: the homepage of Ferraro Atelier; visitor mode Persuade. The ateliê virtual (#personalizar) and the Oficina (#oficina) share the file and adopt the new tokens, but stay Operate surfaces.
 
-Audience and job: people who like watches without being experts and want a piece nobody else has; they arrive mostly from Instagram. Action: build your own watch in the ateliê virtual and send the project by WhatsApp. Secondary: buy a finished piece (Carbon Edition R$ 1.799, Verde Fumê R$ 1.600). Proof on hand: the working SVG watch, real photos, the movements demo. Constraints: static site with no build, Vercel; owner pinned "no buttons in the first part", a motion-design opening with a watch, the best motion possible.
+Audience and job: people who like watches without being experts and want a piece nobody else has; they arrive mostly from Instagram. Action: build your own watch in the ateliê virtual and send the project by WhatsApp. Secondary: buy a finished piece (Carbon Edition R$ 1.799, Verde Fumê R$ 1.600). Proof on hand: the working SVG watch, real photos, the movements demo. Constraints: static site with no build step of its own (Cloudflare Pages copies the site files to dist/); owner pinned "no buttons in the first part", a motion-design opening with a watch, the best motion possible.
 
 Memorable moment: the screen is a dial that tells your own time; scrolling pulls back until the dial becomes a whole watch, which then comes apart.
 

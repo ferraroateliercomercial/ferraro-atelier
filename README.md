@@ -60,11 +60,13 @@ Página para a Ferraro Atelier ver o relógio que o cliente montou. Abra o site 
 - `assets/film/`: para trocar o filme, substitua os dois vídeos mantendo os nomes (`ferraro-filme-9x16.webm` e `ferraro-filme-9x16.mp4`, vertical, sem som) e a capa `ferraro-filme-9x16.webp` (um quadro do começo do vídeo). O site usa só a versão vertical.
 - `css/styles.css`, começo do arquivo: as cores da casa (laca, impressão, opalino, o vermelho do ponteiro de segundos e o fundo de laca `--ground`).
 
-## Análise de visitas (Vercel)
+## Publicação (Cloudflare Pages)
 
-O `index.html` já tem o script do Vercel Web Analytics (o equivalente ao pacote `@vercel/analytics` para sites sem build). Ele passa a contar visitas quando o site está publicado na Vercel e a aba **Analytics** do projeto está ativada no painel da Vercel.
+O site é publicado na Cloudflare Pages, ligada a este repositório: cada push na branch `main` vai para o ar sozinho.
 
-Também tem o script do Vercel Speed Insights (equivalente ao pacote `@vercel/speed-insights`), que mede a velocidade do site para os visitantes. Ele funciona quando a aba **Speed Insights** do projeto está ativada na Vercel.
+- Comando de build: `bash scripts/build.sh` · pasta de saída: `dist`.
+- O script copia só `index.html`, `css/`, `js/` e `assets/` para `dist/`; o resto (branding, documentos, ferramentas) fica no repositório e não é publicado.
+- Visitas: ative o **Web Analytics** do projeto no painel da Cloudflare (gratuito, sem cookies, não precisa de código no site).
 
 ## Rodar no computador
 
@@ -72,4 +74,4 @@ Também tem o script do Vercel Speed Insights (equivalente ao pacote `@vercel/sp
 python3 -m http.server 8000
 ```
 
-Depois abra http://localhost:8000. É um site estático: funciona direto no GitHub Pages, Vercel ou Netlify, sem build.
+Depois abra http://localhost:8000. É um site estático: funciona em qualquer hospedagem de site estático (Cloudflare Pages, Netlify, GitHub Pages).

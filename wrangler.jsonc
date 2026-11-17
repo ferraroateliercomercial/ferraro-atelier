@@ -7,8 +7,12 @@
   // endereço público em ferraro-atelier.<conta>.workers.dev (e links de prévia de cada versão)
   "workers_dev": true,
   "preview_urls": true,
+  // o Worker só roda nos pedidos do filme (respostas por partes); o resto vem direto dos arquivos estáticos
+  "main": "worker/index.js",
   "assets": {
     "directory": "./dist",
-    "not_found_handling": "single-page-application"
+    "binding": "ASSETS",
+    "not_found_handling": "single-page-application",
+    "run_worker_first": ["/assets/film/*"]
   }
 }

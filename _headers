@@ -1,0 +1,4 @@
+# Cache das imagens, do filme e dos ícones: um dia no navegador (e mais uma semana servindo a cópia guardada
+# enquanto busca a nova). HTML, CSS e JS continuam sempre conferidos, para uma versão nova chegar na hora.
+/assets/*
+  Cache-Control: public, max-age=86400, stale-while-revalidate=604800

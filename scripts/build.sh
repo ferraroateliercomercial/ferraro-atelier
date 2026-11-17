@@ -8,4 +8,6 @@ rm -rf dist
 mkdir -p dist
 cp index.html dist/
 cp -r css js assets dist/
+# cabeçalhos de cache das imagens e do filme (Cloudflare e Netlify leem este arquivo)
+cp _headers dist/
 echo "dist/ pronto: $(find dist -type f | wc -l) arquivos"

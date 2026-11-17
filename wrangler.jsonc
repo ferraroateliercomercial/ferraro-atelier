@@ -1,0 +1,11 @@
+// Publicação na Cloudflare como Worker com arquivos estáticos (o caminho "Workers" do painel).
+// Comando de build: bash scripts/build.sh · comando de deploy: npx wrangler deploy
+// Na Cloudflare Pages este arquivo é ignorado (lá vale: build "bash scripts/build.sh", saída "dist").
+{
+  "name": "ferraro-atelier",
+  "compatibility_date": "2025-09-01",
+  "assets": {
+    "directory": "./dist",
+    "not_found_handling": "single-page-application"
+  }
+}

@@ -65,6 +65,7 @@ Página para a Ferraro Atelier ver o relógio que o cliente montou. Abra o site 
 O site é publicado na Cloudflare Pages, ligada a este repositório: cada push na branch `main` vai para o ar sozinho.
 
 - Comando de build: `bash scripts/build.sh` · pasta de saída: `dist`.
+- Se o projeto foi criado pelo caminho **Workers** (e não Pages): comando de build `bash scripts/build.sh` e comando de deploy `npx wrangler deploy`; o `wrangler.jsonc` já aponta para `dist`.
 - O script copia só `index.html`, `css/`, `js/` e `assets/` para `dist/`; o resto (branding, documentos, ferramentas) fica no repositório e não é publicado.
 - Visitas: ative o **Web Analytics** do projeto no painel da Cloudflare (gratuito, sem cookies, não precisa de código no site).
 

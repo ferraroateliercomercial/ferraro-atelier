@@ -245,6 +245,7 @@ function bandGeometry(path, w0, w1, t, top) {
 function makeMaterials() {
   const all = new Set();
   const reg = (m) => { all.add(m); return m; };
+  const mark = (m) => { m.userData.alwaysTransparent = true; return m; };
   return {
     all,
     metal: (color, rough = 0.26) => reg(new THREE.MeshStandardMaterial({ color, metalness: 1, roughness: rough, envMapIntensity: 1.15 })),
@@ -254,9 +255,8 @@ function makeMaterials() {
     dial: (map, finish) => reg(new THREE.MeshPhysicalMaterial({ map, roughness: finish === "raios" ? 0.3 : 0.42, metalness: finish === "raios" ? 0.14 : 0.04, clearcoat: 0.75, clearcoatRoughness: 0.2, anisotropy: finish === "raios" ? 0.9 : 0, anisotropyMap: finish === "raios" ? sunrayMap() : null, envMapIntensity: 0.8 })),
     ceramic: (map) => reg(new THREE.MeshPhysicalMaterial({ map, roughness: 0.18, metalness: 0, clearcoat: 1, clearcoatRoughness: 0.08, envMapIntensity: 1 })),
     textured: (map, rough, metal = 0) => reg(new THREE.MeshStandardMaterial({ map, roughness: rough, metalness: metal, envMapIntensity: 0.9 })),
-    glass: (lowTier) => reg(lowTier
-      ? new THREE.MeshPhysicalMaterial({ color: "#eef4f8", transparent: true, opacity: 0.14, roughness: 0.04, metalness: 0, envMapIntensity: 0.7, depthWrite: false })
-      : new THREE.MeshPhysicalMaterial({ color: "#f3f7fa", transmission: 1, roughness: 0.04, metalness: 0, ior: 1.76, thickness: 5, transparent: true, envMapIntensity: 0.6, depthWrite: false })),
+    // safira: transparente com os reflexos das softboxes (a transmissão sobre o fundo transparente fica leitosa)
+    glass: () => mark(reg(new THREE.MeshPhysicalMaterial({ color: "#f2f6f9", transparent: true, opacity: 0.1, roughness: 0.02, metalness: 0, clearcoat: 1, clearcoatRoughness: 0.02, envMapIntensity: 1.1, depthWrite: false }))),
   };
 }
 
@@ -628,18 +628,76 @@ class Viewer {
     if (!w || !h) return;
     this.renderer.setSize(w, h, false);
     this.camera.aspect = w / h;
-    // o relógio inteiro (520 de altura) cabe na tela com folga
-    const fitH = 560 / (2 * Math.tan(deg(this.camera.fov / 2)));
-    const fitW = 420 / (2 * Math.tan(deg(this.camera.fov / 2)) * this.camera.aspect);
-    this.camera.position.z = Math.max(fitH, fitW) * (this.opts.distance || 1.0);
+    const tan = Math.tan(deg(this.camera.fov / 2));
+    // fitPx: o relógio inteiro (560 de altura) ocupa essa altura em px; sem ele, cabe na tela com folga
+    const fitPx = typeof this.opts.fitPx === "function" ? this.opts.fitPx() : this.opts.fitPx;
+    let z;
+    if (fitPx) z = (560 / (2 * tan)) * (h / fitPx);
+    else z = Math.max(560 / (2 * tan), 420 / (2 * tan * this.camera.aspect));
+    this.baseZ = z * (this.opts.distance || 1.0);
+    this.camera.position.z = this.baseZ / (this.pose?.zoom || 1);
     this.camera.updateProjectionMatrix();
     this.needs = true;
   }
+  /** Pose vinda de fora (a cena da página inicial, presa à rolagem): ângulos em radianos, explode 0..1,
+      zoom (fator de aproximação da câmera) e shiftX (deslocamento do relógio, em unidades do relógio). */
+  setPose({ tilt = 0, yaw = 0, spin = 0, explode = 0, zoom = 1, shiftX = 0 }) {
+    this.pose = { tilt, yaw, spin, explode, zoom, shiftX };
+    this.posed = true; // a pose vem de fora: o laço não anima mais as vistas por conta própria
+    this.pivot.rotation.set(tilt, yaw, spin);
+    this.pivot.position.x = shiftX;
+    this.model?.explode(explode);
+    this.state.explode = explode;
+    if (this.baseZ) this.camera.position.z = this.baseZ / zoom;
+    this.shadow.material.opacity = 0.5 * (1 - explode) * (1 - Math.min(1, Math.abs(yaw) * 1.5));
+    this.needs = true;
+  }
+  /** Opacidade de uma peça (0..1); 1 volta ao material opaco. */
+  partOpacity(name, op) {
+    const g = this.model?.parts[name];
+    if (!g || g.userData.op === op) return;
+    g.userData.op = op;
+    g.visible = op > 0.01;
+    g.traverse((o) => {
+      const m = o.material;
+      if (!m) return;
+      if (m.transmission || m.userData.alwaysTransparent) { m.userData.baseOpacity ??= m.opacity; m.opacity = m.userData.baseOpacity * op; return; }
+      if (op < 1) { if (!m.transparent) { m.transparent = true; m.needsUpdate = true; } m.opacity = op; m.depthWrite = op > 0.5; }
+      else if (m.transparent) { m.transparent = false; m.opacity = 1; m.depthWrite = true; m.needsUpdate = true; }
+    });
+    this.needs = true;
+  }
+  /** Só o lume (sem escurecer a cena): a página inicial acende à noite. */
+  setLume(on) { this.lume = on; this.model?.setNight(on); this.needs = true; }
+  /** Um ponto do relógio (coordenadas do modelo, dentro do pivô) em px, relativo ao elemento. */
+  project(x, y, z = 0) {
+    const v = new THREE.Vector3(x, y, z);
+    this.pivot.localToWorld(v);
+    v.project(this.camera);
+    return [((v.x + 1) / 2) * this.el.clientWidth, ((1 - v.y) / 2) * this.el.clientHeight];
+  }
+  /** Centro de uma peça na tela (px, relativo ao elemento) e o seu raio aproximado em px. */
+  partScreen(name) {
+    const g = this.model?.parts[name];
+    if (!g) return null;
+    const c = this.project(g.position.x, g.position.y, g.position.z);
+    const r = this.project(g.position.x + 104, g.position.y, g.position.z);
+    return { x: c[0], y: c[1], r: Math.hypot(r[0] - c[0], r[1] - c[1]) };
+  }
+  /** Fator de aproximação da câmera para o mostrador (de frente, na explosão atual) medir `wantPx` na tela. */
+  zoomFor(wantPx) {
+    const fitPx = typeof this.opts.fitPx === "function" ? this.opts.fitPx() : this.opts.fitPx || this.el.clientHeight;
+    const z0 = Z.dial + 3 * EXPLODE_GAP * this.state.explode; // o mostrador sobe três níveis na explosão
+    const s0 = fitPx / 560; // px por unidade no plano do relógio, sem zoom
+    return Math.max(1, this.baseZ / (z0 + (this.baseZ * 208 * s0) / wantPx));
+  }
+  /** Diâmetro do mostrador na tela, em px, na pose atual. */
+  dialPx() { const a = this.project(-104, 0, Z.dial), b = this.project(104, 0, Z.dial); return Math.hypot(b[0] - a[0], b[1] - a[1]); }
   setConfig(cfg) {
     this.cfg = { ...cfg };
     const seq = ++this.seq;
     const model = new WatchModel(this.cfg, makeMaterials(), this.low);
-    model.setNight(this.night);
+    model.setNight(this.night || !!this.lume);
     model.explode(this.state.explode);
     const show = () => {
       if (this.model === model) return;
@@ -650,7 +708,7 @@ class Viewer {
       model.root.traverse((o) => { for (const t of [o.material?.map, o.material?.roughnessMap]) if (t) liveMaps.add(t); });
       if (this.lastAngles) model.setAngles(this.lastAngles);
       this.needs = true;
-      this.opts.onReady?.();
+      this.opts.onReady?.(this);
     };
     // o primeiro aparece na hora (as texturas chegam depois); as trocas esperam as texturas, sem piscar
     if (!this.model) show();
@@ -699,6 +757,7 @@ class Viewer {
     this.needs = true;
   }
   /** Que peça está sob o ponteiro: "crown", "pusher:start", "pusher:reset", "rotor" ou null. */
+  setShadow(on) { this.shadow.visible = on; this.needs = true; }
   pick(e) {
     if (!this.model) return null;
     const r = this.renderer.domElement.getBoundingClientRect();
@@ -718,7 +777,7 @@ class Viewer {
     this.raf = requestAnimationFrame(this.loop);
     const s = this.state, t = this.target;
     let moving = false;
-    for (const k of Object.keys(t)) {
+    for (const k of this.posed ? [] : Object.keys(t)) {
       const d = t[k] - s[k];
       if (Math.abs(d) > 0.0008) { s[k] += d * 0.12; moving = true; } else s[k] = t[k];
     }

@@ -463,6 +463,7 @@ const Home = (() => {
     if (h === nightHour) return;
     nightHour = h;
     $("#heroPin").classList.toggle("is-night", h >= 19 || h < 6);
+    anatomy.v3d?.setLume(h >= 19 || h < 6);
   }
   function clockFrame() {
     if (!clock.live) return;
@@ -646,6 +647,9 @@ const Home = (() => {
     lenis?.start();
     if (hasG) gsap.ticker.lagSmoothing(0);
     if (refreshAfterIntro) refreshWhenIdle();
+    // o relógio em 3D entra num momento ocioso, depois da abertura
+    const go = () => { if (window.Watch3D) start3d(); else window.addEventListener("watch3d-ready", start3d, { once: true }); };
+    if (window.requestIdleCallback) requestIdleCallback(go, { timeout: 2500 }); else setTimeout(go, 600);
   }
 
   // ---------------------------------------------------------------------------
@@ -672,11 +676,11 @@ const Home = (() => {
     anatomy.stack = stack;
     // o mostrador do relógio redondo é a mesma laca da tela cheia: a cor não muda na troca
     const lac = document.createElement("canvas");
-    lac.width = lac.height = 720;
-    drawLacquer(lac.getContext("2d"), 720);
+    lac.width = lac.height = 1024;
+    drawLacquer(lac.getContext("2d"), 1024);
     HERO.dialImage = lac.toDataURL("image/webp", 0.92);
     renderStack(stack, HERO);
-    Clockwork.add(new Movement(stack, HERO));
+    anatomy.mv = Clockwork.add(new Movement(stack, HERO));
     anatomy.layers = $$(".layer", stack).map((el) => ({ el, m: HERO_MOTION[el.dataset.name] }));
     // as legendas ficam em volta do relógio, alternando os lados
     $$("#heroCallouts li").forEach((li, i) => { li.dataset.side = i % 2 ? "l" : "r"; });
@@ -689,9 +693,37 @@ const Home = (() => {
       });
     }
   }
+  /** O relógio em 3D no lugar do desenho em camadas, quando há WebGL e movimento. Entra depois da abertura, num
+      momento ocioso; até ficar pronto (e sem WebGL), a cena roda com o desenho. */
+  function start3d() {
+    if (anatomy.v3d || anatomy.v3dStarted || !motion || !window.Watch3D?.supported()) return;
+    anatomy.v3dStarted = true;
+    const host = $("#hero3d");
+    host.hidden = false;
+    const stack = anatomy.stack;
+    Watch3D.create(host, HERO, {
+      // um pouco menor que o desenho: aberto em três quartos ele ocupa mais espaço, e as legendas precisam de folga
+      fitPx: () => (stack.offsetHeight || 520) * 0.86,
+      onReady: (v) => {
+        if (anatomy.v3d) return;
+        anatomy.v3d = v;
+        $("#heroStage").classList.add("is-3d");
+        anatomy.mv.onAngles = (a) => v.setAngles(a);
+        v.setLume($("#heroPin").classList.contains("is-night"));
+        // o mostrador da tela cheia precisa pousar no mostrador do 3D
+        refreshWhenIdle();
+      },
+    });
+  }
   function isolate(name) {
     anatomy.isolated = name;
     anatomy.stack.classList.toggle("is-isolating", !!name);
+    if (anatomy.v3d) {
+      for (const n of ["pulseira", "pulseira-baixo", "movimento", "caixa", "mostrador", "ponteiros", "luneta", "cristal"]) {
+        const on = !name || n === name || (name === "pulseira" && n === "pulseira-baixo");
+        anatomy.v3d.partOpacity(n, on ? 1 : 0.16);
+      }
+    }
     anatomy.layers.forEach(({ el }) => {
       const on = !!name && (el.dataset.name === name || (name === "pulseira" && el.dataset.name === "pulseira-baixo"));
       el.classList.toggle("is-focus", on);
@@ -706,13 +738,14 @@ const Home = (() => {
     const stack = anatomy.stack;
     const sw = stack.offsetWidth;
     if (!sw) return { k: 1, x: 0 };
+    // no 3D: o mostrador (208 unidades) de frente, sem zoom; o relógio inteiro (560) ocupa a altura do desenho
     const dialD = sw * (204 / 400);
     const W = window.innerWidth, H = window.innerHeight;
     const mobile = isMobile();
     const want = mobile ? Math.min(W * 0.8, H * 0.46) : Math.min(H * 0.62, W * 0.42);
     const scene = $("#heroScene").getBoundingClientRect();
     const x = mobile ? 0 : W * 0.3 - (scene.left + scene.width / 2);
-    anatomy.zt = { k: Math.max(1, want / dialD), x };
+    anatomy.zt = { k: anatomy.v3d ? anatomy.v3d.zoomFor(want) : Math.max(1, want / dialD), x };
     return anatomy.zt;
   }
 
@@ -743,22 +776,40 @@ const Home = (() => {
     const sinT = Math.sin((tilt * Math.PI) / 180);
     const cosT = Math.cos((tilt * Math.PI) / 180);
     const lift = 2.6 * gap * sinT * 0.92;
-    stack.style.setProperty("--tilt", `${tilt.toFixed(2)}deg`);
-    stack.style.setProperty("--yaw", `${yaw.toFixed(2)}deg`);
-    stack.style.setProperty("--spin", `${spin.toFixed(2)}deg`);
-    stack.style.setProperty("--lift", `${lift.toFixed(1)}px`);
+    const v3d = anatomy.v3d;
+    if (!v3d) {
+      stack.style.setProperty("--tilt", `${tilt.toFixed(2)}deg`);
+      stack.style.setProperty("--yaw", `${yaw.toFixed(2)}deg`);
+      stack.style.setProperty("--spin", `${spin.toFixed(2)}deg`);
+      stack.style.setProperty("--lift", `${lift.toFixed(1)}px`);
+    }
 
     // a câmera: a cena cresce em volta do mostrador e, no computador, desliza para o outro lado
     const zooming = z > 0.001;
-    if (zooming !== anatomy.zooming) { anatomy.zooming = zooming; stack.classList.toggle("is-zooming", zooming); }
+    if (zooming !== anatomy.zooming) { anatomy.zooming = zooming; stack.classList.toggle("is-zooming", zooming); v3d?.setShadow(!zooming); }
     const zoomed = z > 0.985;
     if (zoomed !== anatomy.zoomed) { anatomy.zoomed = zoomed; stack.classList.toggle("is-zoomed", zoomed); $("#heroStage").classList.toggle("is-zoomed", zoomed); }
     const zt = zooming ? zoomTarget() : null;
-    const sceneT = zooming ? `translate3d(${(zt.x * z).toFixed(1)}px, 0, 0) scale(${(1 + (zt.k - 1) * z).toFixed(4)})` : "";
+    // no 3D a câmera aproxima (nitidez total) e a cena só desliza; no desenho, a cena desliza e cresce
+    const sceneT = !zooming ? "" : v3d ? `translate3d(${(zt.x * z).toFixed(1)}px, 0, 0)` : `translate3d(${(zt.x * z).toFixed(1)}px, 0, 0) scale(${(1 + (zt.k - 1) * z).toFixed(4)})`;
     if (sceneT !== anatomy.sceneT) { anatomy.sceneT = sceneT; $("#heroScene").style.transform = sceneT; }
+
+    if (v3d) {
+      // a mesma coreografia, no relógio de verdade: inclina, vira de três quartos, se abre em camadas; no zoom a
+      // câmera entra e o relógio desliza para o lado (o deslocamento em px vira unidades do relógio)
+      const zoomK = zooming ? 1 + (zt.k - 1) * z : 1;
+      const breathe = Math.sin(t * 1.3) * 0.004 * e;
+      v3d.setPose({ tilt: -(tilt * Math.PI) / 180 + breathe, yaw: (yaw * Math.PI) / 180, spin: (spin * Math.PI) / 180, explode: e, zoom: zoomK });
+      for (const { m, el } of anatomy.layers) {
+        let op = 1;
+        if (zooming && m.level !== 3 && m.level !== 4) op = 1 - smooth(clamp01((z - (m.level > 4 ? 0 : 0.12)) / 0.5));
+        if (!anatomy.isolated) v3d.partOpacity(el.dataset.name, op);
+      }
+    }
 
     const pos = {};
     for (const { el, m } of anatomy.layers) {
+      if (v3d) { pos[m.level === 0 ? (m.baseY ? 0 : -1) : m.level] = { half: m.half }; continue; }
       // as peças de cima saem primeiro
       const ei = smooth(clamp01((e - (6 - m.level) * 0.055) / 0.67));
       const breathe = Math.sin(t * 1.3 + m.level * 0.9) * 4 * ei;
@@ -803,13 +854,15 @@ const Home = (() => {
       const layer = anatomy.layers.find((l) => l.m.level === +li.dataset.layer);
       if (!p || !layer) return;
       const side = li.dataset.side;
-      const r = layer.el.getBoundingClientRect();
-      const yScreen = Math.max(r.top + r.height / 2 - sr.top, prev[side] + 72);
+      let yc;
+      if (v3d) { const ps = v3d.partScreen(layer.el.dataset.name); yc = ps ? ps.y + (scene.top - sr.top) : 0; }
+      else { const r = layer.el.getBoundingClientRect(); yc = r.top + r.height / 2 - sr.top; }
+      const yScreen = Math.max(yc, prev[side] + 72);
       prev[side] = yScreen;
       li.style.transform = `translate3d(0, ${(yScreen - 14).toFixed(1)}px, 0)`;
       // lado e comprimento do fio só mudam quando a tela muda de tamanho
       // o relógio virado de lado avança para a esquerda: as legendas da esquerda ficam um pouco mais longe
-      const rch = side === "r" ? reach : reach + 48;
+      const rch = side === "r" ? reach : reach + (anatomy.v3d ? 96 : 48);
       const x = side === "r" ? `${(cx + rch).toFixed(1)}px` : `${(sr.width - cx + rch).toFixed(1)}px`;
       const lead = `${Math.max(16, rch - p.half * W - 10).toFixed(1)}px`;
       if (li._x !== x) { li._x = x; li.style[side === "r" ? "left" : "right"] = x; }
@@ -827,9 +880,18 @@ const Home = (() => {
     // posição do relógio sem nenhuma transformação (vista de frente)
     let el = stack, left = 0, top = 0;
     while (el && el !== $("#heroPin")) { left += el.offsetLeft; top += el.offsetTop; el = el.offsetParent; }
-    const dialD = sw * (204 / 400);
     const hx = head.offsetLeft + head.offsetWidth / 2;
     const hy = head.offsetTop + head.offsetHeight / 2;
+    if (anatomy.v3d) {
+      // o 3D ocupa a cena inteira: o mostrador fica no centro dela, com o diâmetro que a câmera dá
+      const v = anatomy.v3d;
+      const host = v.el;
+      let hl = 0, ht = 0, el2 = host;
+      while (el2 && el2 !== $("#heroPin")) { hl += el2.offsetLeft; ht += el2.offsetTop; el2 = el2.offsetParent; }
+      const [cx, cy] = v.project(0, 0, 16);
+      return { x: hl + cx - hx, y: ht + cy - hy, k: v.dialPx() / geo.D };
+    }
+    const dialD = sw * (204 / 400);
     return { x: left + sw / 2 - hx, y: top + sh / 2 - hy, k: dialD / geo.D };
   }
 
@@ -1471,6 +1533,6 @@ const Home = (() => {
     }
   }
 
-  return { init, onRoute, goTo };
+  return { init, onRoute, goTo, anatomy };
 })();
 window.Home = Home;

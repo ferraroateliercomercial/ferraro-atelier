@@ -373,6 +373,12 @@ html[data-intro="on"] .anatomy__stage, html[data-intro="short"] .anatomy__stage 
    no tamanho antigo e deixaria o mostrador ampliado borrado) */
 #heroStack.is-zoomed, #heroStack.is-zoomed .layer, .anatomy__stage.is-zoomed #heroScene { will-change: auto; }
 #heroStack { width: min(400px, 25vw, calc((100svh - 170px) * .77)); will-change: transform; }
+/* o relógio em 3D cobre a cena inteira; o desenho em camadas fica por baixo (ainda mede o tamanho) */
+.anatomy__3d { position: absolute; inset: 0; opacity: 0; transition: opacity .8s var(--ease-out); pointer-events: none; }
+.anatomy__3d[hidden] { display: none; }
+.anatomy__3d canvas { display: block; width: 100%; height: 100%; }
+.anatomy__stage.is-3d .anatomy__3d { opacity: 1; }
+.anatomy__stage.is-3d #heroStack { visibility: hidden; }
 #heroStack .layer { will-change: transform; transition: opacity .3s var(--ease-out); }
 #heroStack.is-isolating .layer:not(.is-focus) { opacity: .16; }
 .stack::before {
